@@ -29,6 +29,17 @@ import {
   Upload as Upload04IconSvg,
   XCircle as XCircleIconSvg,
   Loading as Loading03IconSvg,
+  Search as Search01IconSvg,
+  Filter as Filter01IconSvg,
+  Settings as Settings02IconSvg,
+  Share as Share08IconSvg,
+  Link as Link01IconSvg,
+  ChevronLeft as ChevronLeft01IconSvg,
+  ChevronRight as ChevronRight01IconSvg,
+  ChevronDown as ChevronDown01IconSvg,
+  MoreVertical as MoreVertical01IconSvg,
+  AlertCircle as AlertCircle01IconSvg,
+  CheckmarkCircle01Icon as CheckmarkCircle01IconSvg,
 } from '@hugeicons/core-free-icons'
 
 interface IconProps {
@@ -77,3 +88,14 @@ export const PlusSignIcon = createIcon(PlusSignIconSvg)
 export const Upload04Icon = createIcon(Upload04IconSvg)
 export const XCircleIcon = createIcon(XCircleIconSvg)
 export const Loading03Icon = createIcon(Loading03IconSvg)
+export const Search01Icon = createIcon(Search01IconSvg)
+export const Filter01Icon = createIcon(Filter01IconSvg)
+export const Settings02Icon = createIcon(Settings02IconSvg)
+export const Share08Icon = createIcon(Share08IconSvg)
+export const Link01Icon = createIcon(Link01IconSvg)
+export const ChevronLeft01Icon = createIcon(ChevronLeft01IconSvg)
+export const ChevronRight01Icon = createIcon(ChevronRight01IconSvg)
+export const ChevronDown01Icon = createIcon(ChevronDown01IconSvg)
+export const MoreVertical01Icon = createIcon(MoreVertical01IconSvg)
+export const AlertCircle01Icon = createIcon(AlertCircle01IconSvg)
+export const CheckmarkCircle01Icon = createIcon(CheckmarkCircle01IconSvg)

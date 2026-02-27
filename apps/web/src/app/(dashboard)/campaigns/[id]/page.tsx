@@ -26,8 +26,9 @@ const objectiveLabels = {
   SEASONAL: 'Seasonal',
 }
 
-export default function CampaignDetailPage({ params }: { params: { id: string } }) {
-  const campaign = mockCampaigns.find(c => c.id === params.id)
+export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const campaign = mockCampaigns.find(c => c.id === id)
   
   if (!campaign) {
     notFound()
