@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/db'
 import type { ApiResponse } from '@repo/types'
+import { analyzeBrand } from '../lib/brand-analyzer'
 
 export const brandsRouter = new Hono()
 
@@ -42,20 +43,61 @@ brandsRouter.get('/:id', async (c) => {
   }
 })
 
-// POST /api/brands - Create brand
+// POST /api/brands/analyze - Analyze URL and create brand
+brandsRouter.post('/analyze', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { url } = body
+    
+    if (!url) {
+      return c.json<ApiResponse>({ error: 'URL is required' }, 400)
+    }
+
+    // Analyze brand DNA (mock implementation with delay)
+    const brandDNA = await analyzeBrand(url)
+
+    // Create brand in database
+    const brand = await prisma.brand.create({
+      data: {
+        userId: body.userId || 'temp-user-id', // TODO: Get from auth
+        name: brandDNA.name,
+        url: brandDNA.url,
+        logo: brandDNA.logo,
+        colors: brandDNA.colors,
+        typography: brandDNA.typography,
+        voice: brandDNA.voice,
+        values: brandDNA.values,
+        aesthetic: brandDNA.aesthetic,
+        industry: brandDNA.industry,
+        targetAudience: brandDNA.targetAudience,
+        summary: brandDNA.summary,
+        images: brandDNA.images,
+        socialProfiles: brandDNA.socialProfiles || {},
+      },
+    })
+
+    return c.json<ApiResponse>({ 
+      data: brand, 
+      message: 'Brand DNA analyzed successfully' 
+    }, 201)
+  } catch (error) {
+    console.error('Error analyzing brand:', error)
+    return c.json<ApiResponse>({ error: 'Failed to analyze brand' }, 500)
+  }
+})
+
+// POST /api/brands - Create brand manually
 brandsRouter.post('/', async (c) => {
   try {
     const body = await c.req.json()
-    // TODO: Validate with Zod
-    // TODO: Queue brand DNA analysis job
 
     const brand = await prisma.brand.create({
       data: {
         userId: body.userId || 'temp-user-id', // TODO: Get from auth
         name: body.name,
-        url: body.url,
-        logo: { primary: '', variants: [] },
-        colors: {
+        url: body.url || '',
+        logo: body.logo || { primary: '', variants: [] },
+        colors: body.colors || {
           primary: '#000000',
           secondary: '#ffffff',
           accent: '#0000ff',
@@ -63,15 +105,19 @@ brandsRouter.post('/', async (c) => {
           text: '#000000',
           palette: [],
         },
-        typography: { heading: 'sans-serif', body: 'sans-serif' },
-        voice: { tone: [], personality: [], keywords: [], sampleTexts: [] },
-        values: [],
-        aesthetic: [],
-        images: { scraped: [], uploaded: [], products: [] },
+        typography: body.typography || { heading: 'sans-serif', body: 'sans-serif' },
+        voice: body.voice || { tone: [], personality: [], keywords: [], sampleTexts: [] },
+        values: body.values || [],
+        aesthetic: body.aesthetic || [],
+        industry: body.industry,
+        targetAudience: body.targetAudience,
+        summary: body.summary,
+        images: body.images || { scraped: [], uploaded: [], products: [] },
+        socialProfiles: body.socialProfiles || {},
       },
     })
 
-    return c.json<ApiResponse>({ data: brand, message: 'Brand created. DNA analysis queued.' }, 201)
+    return c.json<ApiResponse>({ data: brand, message: 'Brand created' }, 201)
   } catch (error) {
     console.error('Error creating brand:', error)
     return c.json<ApiResponse>({ error: 'Failed to create brand' }, 500)
@@ -109,5 +155,50 @@ brandsRouter.delete('/:id', async (c) => {
   } catch (error) {
     console.error('Error deleting brand:', error)
     return c.json<ApiResponse>({ error: 'Failed to delete brand' }, 500)
+  }
+})
+
+// POST /api/brands/:id/analyze - Re-analyze existing brand
+brandsRouter.post('/:id/analyze', async (c) => {
+  try {
+    const id = c.req.param('id')
+    
+    const existingBrand = await prisma.brand.findUnique({
+      where: { id },
+    })
+
+    if (!existingBrand || !existingBrand.url) {
+      return c.json<ApiResponse>({ error: 'Brand not found or no URL' }, 404)
+    }
+
+    // Re-analyze
+    const brandDNA = await analyzeBrand(existingBrand.url)
+
+    // Update brand
+    const brand = await prisma.brand.update({
+      where: { id },
+      data: {
+        name: brandDNA.name,
+        logo: brandDNA.logo,
+        colors: brandDNA.colors,
+        typography: brandDNA.typography,
+        voice: brandDNA.voice,
+        values: brandDNA.values,
+        aesthetic: brandDNA.aesthetic,
+        industry: brandDNA.industry,
+        targetAudience: brandDNA.targetAudience,
+        summary: brandDNA.summary,
+        images: brandDNA.images,
+        socialProfiles: brandDNA.socialProfiles || {},
+      },
+    })
+
+    return c.json<ApiResponse>({ 
+      data: brand, 
+      message: 'Brand DNA re-analyzed successfully' 
+    })
+  } catch (error) {
+    console.error('Error re-analyzing brand:', error)
+    return c.json<ApiResponse>({ error: 'Failed to re-analyze brand' }, 500)
   }
 })
