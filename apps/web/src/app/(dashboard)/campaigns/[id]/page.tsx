@@ -1,5 +1,5 @@
 import { Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui'
-import { Edit02Icon, Copy01Icon, Delete02Icon, Download04Icon, Add01Icon } from '@hugeicons/react'
+import { Edit02Icon, Copy01Icon, Delete02Icon, Download04Icon, Add01Icon } from '@/lib/icons-temp'
 import { mockCampaigns, mockCreatives } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'

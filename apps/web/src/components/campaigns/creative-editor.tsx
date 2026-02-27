@@ -9,7 +9,7 @@ import {
   Image01Icon,
   Magic01Icon,
   ClockIcon 
-} from '@hugeicons/react'
+} from '@/lib/icons-temp'
 import { MockCreative } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'

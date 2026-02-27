@@ -12,7 +12,7 @@ import {
   Lightning01Icon,
   Building03Icon,
   Menu01Icon,
-} from '@hugeicons/react'
+} from '@/lib/icons-temp'
 
 const navigation = [
   { name: 'Brand DNA', href: '/brand', icon: Sparkles01Icon },

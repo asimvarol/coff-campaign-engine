@@ -1,5 +1,5 @@
 import { Button, Badge } from '@repo/ui'
-import { Add01Icon, Target03Icon } from '@hugeicons/react'
+import { Add01Icon, Target03Icon } from '@/lib/icons-temp'
 import Link from 'next/link'
 import { mockCampaigns, getCampaignStats } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
