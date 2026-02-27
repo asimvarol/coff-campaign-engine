@@ -9,7 +9,7 @@ import {
   Image01Icon,
   Magic01Icon,
   ClockIcon 
-} from '@/lib/icons-temp'
+} from '@/lib/icons'
 import { MockCreative } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
@@ -59,7 +59,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href={`/campaigns/${campaignId}`}>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" aria-label="Back to campaign">
                 <ArrowLeft01Icon className="mr-2 h-4 w-4" />
                 Back to Campaign
               </Button>
@@ -73,11 +73,11 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" aria-label="Regenerate creative image">
               <RefreshIcon className="mr-2 h-4 w-4" />
               Regenerate
             </Button>
-            <Button size="sm">
+            <Button size="sm" aria-label="Download creative">
               <Download04Icon className="mr-2 h-4 w-4" />
               Download
             </Button>
@@ -174,6 +174,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                 variant={activeTab === 'image' ? 'default' : 'outline'}
                 onClick={() => setActiveTab('image')}
                 className="flex-1"
+                aria-label="Edit image settings"
               >
                 <Image01Icon className="mr-2 h-4 w-4" />
                 Image
@@ -183,6 +184,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                 variant={activeTab === 'text' ? 'default' : 'outline'}
                 onClick={() => setActiveTab('text')}
                 className="flex-1"
+                aria-label="Edit text content"
               >
                 Text
               </Button>
@@ -191,6 +193,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                 variant={activeTab === 'overlay' ? 'default' : 'outline'}
                 onClick={() => setActiveTab('overlay')}
                 className="flex-1"
+                aria-label="Edit overlay settings"
               >
                 Overlay
               </Button>
@@ -211,11 +214,11 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" aria-label="Upload new background image">
                       <Image01Icon className="mr-2 h-4 w-4" />
                       Upload New
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" aria-label="Generate new background with AI">
                       <Magic01Icon className="mr-2 h-4 w-4" />
                       Generate New
                     </Button>
@@ -403,7 +406,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                     />
                   </div>
 
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full" aria-label="Generate CTA button variations with AI">
                     <Magic01Icon className="mr-2 h-4 w-4" />
                     Generate CTA Variations
                   </Button>
@@ -450,7 +453,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" aria-label="Fix layout with AI">
                   <Magic01Icon className="mr-2 h-4 w-4" />
                   Fix Layout (AI)
                 </Button>

@@ -1,5 +1,5 @@
 import { Button, Badge } from '@repo/ui'
-import { Add01Icon, Target03Icon } from '@/lib/icons-temp'
+import { Add01Icon, Target03Icon } from '@/lib/icons'
 import Link from 'next/link'
 import { mockCampaigns, getCampaignStats } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
@@ -36,7 +36,7 @@ export default function CampaignsPage() {
           <p className="text-muted-foreground">Create and manage multi-platform campaigns</p>
         </div>
         <Link href="/campaigns/new">
-          <Button size="lg">
+          <Button size="lg" aria-label="Create new campaign">
             <Add01Icon className="mr-2 h-4 w-4" />
             New Campaign
           </Button>
@@ -74,7 +74,7 @@ export default function CampaignsPage() {
             Create your first AI-powered campaign. We'll generate creatives for all your platforms.
           </p>
           <Link href="/campaigns/new" className="mt-6">
-            <Button>
+            <Button aria-label="Create your first campaign">
               <Add01Icon className="mr-2 h-4 w-4" />
               Create First Campaign
             </Button>

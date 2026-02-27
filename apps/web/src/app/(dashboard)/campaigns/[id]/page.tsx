@@ -1,5 +1,5 @@
 import { Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui'
-import { Edit02Icon, Copy01Icon, Delete02Icon, Download04Icon, Add01Icon } from '@/lib/icons-temp'
+import { Edit02Icon, Copy01Icon, Delete02Icon, Download04Icon, Add01Icon } from '@/lib/icons'
 import { mockCampaigns, mockCreatives } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
@@ -74,19 +74,19 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" aria-label="Edit campaign">
               <Edit02Icon className="mr-2 h-4 w-4" />
               Edit
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" aria-label="Duplicate campaign">
               <Copy01Icon className="mr-2 h-4 w-4" />
               Duplicate
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" aria-label="Download all creatives">
               <Download04Icon className="mr-2 h-4 w-4" />
               Download All
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" aria-label="Archive campaign">
               <Delete02Icon className="mr-2 h-4 w-4" />
               Archive
             </Button>
@@ -131,7 +131,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold">Creatives</h2>
           <Link href="/campaigns/new">
-            <Button>
+            <Button aria-label="Generate more creatives">
               <Add01Icon className="mr-2 h-4 w-4" />
               Generate More
             </Button>
