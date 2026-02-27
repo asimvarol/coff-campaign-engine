@@ -53,7 +53,7 @@ coff-campaign-engine/
 - **Base color**: Stone
 - **Theme**: Pink
 - **Icons**: HugeIcons (`@hugeicons/react` + `@hugeicons/core-free-icons`)
-- **Font**: Outfit (400, 500, 600, 700)
+- **Font**: Google Sans Flex (400, 500, 600, 700)
 - **Radius**: `0.625rem`
 - **RTL**: false
 - **Menu accent**: subtle
@@ -95,11 +95,11 @@ coff-campaign-engine/
 
 ### Typography
 
-- **Font family**: `"Outfit", ui-sans-serif, system-ui, sans-serif`
+- **Font family**: `"Google Sans Flex", ui-sans-serif, system-ui, sans-serif`
 - **Heading weights**: 600, 700
 - **Body weight**: 400, 500
 - **Numbers**: `tabular-nums` for data tables
-- **NO Geist** — Outfit only
+- **NO Geist** — Google Sans Flex only
 
 ### Icons
 
@@ -362,7 +362,7 @@ Implement in order:
 ## 🚨 Common Pitfalls
 
 1. **Using Lucide icons** → Use HugeIcons only
-2. **Using Geist font** → Use Outfit only
+2. **Using Geist font** → Use Google Sans Flex only
 3. **HSL colors** → Use OKLCH only
 4. **Using `any` type** → Always define proper types
 5. **Client Component when Server would work** → Default to Server
@@ -379,10 +379,10 @@ Implement in order:
 - [Master Plan](./COFF-CAMPAIGN-ENGINE.md) — Full feature spec
 - [Design Preset](https://ui.shadcn.com/init?base=radix&style=mira&baseColor=stone&theme=pink&iconLibrary=hugeicons&font=outfit&menuAccent=subtle&menuColor=default&radius=default&template=next&rtl=false)
 - [HugeIcons](https://hugeicons.com) — Icon library
-- [Outfit Font](https://fonts.google.com/specimen/Outfit)
+- [Google Sans Flex Font](https://fonts.google.com/specimen/Google Sans Flex)
 - [shadcn/ui](https://ui.shadcn.com) — Component library
 - [Hono](https://hono.dev) — API framework
 
 ---
 
-**Remember**: Mira preset + HugeIcons + Outfit font + OKLCH colors + dark-first. No exceptions.
+**Remember**: Mira preset + HugeIcons + Google Sans Flex font + OKLCH colors + dark-first. No exceptions.
