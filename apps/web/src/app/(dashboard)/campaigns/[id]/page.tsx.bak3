@@ -28,7 +28,7 @@ const objectiveLabels = {
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const campaign = mockCampaigns.find(c => c.id === id)
+  const campaign = mockCampaigns.find(c => c.id === params.id)
   
   if (!campaign) {
     notFound()

@@ -8,19 +8,20 @@ import { PhotoshootEmptyState } from '@/components/photoshoot/empty-state'
 import { getPhotoshoots } from '@/lib/mock-data/photoshoots'
 
 interface PhotoshootPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string
     limit?: string
-  }
+  }>
 }
 
 /**
  * Photoshoot Studio main page
  * Displays list of all photoshoots with pagination
  */
-export default function PhotoshootPage({ searchParams }: PhotoshootPageProps) {
-  const page = parseInt(searchParams.page ?? '1', 10)
-  const limit = parseInt(searchParams.limit ?? '12', 10)
+export default async function PhotoshootPage({ searchParams }: PhotoshootPageProps) {
+  const params = await searchParams
+  const page = parseInt(params.page ?? '1', 10)
+  const limit = parseInt(params.limit ?? '12', 10)
 
   const { data: photoshoots, pagination } = getPhotoshoots({ page, limit })
 
