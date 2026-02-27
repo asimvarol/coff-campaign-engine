@@ -71,11 +71,11 @@
       "name": "@repo/db",
       "version": "0.1.0",
       "dependencies": {
-        "@prisma/client": "^6.2.0",
+        "@prisma/client": "^6.19.2",
       },
       "devDependencies": {
         "@repo/config": "workspace:*",
-        "prisma": "^6.2.0",
+        "prisma": "^6.19.2",
         "typescript": "^5.7.2",
       },
     },

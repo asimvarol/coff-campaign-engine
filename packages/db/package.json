@@ -13,11 +13,11 @@
     "clean": "rm -rf .turbo node_modules"
   },
   "dependencies": {
-    "@prisma/client": "^6.2.0"
+    "@prisma/client": "^6.19.2"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
-    "prisma": "^6.2.0",
+    "prisma": "^6.19.2",
     "typescript": "^5.7.2"
   }
 }
