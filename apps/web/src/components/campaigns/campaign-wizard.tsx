@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Textarea, Progress } from '@repo/ui'
-import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons-temp'
+import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons'
 import { CampaignObjective } from '@repo/types'
 import { mockBrands, generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
 import type { CampaignConcept } from '@repo/types'

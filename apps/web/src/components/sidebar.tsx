@@ -12,7 +12,7 @@ import {
   Lightning01Icon,
   Building03Icon,
   Menu01Icon,
-} from '@/lib/icons-temp'
+} from '@/lib/icons'
 
 const navigation = [
   { name: 'Brand DNA', href: '/brand', icon: Sparkles01Icon },
