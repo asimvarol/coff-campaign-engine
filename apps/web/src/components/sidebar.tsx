@@ -32,6 +32,11 @@ import {
   Building03Icon,
   Link01Icon,
   ClockIcon,
+  Dashboard01Icon,
+  ChartHistogram01Icon,
+  Eye01Icon,
+  Lightbulb01Icon,
+  FileText01Icon,
 } from '@/lib/icons'
 
 const navigation = [
@@ -48,7 +53,18 @@ const navigation = [
       { name: 'Accounts', href: '/publish/accounts', icon: Link01Icon },
     ],
   },
-  { name: 'Analytics', href: '/analytics', icon: Analytics01Icon },
+  {
+    name: 'Analytics',
+    href: '/analytics',
+    icon: Analytics01Icon,
+    subItems: [
+      { name: 'Overview', href: '/analytics', icon: Dashboard01Icon },
+      { name: 'Campaigns', href: '/analytics/campaigns', icon: ChartHistogram01Icon },
+      { name: 'Creatives', href: '/analytics/creatives', icon: Eye01Icon },
+      { name: 'Insights', href: '/analytics/insights', icon: Lightbulb01Icon },
+      { name: 'Reports', href: '/analytics/reports', icon: FileText01Icon },
+    ],
+  },
   { name: 'Autopilot', href: '/autopilot', icon: Lightning01Icon },
   { name: 'Agency', href: '/agency', icon: Building03Icon },
 ]

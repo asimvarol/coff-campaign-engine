@@ -43,6 +43,11 @@ import {
   AlertCircleIcon as AlertCircle01IconSvg,
   CheckmarkCircle01Icon as CheckmarkCircle01IconSvg,
   ArrowUpRight01Icon as TrendingUpIconSvg,
+  ArrowUp as ArrowUp01IconSvg,
+  ArrowDown as ArrowDown01IconSvg,
+  FileText as FileText01IconSvg,
+  Lightbulb as Lightbulb01IconSvg,
+  Eye as Eye01IconSvg,
 } from '@hugeicons/core-free-icons'
 
 interface IconProps {
@@ -117,3 +122,14 @@ export const TrendingUpIcon = createIcon(TrendingUpIconSvg)
 export const Trash2Icon = createIcon(Delete02IconSvg)
 export const MenuIcon = createIcon(Menu01IconSvg) // Alias
 export const ZapIcon = createIcon(Lightning01IconSvg) // Alias (Lucide name)
+export const ArrowUp01Icon = createIcon(ArrowUp01IconSvg)
+export const ArrowDown01Icon = createIcon(ArrowDown01IconSvg)
+export const FileText01Icon = createIcon(FileText01IconSvg)
+export const Lightbulb01Icon = createIcon(Lightbulb01IconSvg)
+export const Eye01Icon = createIcon(Eye01IconSvg)
+// Aliases for analytics
+export const TrendUp01Icon = ArrowUp01Icon
+export const TrendDown01Icon = ArrowDown01Icon
+export const ChartHistogram01Icon = Analytics01Icon
+export const Dashboard01Icon = Analytics01Icon
+export const BarChart01Icon = Analytics01Icon

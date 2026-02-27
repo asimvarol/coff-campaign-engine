@@ -1,0 +1,256 @@
+'use client'
+
+import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
+import {
+  Lightbulb01Icon,
+  AlertCircle01Icon,
+  TrendUp01Icon,
+  Eye01Icon,
+  Magic01Icon,
+} from '@/lib/icons'
+import { mockAIInsights } from '@/lib/mock-data/analytics'
+import type { AIInsight } from '@repo/types'
+
+const insightIcons = {
+  alert: AlertCircle01Icon,
+  optimization: TrendUp01Icon,
+  trend: TrendUp01Icon,
+  audience: Eye01Icon,
+}
+
+const severityColors = {
+  low: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  medium: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
+  high: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+  critical: 'bg-destructive/10 text-destructive border-destructive/30',
+}
+
+export default function InsightsPage() {
+  const [insights, setInsights] = useState<AIInsight[]>(mockAIInsights)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [selectedInsight, setSelectedInsight] = useState<AIInsight | null>(null)
+
+  const handleGenerateInsights = async () => {
+    setIsGenerating(true)
+    // Mock generation delay
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    
+    // Mock new insight
+    const newInsight: AIInsight = {
+      id: `insight-${Date.now()}`,
+      type: 'optimization',
+      title: 'Carousel Format Trending',
+      description: 'Carousel posts have 2.1x higher save rate compared to single image posts.',
+      affectedEntity: null,
+      suggestedAction: 'Create more carousel content for upcoming campaigns.',
+      severity: 'medium',
+      createdAt: new Date(),
+      isRead: false,
+    }
+    
+    setInsights([newInsight, ...insights])
+    setIsGenerating(false)
+  }
+
+  const markAsRead = (insightId: string) => {
+    setInsights(insights.map((i) => (i.id === insightId ? { ...i, isRead: true } : i)))
+  }
+
+  const unreadCount = insights.filter((i) => !i.isRead).length
+
+  return (
+    <div className="p-8">
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">AI Insights</h1>
+          <p className="text-muted-foreground">
+            AI-generated recommendations and performance alerts
+          </p>
+        </div>
+        <button
+          onClick={handleGenerateInsights}
+          disabled={isGenerating}
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        >
+          <Magic01Icon size={18} />
+          {isGenerating ? 'Generating...' : 'Generate New Insights (2 credits)'}
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="mb-6 grid gap-6 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Total Insights</CardDescription>
+            <CardTitle className="text-2xl">{insights.length}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Unread</CardDescription>
+            <CardTitle className="text-2xl text-primary">{unreadCount}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Critical Alerts</CardDescription>
+            <CardTitle className="text-2xl text-destructive">
+              {insights.filter((i) => i.severity === 'critical').length}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Actions Suggested</CardDescription>
+            <CardTitle className="text-2xl">
+              {insights.filter((i) => i.suggestedAction).length}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+
+      {/* Insights List */}
+      <div className="space-y-4">
+        {insights.map((insight) => {
+          const Icon = insightIcons[insight.type]
+          const severityColor = severityColors[insight.severity]
+
+          return (
+            <Card
+              key={insight.id}
+              className={`cursor-pointer transition-all hover:border-primary ${
+                !insight.isRead ? 'border-l-4 border-l-primary' : ''
+              }`}
+              onClick={() => {
+                setSelectedInsight(insight)
+                markAsRead(insight.id)
+              }}
+            >
+              <CardContent className="p-6">
+                <div className="flex gap-4">
+                  <div
+                    className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${
+                      insight.type === 'alert' ? 'bg-destructive/10' : 'bg-primary/10'
+                    }`}
+                  >
+                    <Icon
+                      size={20}
+                      className={insight.type === 'alert' ? 'text-destructive' : 'text-primary'}
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{insight.title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{insight.description}</p>
+                      </div>
+                      <span className={`rounded-full border px-2 py-0.5 text-xs ${severityColor}`}>
+                        {insight.severity}
+                      </span>
+                    </div>
+
+                    {insight.affectedEntity && (
+                      <div className="mb-2 inline-block rounded-md bg-muted px-2 py-1 text-xs">
+                        <span className="text-muted-foreground">
+                          {insight.affectedEntity.type === 'campaign' ? '📊' : '🎨'}{' '}
+                          {insight.affectedEntity.name}
+                        </span>
+                      </div>
+                    )}
+
+                    {insight.suggestedAction && (
+                      <div className="mt-3 rounded-lg bg-muted/50 p-3">
+                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                          💡 Suggested Action:
+                        </p>
+                        <p className="text-sm">{insight.suggestedAction}</p>
+                        <div className="mt-3 flex gap-2">
+                          <button className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90">
+                            Take Action
+                          </button>
+                          <button className="rounded-md bg-background px-3 py-1 text-xs font-medium hover:bg-muted">
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {new Date(insight.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      {insights.length === 0 && (
+        <Card>
+          <CardContent className="flex h-48 flex-col items-center justify-center gap-4">
+            <Lightbulb01Icon size={48} className="text-muted-foreground" />
+            <div className="text-center">
+              <p className="font-medium">No insights yet</p>
+              <p className="text-sm text-muted-foreground">
+                Generate AI insights to get performance recommendations
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Detail Modal (simplified) */}
+      {selectedInsight && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+          onClick={() => setSelectedInsight(null)}
+        >
+          <Card className="w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <CardTitle>{selectedInsight.title}</CardTitle>
+              <CardDescription>
+                {new Date(selectedInsight.createdAt).toLocaleString()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="mb-2 font-medium">Description</h4>
+                <p className="text-sm text-muted-foreground">{selectedInsight.description}</p>
+              </div>
+
+              {selectedInsight.affectedEntity && (
+                <div>
+                  <h4 className="mb-2 font-medium">Affected {selectedInsight.affectedEntity.type}</h4>
+                  <p className="text-sm">{selectedInsight.affectedEntity.name}</p>
+                </div>
+              )}
+
+              {selectedInsight.suggestedAction && (
+                <div>
+                  <h4 className="mb-2 font-medium">Suggested Action</h4>
+                  <p className="text-sm">{selectedInsight.suggestedAction}</p>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-4">
+                <button className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                  Take Action
+                </button>
+                <button
+                  onClick={() => setSelectedInsight(null)}
+                  className="rounded-md bg-muted px-4 py-2 text-sm font-medium hover:bg-muted/80"
+                >
+                  Close
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  )
+}

@@ -342,10 +342,9 @@ export interface PhotoshootListRequest {
   status?: PhotoshootStatus
 }
 
-// Analytics Types (new)
+// Analytics Types (from main - simple KPI views)
 export type AnalyticsDateRange = '7d' | '30d' | '90d' | 'custom'
 export interface AnalyticsKPI { label: string; value: string; change: number; trend: 'up' | 'down' | 'flat' }
-export interface PlatformBreakdown { platform: string; percentage: number; reach: number; engagement: number; color: string }
 export interface CreativePerformanceView { id: string; name: string; campaignName: string; platform: string; format: string; thumbnailUrl: string; reach: number; impressions: number; engagementRate: number; ctr: number; clicks: number; saves: number; performanceScore: number; performanceLabel: 'excellent' | 'good' | 'average' | 'poor' | 'critical'; publishedAt: Date }
 export interface AnalyticsAIInsight { id: string; type: 'success' | 'warning' | 'suggestion' | 'trend'; title: string; description: string; metric?: string; creativeId?: string }
 export interface CampaignAnalytics { id: string; name: string; brandName: string; status: CampaignStatus; platforms: string[]; creativeCount: number; totalReach: number; totalEngagement: number; avgCtr: number; avgEngagementRate: number; spend: number; roas: number; startDate: Date; endDate: Date | null }
@@ -357,3 +356,94 @@ export interface AgencyBrand { id: string; name: string; logoUrl: string; indust
 export interface AgencyBillingEntry { id: string; brandId: string; brandName: string; action: string; credits: number; date: Date; userId: string; userName: string }
 export interface TeamActivity { id: string; userId: string; userName: string; userAvatar: string | null; action: string; target: string; brandId: string | null; brandName: string | null; createdAt: Date }
 export interface Agency { id: string; name: string; plan: AgencyPlan; members: AgencyMember[]; brands: AgencyBrand[]; totalCreditsUsed: number; totalCreditsRemaining: number; monthlySpend: number; createdAt: Date }
+
+// Analytics Types (from analytics feature - detailed metrics)
+export interface AnalyticsOverview {
+  totalReach: number
+  totalReachChange: number
+  totalEngagement: number
+  totalEngagementChange: number
+  avgCtr: number
+  avgCtrChange: number
+  totalClicks: number
+  totalClicksChange: number
+  totalSaves: number
+  totalSavesChange: number
+}
+
+export interface ReachTrendDataPoint {
+  date: string
+  reach: number
+  engagement: number
+  clicks: number
+}
+
+export interface PlatformBreakdown {
+  platform: string
+  reach: number
+  engagement: number
+  clicks: number
+  percentage: number
+  color?: string
+}
+
+export interface CampaignMetrics {
+  campaignId: string
+  campaignName: string
+  brandName: string
+  reach: number
+  engagement: number
+  ctr: number
+  clicks: number
+  score: number
+}
+
+export interface CreativeMetrics extends CreativePerformance {
+  creativeName: string
+  campaignName: string
+  thumbnailUrl: string
+}
+
+export interface AIInsight {
+  id: string
+  type: 'alert' | 'optimization' | 'trend' | 'audience'
+  title: string
+  description: string
+  affectedEntity: {
+    type: 'campaign' | 'creative'
+    id: string
+    name: string
+  } | null
+  suggestedAction: string | null
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  createdAt: Date
+  isRead: boolean
+}
+
+export interface ReportTemplate {
+  id: string
+  name: string
+  description: string
+  type: 'weekly' | 'monthly' | 'campaign' | 'custom'
+  includesSections: string[]
+}
+
+export interface GeneratedReport {
+  id: string
+  templateId: string
+  templateName: string
+  dateRange: { start: Date; end: Date }
+  generatedAt: Date
+  format: 'pdf' | 'csv'
+  downloadUrl: string | null
+}
+
+export interface ScheduledReport {
+  id: string
+  templateId: string
+  templateName: string
+  frequency: 'daily' | 'weekly' | 'monthly'
+  nextRunAt: Date
+  recipients: string[]
+  isActive: boolean
+}
