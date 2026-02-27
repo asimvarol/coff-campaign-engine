@@ -1,0 +1,26 @@
+{
+  "name": "@repo/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "start": "bun run dist/index.js",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rm -rf .turbo node_modules dist"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@repo/db": "workspace:*",
+    "@repo/types": "workspace:*",
+    "hono": "^4.6.17",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@repo/config": "workspace:*",
+    "@types/bun": "latest",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "coff-campaign-engine",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI-powered campaign management and optimization platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "test": "turbo run test",
+    "db:migrate": "cd packages/db && bunx prisma migrate dev",
+    "db:generate": "cd packages/db && bunx prisma generate",
+    "db:studio": "cd packages/db && bunx prisma studio",
+    "db:push": "cd packages/db && bunx prisma db push"
+  },
+  "devDependencies": {
+    "@turbo/gen": "^2.3.3",
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "bun@1.1.42",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.27",
+    "tailwindcss": "^3"
+  }
+}

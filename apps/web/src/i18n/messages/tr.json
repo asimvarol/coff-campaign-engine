@@ -1,0 +1,25 @@
+{
+  "common": {
+    "loading": "Yükleniyor...",
+    "error": "Bir şeyler ters gitti",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "create": "Oluştur",
+    "back": "Geri"
+  },
+  "brand": {
+    "title": "Marka DNA",
+    "subtitle": "Marka kimliklerinizi çıkarın ve yönetin",
+    "addBrand": "Marka Ekle",
+    "noBrands": "Henüz marka yok",
+    "createFirst": "İlk markanızı oluşturun"
+  },
+  "campaign": {
+    "title": "Kampanyalar",
+    "subtitle": "Çoklu platform kampanyaları oluşturun ve yönetin",
+    "newCampaign": "Yeni Kampanya",
+    "noCampaigns": "Henüz kampanya yok"
+  }
+}

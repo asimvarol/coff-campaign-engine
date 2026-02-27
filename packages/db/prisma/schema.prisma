@@ -1,0 +1,327 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER (Coff existing auth) ====================
+// Simplified - use existing Coff auth system
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  brands    Brand[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+// ==================== BRAND ====================
+model Brand {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  url            String?
+  logo           Json     // {primary: string, variants: string[]}
+  colors         Json     // {primary, secondary, accent, background, text, palette[]}
+  typography     Json     // {heading, body, accent?}
+  voice          Json     // {tone[], personality[], keywords[], sampleTexts[]}
+  values         String[]
+  aesthetic      String[]
+  industry       String?
+  targetAudience String?
+  summary        String?  @db.Text
+  images         Json     // {scraped[], uploaded[], products[]}
+  socialProfiles Json?    // {instagram?, facebook?, tiktok?, ...}
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  campaigns       Campaign[]
+  creatives       Creative[]
+  socialAccounts  SocialAccount[]
+  autopilotRules  AutopilotRule[]
+
+  // Agency
+  agencyId        String?
+  agency          Agency?         @relation(fields: [agencyId], references: [id])
+
+  @@index([userId])
+  @@index([agencyId])
+}
+
+// ==================== CAMPAIGN ====================
+model Campaign {
+  id              String           @id @default(cuid())
+  brandId         String
+  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?          @db.Text
+  objective       CampaignObjective
+  platforms       String[]         // ["instagram", "facebook", "tiktok"]
+  status          CampaignStatus   @default(DRAFT)
+  concept         Json             // AI-generated concept details
+  productImage    String?
+  referenceImages String[]
+
+  creatives       Creative[]
+  schedules       PublishSchedule[]
+
+  creditsCost     Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([brandId])
+  @@index([status])
+}
+
+enum CampaignObjective {
+  AWARENESS
+  ENGAGEMENT
+  CONVERSION
+  TRAFFIC
+  PRODUCT_LAUNCH
+  SEASONAL
+}
+
+enum CampaignStatus {
+  DRAFT
+  GENERATING
+  REVIEW
+  APPROVED
+  PUBLISHED
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+// ==================== CREATIVE ====================
+model Creative {
+  id              String        @id @default(cuid())
+  campaignId      String
+  campaign        Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  brandId         String
+  brand           Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  platform        String        // "instagram"
+  format          String        // "story"
+  width           Int
+  height          Int
+
+  // Content
+  imageUrl        String
+  imagePrompt     String        @db.Text
+  thumbnailUrl    String?
+  header          Json?         // {text, font, size, color, position, visible}
+  description     Json?         // {text, font, size, color, position, visible}
+  cta             Json?         // {text, style, url, visible}
+  overlay         Json?         // {color, opacity}
+
+  // Versioning
+  version         Int           @default(1)
+  parentId        String?       // Previous version
+
+  // Publishing
+  publishStatus   PublishStatus @default(DRAFT)
+  publishedAt     DateTime?
+  postUrl         String?
+  postId          String?       // Platform post ID
+
+  // Performance
+  performance     CreativePerformance[]
+  performanceScore Float?       // AI composite 0-100
+
+  // Autopilot
+  autopilotStatus String?       // "active", "paused_by_autopilot", "replaced"
+  replacedById    String?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([campaignId])
+  @@index([brandId])
+  @@index([publishStatus])
+}
+
+enum PublishStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  PAUSED
+  REMOVED
+}
+
+// ==================== PERFORMANCE ====================
+model CreativePerformance {
+  id             String   @id @default(cuid())
+  creativeId     String
+  creative       Creative @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+
+  // Snapshot time
+  recordedAt     DateTime @default(now())
+
+  // Metrics
+  reach          Int      @default(0)
+  impressions    Int      @default(0)
+  likes          Int      @default(0)
+  comments       Int      @default(0)
+  shares         Int      @default(0)
+  saves          Int      @default(0)
+  clicks         Int      @default(0)
+  videoViews     Int?
+  avgWatchTime   Float?
+
+  // Computed
+  engagementRate Float?
+  ctr            Float?
+
+  // Cost (ads)
+  spend          Float?
+  cpc            Float?
+  cpm            Float?
+  roas           Float?
+
+  @@index([creativeId, recordedAt])
+}
+
+// ==================== PUBLISHING ====================
+model SocialAccount {
+  id             String   @id @default(cuid())
+  brandId        String
+  brand          Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  platform       String   // "instagram", "facebook", etc.
+  accountId      String   // Platform account ID
+  accountName    String
+  avatarUrl      String?
+  accessToken    String   // Should be encrypted
+  refreshToken   String?  // Should be encrypted
+  tokenExpiresAt DateTime?
+  isActive       Boolean  @default(true)
+  metadata       Json?    // Platform-specific data
+  createdAt      DateTime @default(now())
+
+  schedules      PublishSchedule[]
+
+  @@unique([brandId, platform, accountId])
+  @@index([brandId])
+}
+
+model PublishSchedule {
+  id          String         @id @default(cuid())
+  creativeId  String
+  campaignId  String
+  campaign    Campaign       @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  accountId   String
+  account     SocialAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  scheduledAt DateTime
+  publishedAt DateTime?
+  status      ScheduleStatus @default(PENDING)
+
+  caption     String?        @db.Text
+  hashtags    String[]
+  error       String?        @db.Text
+  retryCount  Int            @default(0)
+
+  createdAt   DateTime       @default(now())
+
+  @@index([scheduledAt, status])
+  @@index([campaignId])
+}
+
+enum ScheduleStatus {
+  PENDING
+  QUEUED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+// ==================== AUTOPILOT ====================
+model AutopilotRule {
+  id               String   @id @default(cuid())
+  brandId          String
+  brand            Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  name             String
+  isActive         Boolean  @default(true)
+
+  conditions       Json     // [{metric, operator, value, timeWindow, platform?}]
+  conditionLogic   String   @default("AND")
+  actions          Json     // [{type, config}]
+
+  maxActionsPerDay Int      @default(5)
+  cooldownMinutes  Int      @default(360)
+
+  logs             AutopilotLog[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([brandId])
+  @@index([isActive])
+}
+
+model AutopilotLog {
+  id            String        @id @default(cuid())
+  ruleId        String
+  rule          AutopilotRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  creativeId    String
+
+  triggerMetric String        // "ctr"
+  triggerValue  Float         // 0.3
+  threshold     Float         // 1.0
+
+  actionTaken   String        // "pause", "replace", "notify"
+  actionResult  Json?         // {newCreativeId, notificationSent, etc.}
+
+  createdAt     DateTime      @default(now())
+
+  @@index([ruleId, createdAt])
+  @@index([creativeId])
+}
+
+// ==================== AGENCY ====================
+model Agency {
+  id        String   @id @default(cuid())
+  ownerId   String
+  name      String
+  brands    Brand[]
+  members   AgencyMember[]
+  plan      String   @default("free") // "free", "pro", "enterprise"
+  createdAt DateTime @default(now())
+
+  @@index([ownerId])
+}
+
+model AgencyMember {
+  id          String      @id @default(cuid())
+  agencyId    String
+  agency      Agency      @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  userId      String
+  role        AgencyRole  @default(EDITOR)
+  brandAccess String[]    // Brand IDs (empty = all)
+  invitedAt   DateTime    @default(now())
+  acceptedAt  DateTime?
+
+  @@unique([agencyId, userId])
+  @@index([agencyId])
+  @@index([userId])
+}
+
+enum AgencyRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}

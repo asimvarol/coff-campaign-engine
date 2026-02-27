@@ -1,0 +1,25 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back"
+  },
+  "brand": {
+    "title": "Brand DNA",
+    "subtitle": "Extract and manage your brand identities",
+    "addBrand": "Add Brand",
+    "noBrands": "No brands yet",
+    "createFirst": "Create your first brand"
+  },
+  "campaign": {
+    "title": "Campaigns",
+    "subtitle": "Create and manage multi-platform campaigns",
+    "newCampaign": "New Campaign",
+    "noCampaigns": "No campaigns yet"
+  }
+}
