@@ -12,6 +12,9 @@ export * from './components/textarea'
 export * from './components/color-picker'
 export * from './components/tag-input'
 export * from './components/progress-stepper'
+export * from './components/progress'
+export * from './components/slider'
+export * from './components/tabs'
 
 // Utils
 export * from './lib/utils'

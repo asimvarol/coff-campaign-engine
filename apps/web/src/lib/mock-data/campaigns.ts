@@ -299,7 +299,7 @@ export const mockCreatives: MockCreative[] = [
       visible: true,
     },
     cta: {
-      text: 'Shop Mother's Day',
+      text: 'Shop Mother\'s Day',
       style: 'primary',
       url: 'https://goldenhornshop.com',
       visible: true,
