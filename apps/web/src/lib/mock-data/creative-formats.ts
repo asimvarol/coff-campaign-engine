@@ -68,8 +68,7 @@ export const PLATFORM_COLORS: Record<string, string> = {
 export function getAllFormatsForPlatforms(platforms: string[]): Array<{
   platform: string
   format: string
-  ...CreativeFormat
-}> {
+} & CreativeFormat> {
   const formats: Array<{ platform: string; format: string } & CreativeFormat> = []
   
   platforms.forEach(platform => {
