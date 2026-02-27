@@ -1,7 +1,7 @@
 # CLAUDE.md — Development Rules & Architecture
 
 **Project**: Coff Campaign Engine
-**Method**: RALPH (Read, Assess, Layout, Plan, Harvest)
+**Method**: RALPH (Research, Architecture, Layout, Production, Health Check)
 **Last Updated**: 2026-02-27
 
 ---
@@ -28,7 +28,7 @@ coff-campaign-engine/
 │   ├── web/              # Next.js 15 (App Router, port 3001)
 │   └── api/              # Hono API server (port 3002)
 ├── packages/
-│   ├── ui/               # shadcn/ui components
+│   ├── ui/               # shadcn/ui components (Mira style)
 │   ├── db/               # Prisma schema & client
 │   ├── types/            # Shared TypeScript types
 │   └── config/           # Shared tsconfig, eslint, etc.
@@ -37,13 +37,117 @@ coff-campaign-engine/
 
 ### Tech Stack
 
-- **Frontend**: Next.js 15, React 19, Tailwind v4, shadcn/ui
+- **Frontend**: Next.js 15, React 19, Tailwind v4, shadcn/ui (Mira preset)
 - **Backend**: Hono (API), Prisma (ORM), PostgreSQL, Redis (queue/cache)
-- **AI**: fal.ai (image gen), OpenAI (text/concepts)
+- **AI**: fal.ai Nano Banana 2 (image gen), OpenAI (text/concepts)
 - **Queue**: BullMQ (background jobs)
 - **i18n**: next-intl (EN, TR)
-- **Fonts**: Geist Sans, Geist Mono
-- **Colors**: OKLCH palette, dark theme default
+- **Package Manager**: Bun
+
+---
+
+## 🎨 Design System — NON-NEGOTIABLE
+
+### Preset: Mira (Radix)
+- **Style**: `radix-mira`
+- **Base color**: Stone
+- **Theme**: Pink
+- **Icons**: HugeIcons (`@hugeicons/react` + `@hugeicons/core-free-icons`)
+- **Font**: Outfit (400, 500, 600, 700)
+- **Radius**: `0.625rem`
+- **RTL**: false
+- **Menu accent**: subtle
+- **Color format**: OKLCH
+
+### Color Palette (OKLCH)
+
+**Light Mode:**
+```css
+--background: oklch(1 0 0)                    /* Pure white */
+--foreground: oklch(0.147 0.004 49.25)        /* Near black, warm */
+--primary: oklch(0.59 0.22 1)                 /* Pink/rose */
+--primary-foreground: oklch(0.97 0.01 343)    /* Light pink */
+--secondary: oklch(0.967 0.001 286.375)       /* Cool gray */
+--muted: oklch(0.97 0.001 106.424)            /* Warm gray */
+--accent: oklch(0.97 0.001 106.424)           /* Warm gray */
+--destructive: oklch(0.577 0.245 27.325)      /* Red-orange */
+--border: oklch(0.923 0.003 48.717)           /* Soft stone */
+```
+
+**Dark Mode (DEFAULT):**
+```css
+--background: oklch(0.147 0.004 49.25)        /* Deep warm black */
+--foreground: oklch(0.985 0.001 106.423)      /* Off-white */
+--primary: oklch(0.66 0.21 354)               /* Brighter pink */
+--card: oklch(0.216 0.006 56.043)             /* Dark card */
+--border: oklch(1 0 0 / 10%)                  /* White 10% */
+--input: oklch(1 0 0 / 15%)                   /* White 15% */
+```
+
+**Chart Colors (Pink gradient):**
+```css
+--chart-1: oklch(0.82 0.11 346)   /* Light pink */
+--chart-2: oklch(0.73 0.18 350)   /* Medium pink */
+--chart-3: oklch(0.66 0.21 354)   /* Pink */
+--chart-4: oklch(0.59 0.22 1)     /* Deep pink */
+--chart-5: oklch(0.52 0.20 4)     /* Dark pink */
+```
+
+### Typography
+
+- **Font family**: `"Outfit", ui-sans-serif, system-ui, sans-serif`
+- **Heading weights**: 600, 700
+- **Body weight**: 400, 500
+- **Numbers**: `tabular-nums` for data tables
+- **NO Geist** — Outfit only
+
+### Icons
+
+- **Primary**: HugeIcons (`@hugeicons/react`)
+- **Import**: `import { IconName } from '@hugeicons/react'`
+- **Size**: Default 20px, sidebar 18px, hero 24px
+- **NO Lucide** — HugeIcons only (unless specific icon missing)
+
+### Component Rules
+
+- **Dark theme first** — design for dark, light is secondary
+- **Cards**: `bg-card` with `border` (oklch 10% white in dark)
+- **Buttons**: Primary uses pink, secondary uses muted
+- **Inputs**: `bg-input` (15% white in dark), focus ring pink
+- **Badges**: Use `default`, `secondary`, `destructive`, `outline` only
+- **Animations**: `tw-animate-css` for transitions
+- **Spacing**: `p-4` for cards, `p-6` for page sections, `gap-4` for grids
+
+### CSS Architecture (Tailwind v4)
+
+```css
+/* globals.css structure — DO NOT change order */
+@import "tw-animate-css";
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* All CSS variables here */
+}
+
+.dark {
+  /* Dark mode overrides */
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground; }
+}
+```
+
+### Layout Patterns
+
+- **Sidebar**: Fixed left, collapsible, `bg-sidebar` with subtle accent
+- **Content area**: `max-w-7xl mx-auto` for main content
+- **Cards**: Rounded `rounded-[var(--radius)]`, border, shadow-sm in light
+- **Empty states**: Centered, dashed border, icon + title + CTA
+- **Loading**: Skeleton components matching layout shape
 
 ---
 
@@ -59,10 +163,10 @@ coff-campaign-engine/
 
 ### 2. File Naming
 
-- Components: `PascalCase.tsx` (e.g., `BrandDNACard.tsx`)
+- Components: `kebab-case.tsx` (e.g., `brand-dna-card.tsx`)
 - Utilities: `camelCase.ts` (e.g., `formatDate.ts`)
-- API routes: `route.ts` (Next.js convention)
-- Types: `types.ts` or `[name].types.ts`
+- API routes: `kebab-case.ts` (e.g., `brands.ts`)
+- Types: defined in `packages/types/src/index.ts`
 
 ### 3. Import Order
 
@@ -75,29 +179,37 @@ import { Hono } from 'hono'
 import { Button } from '@repo/ui/button'
 import { prisma } from '@repo/db'
 
-// 3. Relative imports
+// 3. HugeIcons
+import { Globe02Icon, Palette01Icon } from '@hugeicons/react'
+
+// 4. Relative imports
 import { formatDate } from '@/lib/utils'
-import type { BrandDNA } from '@/types'
+import type { BrandDNA } from '@repo/types'
 ```
 
-### 4. Database (Prisma)
+### 4. SelectItem Values
+
+- **NEVER** use empty string `""` as SelectItem value (crashes Radix)
+- Use `"__all__"` or `"__none__"` sentinels
+
+### 5. Database (Prisma)
 
 - **Always generate after schema changes**: `bun run db:generate`
 - **Use transactions** for multi-model operations
 - **Indexes** on foreign keys and frequently queried fields
 - **Soft deletes** where appropriate (add `deletedAt: DateTime?`)
 
-### 5. Error Handling
+### 6. Error Handling
 
 ```typescript
-// API routes — return proper status codes
+// API routes — return proper status codes + consistent format
 app.get('/api/brands/:id', async (c) => {
   try {
     const brand = await prisma.brand.findUnique({
       where: { id: c.req.param('id') }
     })
     if (!brand) return c.json({ error: 'Brand not found' }, 404)
-    return c.json(brand)
+    return c.json({ data: brand })
   } catch (error) {
     console.error('Error fetching brand:', error)
     return c.json({ error: 'Internal server error' }, 500)
@@ -105,208 +217,172 @@ app.get('/api/brands/:id', async (c) => {
 })
 ```
 
-### 6. Environment Variables
+### 7. Environment Variables
 
 - **Never commit `.env`** — always use `.env.example`
-- **Validate on startup** — use `zod` to validate env vars
-- **Type-safe access** — create `env.ts` helper
+- **Validate on startup** with Zod
+- **Prefix**: `NEXT_PUBLIC_` for client-side only
 
-```typescript
-// lib/env.ts
-import { z } from 'zod'
+---
 
-const envSchema = z.object({
-  DATABASE_URL: z.string(),
-  FAL_AI_KEY: z.string(),
-  // ...
-})
+## 🔀 Git Workflow — MANDATORY
 
-export const env = envSchema.parse(process.env)
+### Branch Protection
+- **`main` branch is PROTECTED** — never push directly to main
+- For every feature/fix, create a feature branch:
+  ```bash
+  git checkout -b feat/short-description
+  ```
+
+### Branch Naming
+```
+feat/brand-dna-editor        # New feature
+fix/autopilot-rule-eval      # Bug fix
+refactor/campaign-api        # Code refactoring
+chore/update-deps            # Maintenance
+docs/api-documentation       # Documentation
+style/dark-theme-polish      # Styling only
 ```
 
-### 7. UI Components (shadcn/ui)
-
-- **Install via CLI**: `bunx shadcn@latest add button`
-- **Customize in packages/ui** — maintain consistency
-- **Dark theme first** — design for dark, adapt to light
-- **Accessible** — use proper ARIA labels, keyboard navigation
-
-### 8. API Design
-
-- **RESTful conventions** — GET, POST, PUT, DELETE
-- **Consistent response format**:
-  ```json
-  {
-    "data": {...},
-    "error": null
-  }
-  ```
-- **Use HTTP status codes** properly
-- **Pagination** for list endpoints
-- **Rate limiting** on public endpoints
-
----
-
-## 🧠 Key Concepts
-
-### Brand DNA
-
-- **Purpose**: Extract brand identity from website
-- **Pipeline**: Scrape → Extract colors/fonts → AI analysis → Store
-- **Cost**: 20 credits
-- **Models**: `Brand`
-
-### Campaign
-
-- **Purpose**: Generate multi-platform ad campaigns
-- **Flow**: Brief → AI concepts → Creative generation → Review → Publish
-- **Cost**: 5 credits (concepts) + 3 credits per creative
-- **Models**: `Campaign`, `Creative`, `CreativePerformance`
-
-### Autopilot (🚀 Killer Feature)
-
-- **Purpose**: Auto-pause failing ads, auto-generate replacements
-- **Trigger**: Performance metrics below threshold (e.g., CTR < 1%)
-- **Actions**: Pause, Replace, Notify, Boost
-- **Models**: `AutopilotRule`, `AutopilotLog`
-
----
-
-## 🔄 Development Workflow
-
-### Starting New Feature
-
-1. **Read master plan** (`COFF-CAMPAIGN-ENGINE.md`)
-2. **Update database schema** if needed (`packages/db/prisma/schema.prisma`)
-3. **Generate Prisma client** (`bun run db:generate`)
-4. **Create types** (`packages/types/`)
-5. **Build API endpoints** (`apps/api/`)
-6. **Build UI components** (`apps/web/`)
-7. **Test manually** (no automated tests yet, but write tests in future)
-8. **Commit with descriptive message**
-
-### Git Commit Style
-
+### Commit Style
 ```
 feat: add Brand DNA extraction pipeline
 fix: autopilot rule evaluation logic
 chore: update dependencies
 docs: add API documentation
+style: apply Mira theme to sidebar
+refactor: extract campaign generation into service
 ```
 
-### Before Pushing
+### PR Workflow
+```bash
+# 1. Create feature branch
+git checkout -b feat/brand-dna-editor
 
-- [ ] `bun run lint` — no errors
-- [ ] `bun run type-check` — no errors
-- [ ] `bun run build` — builds successfully
-- [ ] Manual testing of changed features
-- [ ] Environment variables documented in `.env.example`
+# 2. Make changes, commit regularly
+git add -A
+git commit -m "feat: add brand DNA color palette editor"
+
+# 3. Push and create PR
+git push -u origin feat/brand-dna-editor
+gh pr create --title "feat: Brand DNA editor" --body "## Summary
+- Added color palette editor with OKLCH picker
+- Added font selector with Google Fonts preview
+- Added tag input for brand values
+
+## Screenshots
+[attach screenshots]
+
+## Checklist
+- [ ] Types updated
+- [ ] API endpoints working
+- [ ] UI responsive (mobile + desktop)
+- [ ] Dark theme verified
+- [ ] No TypeScript errors"
+```
+
+### PR Requirements
+- **Title**: Must follow commit convention (`feat:`, `fix:`, etc.)
+- **Description**: Summary of changes + screenshots for UI changes
+- **Checklist**: All items checked before merge
+- **Review**: Code review required before merge
+- **CI**: All checks must pass (lint, type-check, build)
+
+### After PR Merge
+```bash
+git checkout main
+git pull
+git branch -d feat/branch-name  # Clean up local branch
+```
 
 ---
 
-## 📦 Package-Specific Rules
+## 📋 RALPH Method — Per Feature
 
-### `apps/web` (Next.js)
+### R — Research
+- Problem definition, user persona, pain point
+- Competitor analysis
+- Which roles use this feature
 
-- **Port**: 3001
-- **Use App Router** — `app/` directory
-- **Server Components** by default
-- **Client Components** only when needed (interactivity, hooks, browser APIs)
-- **Route groups** for layout variations: `(auth)`, `(dashboard)`, etc.
-- **Metadata** on every page
+### A — Architecture
+- Types (`packages/types/src/index.ts`)
+- Mock data structure
+- Component tree
+- API endpoint plan
 
-### `apps/api` (Hono)
+### L — Layout
+- Wireframe or ASCII layout
+- Responsive breakpoints
+- Badge colors, KPI definitions
+- Empty state design
 
-- **Port**: 3002
-- **CORS** enabled for `localhost:3001`
-- **Auth middleware** on protected routes
-- **Rate limiting** on expensive operations
-- **Queue jobs** for long-running tasks (fal.ai generation, scraping)
+### P — Production
+Implement in order:
+1. Types → `packages/types/src/index.ts`
+2. Mock data → `apps/web/src/lib/mock-data/`
+3. API routes → `apps/api/src/routes/`
+4. Sidebar nav → `apps/web/src/components/sidebar.tsx`
+5. Components → `apps/web/src/components/{feature}/`
+6. Page → `apps/web/src/app/(dashboard)/{feature}/`
+7. Loading skeleton → `loading.tsx`
 
-### `packages/db` (Prisma)
+### H — Health Check
+- [ ] `turbo build` passes
+- [ ] Page renders 200 OK
+- [ ] Stats display correct values
+- [ ] Search + filter works
+- [ ] Empty state visible
+- [ ] Loading skeleton exists
+- [ ] Sidebar active link correct
+- [ ] Mobile responsive (320px+)
+- [ ] Dark theme verified
+- [ ] HugeIcons used (not Lucide)
 
-- **Single source of truth** for data models
-- **Migrations** for schema changes
-- **Seed script** for dev data
-- **Indexes** on foreign keys
+---
 
-### `packages/ui` (shadcn/ui)
+## 🧠 Key Modules
 
-- **Shared components** only
-- **Storybook** (future) for documentation
-- **Tailwind classes** — no CSS modules
-- **Variants** using `cva` (class-variance-authority)
+### Brand DNA (Sprint 1)
+- **Pipeline**: URL → Scrape → Extract colors/fonts → AI analysis → Store
+- **Cost**: 20 credits
+- **Models**: `Brand`
 
-### `packages/types`
+### Campaign Engine (Sprint 2)
+- **Flow**: Brief → AI concepts → Creative generation → Review → Publish
+- **Cost**: 5 credits (concepts) + 3 credits per creative
+- **Models**: `Campaign`, `Creative`
 
-- **Shared types** between web and API
-- **No runtime code** — types only
-- **Export everything** explicitly
+### Autopilot ⚡ (Sprint 6 — Killer Feature)
+- **Trigger**: Performance metrics below threshold
+- **Actions**: Pause, Replace, Notify, Boost
+- **Models**: `AutopilotRule`, `AutopilotLog`
 
 ---
 
 ## 🚨 Common Pitfalls
 
-1. **Using `any` type** → Always define proper types
-2. **Client Component when Server Component would work** → Default to Server
-3. **Not handling API errors** → Always try/catch
-4. **Hardcoding URLs** → Use env vars
-5. **Forgetting to regenerate Prisma** → Run `db:generate` after schema changes
-6. **Not using transactions** → Multi-model operations should be atomic
-7. **Missing indexes** → Queries on foreign keys need indexes
-
----
-
-## 🎨 Design System
-
-### Colors (OKLCH)
-
-```css
-/* packages/ui/styles/globals.css */
-:root {
-  --background: oklch(0.13 0.02 264); /* Dark gray-blue */
-  --foreground: oklch(0.98 0 0);     /* Near white */
-  --primary: oklch(0.7 0.2 264);     /* Brand blue */
-  --accent: oklch(0.8 0.15 120);     /* Success green */
-  --destructive: oklch(0.6 0.2 20);  /* Error red */
-  /* ... */
-}
-```
-
-### Typography
-
-- **Heading**: Geist Sans (700)
-- **Body**: Geist Sans (400)
-- **Mono**: Geist Mono (400)
-
-### Spacing
-
-- Use Tailwind spacing scale: `p-4`, `m-2`, `gap-6`, etc.
-- Consistent padding: `p-4` for cards, `p-6` for sections
-
----
-
-## 🔮 Future Improvements
-
-- [ ] Automated testing (Vitest + React Testing Library)
-- [ ] Storybook for UI components
-- [ ] OpenAPI docs for API
-- [ ] Sentry error tracking
-- [ ] E2E tests (Playwright)
-- [ ] Performance monitoring
-- [ ] Feature flags system
+1. **Using Lucide icons** → Use HugeIcons only
+2. **Using Geist font** → Use Outfit only
+3. **HSL colors** → Use OKLCH only
+4. **Using `any` type** → Always define proper types
+5. **Client Component when Server would work** → Default to Server
+6. **Empty string SelectItem value** → Use `"__all__"` sentinel
+7. **Pushing to main directly** → Always create PR from feature branch
+8. **Missing dark mode check** → Dark is default, always verify
+9. **Not running db:generate** → After every schema change
+10. **Forgetting responsive check** → Test 320px minimum
 
 ---
 
 ## 📚 Resources
 
-- [Master Plan](./COFF-CAMPAIGN-ENGINE.md)
-- [Turborepo Docs](https://turbo.build/repo/docs)
-- [Next.js 15 Docs](https://nextjs.org/docs)
-- [Prisma Docs](https://www.prisma.io/docs)
-- [shadcn/ui](https://ui.shadcn.com)
-- [Hono Docs](https://hono.dev)
+- [Master Plan](./COFF-CAMPAIGN-ENGINE.md) — Full feature spec
+- [Design Preset](https://ui.shadcn.com/init?base=radix&style=mira&baseColor=stone&theme=pink&iconLibrary=hugeicons&font=outfit&menuAccent=subtle&menuColor=default&radius=default&template=next&rtl=false)
+- [HugeIcons](https://hugeicons.com) — Icon library
+- [Outfit Font](https://fonts.google.com/specimen/Outfit)
+- [shadcn/ui](https://ui.shadcn.com) — Component library
+- [Hono](https://hono.dev) — API framework
 
 ---
 
-**Remember**: This is a production-grade platform. Write code you'd be proud to show in a code review. Quality > speed.
+**Remember**: Mira preset + HugeIcons + Outfit font + OKLCH colors + dark-first. No exceptions.
