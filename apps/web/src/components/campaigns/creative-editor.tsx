@@ -3,13 +3,13 @@
 import { useState } from 'react'
 import { Button, Card, Input, Label, Slider } from '@repo/ui'
 import { 
-  ArrowLeft01Icon, 
-  Download04Icon, 
-  RefreshIcon, 
-  Image01Icon,
-  Magic01Icon,
-  ClockIcon 
-} from '@/lib/icons'
+  ArrowLeft, 
+  Download, 
+  RefreshCw, 
+  Image,
+  Sparkles,
+  Clock 
+} from 'lucide-react'
 import { MockCreative } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
@@ -60,7 +60,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
           <div className="flex items-center gap-4">
             <Link href={`/campaigns/${campaignId}`}>
               <Button variant="ghost" size="sm" aria-label="Back to campaign">
-                <ArrowLeft01Icon className="mr-2 h-4 w-4" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Campaign
               </Button>
             </Link>
@@ -74,11 +74,11 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" aria-label="Regenerate creative image">
-              <RefreshIcon className="mr-2 h-4 w-4" />
+              <RefreshCw className="mr-2 h-4 w-4" />
               Regenerate
             </Button>
             <Button size="sm" aria-label="Download creative">
-              <Download04Icon className="mr-2 h-4 w-4" />
+              <Download className="mr-2 h-4 w-4" />
               Download
             </Button>
           </div>
@@ -176,7 +176,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                 className="flex-1"
                 aria-label="Edit image settings"
               >
-                <Image01Icon className="mr-2 h-4 w-4" />
+                <Image className="mr-2 h-4 w-4" />
                 Image
               </Button>
               <Button
@@ -215,11 +215,11 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="flex-1" aria-label="Upload new background image">
-                      <Image01Icon className="mr-2 h-4 w-4" />
+                      <Image className="mr-2 h-4 w-4" />
                       Upload New
                     </Button>
                     <Button variant="outline" className="flex-1" aria-label="Generate new background with AI">
-                      <Magic01Icon className="mr-2 h-4 w-4" />
+                      <Sparkles className="mr-2 h-4 w-4" />
                       Generate New
                     </Button>
                   </div>
@@ -407,7 +407,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                   </div>
 
                   <Button variant="outline" className="w-full" aria-label="Generate CTA button variations with AI">
-                    <Magic01Icon className="mr-2 h-4 w-4" />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     Generate CTA Variations
                   </Button>
                 </div>
@@ -454,7 +454,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                 </div>
 
                 <Button variant="outline" className="w-full" aria-label="Fix layout with AI">
-                  <Magic01Icon className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-2 h-4 w-4" />
                   Fix Layout (AI)
                 </Button>
               </div>
@@ -465,14 +465,14 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
               <h3 className="mb-4 font-semibold">Version History</h3>
               <div className="space-y-2">
                 <div className="flex items-center gap-3 rounded-lg border bg-primary/5 p-3">
-                  <ClockIcon className="h-4 w-4 text-muted-foreground" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                   <div className="flex-1">
                     <div className="text-sm font-medium">v{editedCreative.version} (current)</div>
                     <div className="text-xs text-muted-foreground">2 minutes ago</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 rounded-lg border p-3 opacity-50">
-                  <ClockIcon className="h-4 w-4 text-muted-foreground" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                   <div className="flex-1">
                     <div className="text-sm font-medium">v{editedCreative.version - 1}</div>
                     <div className="text-xs text-muted-foreground">15 minutes ago</div>

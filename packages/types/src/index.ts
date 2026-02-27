@@ -280,3 +280,35 @@ export interface AnalyticsFetchJob {
 export interface AutopilotCheckJob {
   creativeId: string
 }
+
+// Photoshoot Types
+export type PhotoshootMode = 'product' | 'free'
+
+export interface PhotoshootTemplate {
+  id: string
+  name: string
+  description: string
+  thumbnail: string
+  category: 'minimalist' | 'lifestyle' | 'nature' | 'luxury' | 'seasonal' | 'abstract' | 'flatlay' | 'inuse'
+}
+
+export interface PhotoshootVariant {
+  id: string
+  imageUrl: string
+  prompt: string
+  selected: boolean
+}
+
+export interface Photoshoot {
+  id: string
+  mode: PhotoshootMode
+  brandId: string | null
+  productImage: string | null
+  prompt: string | null
+  templateId: string | null
+  variants: PhotoshootVariant[]
+  creditCost: number
+  status: 'uploading' | 'generating' | 'completed' | 'failed'
+  createdAt: Date
+  updatedAt: Date
+}

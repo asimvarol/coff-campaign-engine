@@ -1,5 +1,5 @@
 import { Button, Badge } from '@repo/ui'
-import { Add01Icon, Target03Icon } from '@/lib/icons'
+import { Plus, Target } from 'lucide-react'
 import Link from 'next/link'
 import { mockCampaigns, getCampaignStats } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
@@ -37,7 +37,7 @@ export default function CampaignsPage() {
         </div>
         <Link href="/campaigns/new">
           <Button size="lg" aria-label="Create new campaign">
-            <Add01Icon className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             New Campaign
           </Button>
         </Link>
@@ -67,7 +67,7 @@ export default function CampaignsPage() {
       {mockCampaigns.length === 0 ? (
         <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed border-border p-12 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-            <Target03Icon className="h-8 w-8 text-muted-foreground" />
+            <Target className="h-8 w-8 text-muted-foreground" />
           </div>
           <h3 className="mt-4 text-lg font-semibold">No campaigns yet</h3>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
@@ -75,7 +75,7 @@ export default function CampaignsPage() {
           </p>
           <Link href="/campaigns/new" className="mt-6">
             <Button aria-label="Create your first campaign">
-              <Add01Icon className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-4 w-4" />
               Create First Campaign
             </Button>
           </Link>

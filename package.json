@@ -21,6 +21,7 @@
     "db:push": "cd packages/db && bunx prisma db push"
   },
   "devDependencies": {
+    "@hugeicons/react": "^1.1.5",
     "@turbo/gen": "^2.3.3",
     "prettier": "^3.4.2",
     "turbo": "^2.3.3",

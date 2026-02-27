@@ -5,7 +5,7 @@ import { logger } from 'hono/logger'
 import { brandsRouter } from './routes/brands'
 import { campaignsRouter } from './routes/campaigns'
 import { creativesRouter } from './routes/creatives'
-import { photoshootRouter } from './routes/photoshoot'
+import { photoshootsRouter } from './routes/photoshoots'
 import { publishRouter } from './routes/publish'
 import { analyticsRouter } from './routes/analytics'
 import { autopilotRouter } from './routes/autopilot'
@@ -32,7 +32,7 @@ app.get('/', (c) => {
 app.route('/api/brands', brandsRouter)
 app.route('/api/campaigns', campaignsRouter)
 app.route('/api/creatives', creativesRouter)
-app.route('/api/photoshoot', photoshootRouter)
+app.route('/api/photoshoots', photoshootsRouter)
 app.route('/api/publish', publishRouter)
 app.route('/api/analytics', analyticsRouter)
 app.route('/api/autopilot', autopilotRouter)

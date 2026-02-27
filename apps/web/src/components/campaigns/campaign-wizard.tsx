@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Textarea, Progress } from '@repo/ui'
-import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons'
+import { ArrowLeft, ArrowRight, CheckCircle, Image, Target, Sparkles, Edit, Download } from 'lucide-react'
 import { CampaignObjective } from '@repo/types'
 import { mockBrands, generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
 import type { CampaignConcept } from '@repo/types'
@@ -266,7 +266,7 @@ export function CampaignWizard() {
                 ) : (
                   <>
                     Generate Concepts (5 credits)
-                    <ArrowRight01Icon className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}
               </Button>
@@ -296,7 +296,7 @@ export function CampaignWizard() {
                 >
                   <div className="mb-3 flex items-start justify-between">
                     <h3 className="text-lg font-semibold">{concept.name}</h3>
-                    <Sparkles01Icon className="h-5 w-5 text-primary" />
+                    <Sparkles className="h-5 w-5 text-primary" />
                   </div>
                   <p className="mb-3 text-sm text-muted-foreground">{concept.description}</p>
                   <div className="mb-3 flex items-center gap-2 text-sm">
@@ -316,7 +316,7 @@ export function CampaignWizard() {
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep(1)}>
-                <ArrowLeft01Icon className="mr-2 h-4 w-4" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
               <Button variant="outline" onClick={handleGenerateConcepts} disabled={isGenerating}>
@@ -407,7 +407,7 @@ export function CampaignWizard() {
                       />
                       {isApproved && (
                         <div className="absolute right-2 top-2 rounded-full bg-primary p-1">
-                          <CheckmarkCircle02Icon className="h-4 w-4 text-white" />
+                          <CheckCircle className="h-4 w-4 text-white" />
                         </div>
                       )}
                     </div>
@@ -428,7 +428,7 @@ export function CampaignWizard() {
                           {isApproved ? 'Approved' : 'Approve'}
                         </Button>
                         <Button size="sm" variant="outline">
-                          <Edit02Icon className="h-3 w-3" />
+                          <Edit className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -439,7 +439,7 @@ export function CampaignWizard() {
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep(2)}>
-                <ArrowLeft01Icon className="mr-2 h-4 w-4" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Concepts
               </Button>
               <Button
@@ -448,7 +448,7 @@ export function CampaignWizard() {
                 disabled={!canProceed()}
               >
                 Continue
-                <ArrowRight01Icon className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </CardContent>
@@ -460,7 +460,7 @@ export function CampaignWizard() {
         <Card>
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <CheckmarkCircle02Icon className="h-8 w-8 text-primary" />
+              <CheckCircle className="h-8 w-8 text-primary" />
             </div>
             <CardTitle>Campaign Ready!</CardTitle>
             <CardDescription>
@@ -492,7 +492,7 @@ export function CampaignWizard() {
 
             <div className="grid gap-3 sm:grid-cols-3">
               <Button variant="outline" className="w-full">
-                <Download04Icon className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-4 w-4" />
                 Download All
               </Button>
               <Button variant="outline" className="w-full">

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { Button } from '@repo/ui'
-import { RefreshIcon, ArrowLeft01Icon } from '@/lib/icons'
+import { RefreshCw, ArrowLeft } from 'lucide-react'
 import { useParams } from 'next/navigation'
 
 export default function CreativeEditorError({
@@ -31,7 +31,7 @@ export default function CreativeEditorError({
         </p>
         <div className="flex justify-center gap-3">
           <Button onClick={reset} aria-label="Try again">
-            <RefreshIcon className="mr-2 h-4 w-4" />
+            <RefreshCw className="mr-2 h-4 w-4" />
             Try Again
           </Button>
           <Button
@@ -39,7 +39,7 @@ export default function CreativeEditorError({
             onClick={() => window.location.href = `/campaigns/${params.id}`}
             aria-label="Back to campaign"
           >
-            <ArrowLeft01Icon className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Campaign
           </Button>
         </div>

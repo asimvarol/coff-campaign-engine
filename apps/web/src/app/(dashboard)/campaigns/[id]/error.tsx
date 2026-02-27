@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { Button } from '@repo/ui'
-import { RefreshIcon, ArrowLeft01Icon } from '@/lib/icons'
+import { RefreshCw, ArrowLeft } from 'lucide-react'
 
 export default function CampaignDetailError({
   error,
@@ -28,11 +28,11 @@ export default function CampaignDetailError({
         </p>
         <div className="flex justify-center gap-3">
           <Button onClick={reset} aria-label="Try again">
-            <RefreshIcon className="mr-2 h-4 w-4" />
+            <RefreshCw className="mr-2 h-4 w-4" />
             Try Again
           </Button>
           <Button variant="outline" onClick={() => window.location.href = '/campaigns'} aria-label="Back to campaigns">
-            <ArrowLeft01Icon className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Campaigns
           </Button>
         </div>
