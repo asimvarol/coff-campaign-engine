@@ -1,59 +1,136 @@
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
-import { Camera, Upload } from 'lucide-react'
+import Link from 'next/link'
 
-export default function PhotoshootPage() {
+import { Button } from '@repo/ui'
+
+import { Camera01Icon, PlusSignIcon } from '@/lib/icons'
+import { PhotoshootCard } from '@/components/photoshoot/photoshoot-card'
+import { PhotoshootEmptyState } from '@/components/photoshoot/empty-state'
+import { getPhotoshoots } from '@/lib/mock-data/photoshoots'
+
+interface PhotoshootPageProps {
+  searchParams: {
+    page?: string
+    limit?: string
+  }
+}
+
+/**
+ * Photoshoot Studio main page
+ * Displays list of all photoshoots with pagination
+ */
+export default function PhotoshootPage({ searchParams }: PhotoshootPageProps) {
+  const page = parseInt(searchParams.page ?? '1', 10)
+  const limit = parseInt(searchParams.limit ?? '12', 10)
+
+  const { data: photoshoots, pagination } = getPhotoshoots({ page, limit })
+
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Photoshoot Studio</h1>
-        <p className="text-muted-foreground">AI-powered product photography</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Photoshoot Studio</h1>
+          <p className="mt-1 text-muted-foreground">
+            AI-powered product photography with professional backgrounds
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/photoshoot/create" aria-label="Create new photoshoot">
+            <PlusSignIcon className="mr-2 h-5 w-5" />
+            New Photoshoot
+          </Link>
+        </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <Camera className="mb-2 h-8 w-8 text-primary" />
-            <CardTitle>Product Photoshoot</CardTitle>
-            <CardDescription>Upload product image and generate professional photos with AI backgrounds</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-border">
-              <div className="text-center">
-                <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">Upload product image</p>
+      {photoshoots.length === 0 ? (
+        <PhotoshootEmptyState />
+      ) : (
+        <>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {photoshoots.map((photoshoot) => (
+              <PhotoshootCard key={photoshoot.id} photoshoot={photoshoot} />
+            ))}
+          </div>
+
+          {pagination.totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Showing {(page - 1) * limit + 1} to {Math.min(page * limit, pagination.total)} of{' '}
+                {pagination.total} photoshoots
+              </p>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  asChild={page > 1}
+                  aria-label="Previous page"
+                >
+                  {page > 1 ? (
+                    <Link href={`/photoshoot?page=${page - 1}&limit=${limit}`}>Previous</Link>
+                  ) : (
+                    <span>Previous</span>
+                  )}
+                </Button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => {
+                    // Show first, last, current, and adjacent pages
+                    if (
+                      p === 1 ||
+                      p === pagination.totalPages ||
+                      (p >= page - 1 && p <= page + 1)
+                    ) {
+                      return (
+                        <Button
+                          key={p}
+                          variant={p === page ? 'default' : 'outline'}
+                          size="sm"
+                          asChild={p !== page}
+                          disabled={p === page}
+                          aria-label={`Page ${p}`}
+                          aria-current={p === page ? 'page' : undefined}
+                        >
+                          {p !== page ? (
+                            <Link href={`/photoshoot?page=${p}&limit=${limit}`}>{p}</Link>
+                          ) : (
+                            <span>{p}</span>
+                          )}
+                        </Button>
+                      )
+                    }
+
+                    // Show ellipsis
+                    if (p === page - 2 || p === page + 2) {
+                      return (
+                        <span key={p} className="px-2 text-muted-foreground">
+                          ...
+                        </span>
+                      )
+                    }
+
+                    return null
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= pagination.totalPages}
+                  asChild={page < pagination.totalPages}
+                  aria-label="Next page"
+                >
+                  {page < pagination.totalPages ? (
+                    <Link href={`/photoshoot?page=${page + 1}&limit=${limit}`}>Next</Link>
+                  ) : (
+                    <span>Next</span>
+                  )}
+                </Button>
               </div>
             </div>
-            <Button className="w-full">Generate Photoshoot (10 credits)</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <Camera className="mb-2 h-8 w-8 text-accent" />
-            <CardTitle>Free Generation</CardTitle>
-            <CardDescription>Generate any creative with AI using brand DNA styling</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <textarea
-              className="mb-4 w-full rounded-lg border border-input bg-background p-3 text-sm"
-              rows={6}
-              placeholder="Describe what you want to generate..."
-            />
-            <Button className="w-full">Generate (3 credits)</Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mt-6">
-        <h3 className="mb-3 text-lg font-semibold">Available Templates</h3>
-        <div className="grid gap-3 sm:grid-cols-4">
-          {['Minimalist Studio', 'Lifestyle Scene', 'Nature/Outdoor', 'Luxury', 'Seasonal', 'Abstract', 'Flat Lay', 'In Use'].map((template) => (
-            <div key={template} className="rounded-lg border border-border p-3 text-center text-sm">
-              {template}
-            </div>
-          ))}
-        </div>
-      </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
