@@ -1,50 +1,79 @@
 /**
  * Icon exports for HugeIcons
- * Centralized icon imports from @hugeicons/react
+ * Centralized icon imports from @hugeicons/core-free-icons
  */
+import { HugeiconsIcon } from '@hugeicons/react'
+import type { IconSvgElement } from '@hugeicons/react'
 import {
-  Add01Icon,
-  Target03Icon,
-  ArrowLeft01Icon,
-  ArrowRight01Icon,
-  Sparkles01Icon,
-  Image01Icon,
-  Edit02Icon,
-  Download04Icon,
-  RefreshIcon,
-  Clock01Icon,
-  AiMagicIcon,
-  Camera01Icon,
-  Calendar03Icon,
-  Analytics01Icon,
-  Lightning01Icon,
-  Building03Icon,
-  Menu01Icon,
-  Copy01Icon,
-  Delete02Icon,
-  CheckmarkCircle02Icon,
-} from '@hugeicons/react'
+  Add as Add01IconSvg,
+  Target as Target03IconSvg,
+  ArrowLeft as ArrowLeft01IconSvg,
+  ArrowRight as ArrowRight01IconSvg,
+  Sparkles as SparklesIconSvg,
+  Image as Image01IconSvg,
+  Edit as Edit02IconSvg,
+  Download as Download04IconSvg,
+  Refresh as RefreshIconSvg,
+  Clock as Clock01IconSvg,
+  Magic as AiMagicIconSvg,
+  Camera as Camera01IconSvg,
+  Calendar as Calendar03IconSvg,
+  Analytics as Analytics01IconSvg,
+  Lightning as Lightning01IconSvg,
+  Building as Building03IconSvg,
+  Menu as Menu01IconSvg,
+  Copy as Copy01IconSvg,
+  Delete as Delete02IconSvg,
+  CheckmarkCircle02Icon as CheckmarkCircle02IconSvg,
+  Plus as PlusSignIconSvg,
+  Upload as Upload04IconSvg,
+  XCircle as XCircleIconSvg,
+  Loading as Loading03IconSvg,
+} from '@hugeicons/core-free-icons'
 
-// Re-export all icons with consistent naming
-export {
-  Add01Icon,
-  Target03Icon,
-  ArrowLeft01Icon,
-  ArrowRight01Icon,
-  Sparkles01Icon,
-  Image01Icon,
-  Edit02Icon,
-  Download04Icon,
-  RefreshIcon,
-  Clock01Icon as ClockIcon,
-  AiMagicIcon as Magic01Icon,
-  Camera01Icon,
-  Calendar03Icon,
-  Analytics01Icon,
-  Lightning01Icon,
-  Building03Icon,
-  Menu01Icon,
-  Copy01Icon,
-  Delete02Icon,
-  CheckmarkCircle02Icon,
+interface IconProps {
+  className?: string
+  size?: number
+  strokeWidth?: number
 }
+
+// Helper to create icon wrapper components
+function createIcon(iconSvg: IconSvgElement) {
+  return ({ className, size = 20, strokeWidth = 1.5 }: IconProps) => (
+    <HugeiconsIcon
+      icon={iconSvg}
+      size={size}
+      strokeWidth={strokeWidth}
+      className={className}
+    />
+  )
+}
+
+// Export all icons as React components
+export const Add01Icon = createIcon(Add01IconSvg)
+export const Target03Icon = createIcon(Target03IconSvg)
+export const ArrowLeft01Icon = createIcon(ArrowLeft01IconSvg)
+export const ArrowRight01Icon = createIcon(ArrowRight01IconSvg)
+export const SparklesIcon = createIcon(SparklesIconSvg)
+export const Sparkles01Icon = createIcon(SparklesIconSvg) // Alias
+export const Image01Icon = createIcon(Image01IconSvg)
+export const Edit02Icon = createIcon(Edit02IconSvg)
+export const Download04Icon = createIcon(Download04IconSvg)
+export const RefreshIcon = createIcon(RefreshIconSvg)
+export const ClockIcon = createIcon(Clock01IconSvg)
+export const Clock01Icon = createIcon(Clock01IconSvg)
+export const Magic01Icon = createIcon(AiMagicIconSvg)
+export const AiMagicIcon = createIcon(AiMagicIconSvg)
+export const Camera01Icon = createIcon(Camera01IconSvg)
+export const Calendar03Icon = createIcon(Calendar03IconSvg)
+export const Analytics01Icon = createIcon(Analytics01IconSvg)
+export const Lightning01Icon = createIcon(Lightning01IconSvg)
+export const Building03Icon = createIcon(Building03IconSvg)
+export const Menu01Icon = createIcon(Menu01IconSvg)
+export const Copy01Icon = createIcon(Copy01IconSvg)
+export const Delete02Icon = createIcon(Delete02IconSvg)
+export const CheckmarkCircle02Icon = createIcon(CheckmarkCircle02IconSvg)
+export const PlusSignIcon = createIcon(PlusSignIconSvg)
+export const Upload04Icon = createIcon(Upload04IconSvg)
+export const XCircleIcon = createIcon(XCircleIconSvg)
+export const Loading03Icon = createIcon(Loading03IconSvg)

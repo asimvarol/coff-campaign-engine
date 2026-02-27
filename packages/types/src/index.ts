@@ -280,3 +280,57 @@ export interface AnalyticsFetchJob {
 export interface AutopilotCheckJob {
   creativeId: string
 }
+
+// Photoshoot Types
+export enum PhotoshootStatus {
+  DRAFT = 'DRAFT',
+  GENERATING = 'GENERATING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+}
+
+export enum PhotoshootTemplate {
+  MINIMALIST = 'Minimalist Studio',
+  LIFESTYLE = 'Lifestyle Scene',
+  NATURE = 'Nature/Outdoor',
+  LUXURY = 'Luxury',
+  SEASONAL = 'Seasonal',
+  ABSTRACT = 'Abstract',
+  FLAT_LAY = 'Flat Lay',
+  IN_USE = 'In Use',
+}
+
+export interface PhotoshootVariant {
+  id: string
+  template: PhotoshootTemplate
+  imageUrl: string
+  prompt: string
+  selected: boolean
+}
+
+export interface Photoshoot {
+  id: string
+  name: string
+  productImageUrl: string
+  productImageNoBackground: string | null
+  brandDnaId: string | null
+  brandDnaName: string | null
+  status: PhotoshootStatus
+  creditCost: number
+  variants: PhotoshootVariant[]
+  selectedVariantIds: string[]
+  createdAt: Date
+  completedAt: Date | null
+}
+
+export interface PhotoshootGenerateRequest {
+  productImageUrl: string
+  brandDnaId?: string
+  templates: PhotoshootTemplate[]
+}
+
+export interface PhotoshootListRequest {
+  page?: number
+  limit?: number
+  status?: PhotoshootStatus
+}
