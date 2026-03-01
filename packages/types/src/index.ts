@@ -334,3 +334,19 @@ export interface PhotoshootListRequest {
   limit?: number
   status?: PhotoshootStatus
 }
+
+// Analytics Types (new)
+export type AnalyticsDateRange = '7d' | '30d' | '90d' | 'custom'
+export interface AnalyticsKPI { label: string; value: string; change: number; trend: 'up' | 'down' | 'flat' }
+export interface PlatformBreakdown { platform: string; percentage: number; reach: number; engagement: number; color: string }
+export interface CreativePerformanceView { id: string; name: string; campaignName: string; platform: string; format: string; thumbnailUrl: string; reach: number; impressions: number; engagementRate: number; ctr: number; clicks: number; saves: number; performanceScore: number; performanceLabel: 'excellent' | 'good' | 'average' | 'poor' | 'critical'; publishedAt: Date }
+export interface AnalyticsAIInsight { id: string; type: 'success' | 'warning' | 'suggestion' | 'trend'; title: string; description: string; metric?: string; creativeId?: string }
+export interface CampaignAnalytics { id: string; name: string; brandName: string; status: CampaignStatus; platforms: string[]; creativeCount: number; totalReach: number; totalEngagement: number; avgCtr: number; avgEngagementRate: number; spend: number; roas: number; startDate: Date; endDate: Date | null }
+
+// Agency additional types (AgencyRole enum already exists above)
+export type AgencyPlan = 'FREE' | 'PRO' | 'ENTERPRISE'
+export interface AgencyMember { id: string; name: string; email: string; avatarUrl: string | null; role: AgencyRole; brandAccess: string[]; lastActiveAt: Date; invitedAt: Date; acceptedAt: Date | null }
+export interface AgencyBrand { id: string; name: string; logoUrl: string; industry: string; campaignCount: number; creativeCount: number; creditsUsed: number; avgPerformance: number; lastActivity: Date }
+export interface AgencyBillingEntry { id: string; brandId: string; brandName: string; action: string; credits: number; date: Date; userId: string; userName: string }
+export interface TeamActivity { id: string; userId: string; userName: string; userAvatar: string | null; action: string; target: string; brandId: string | null; brandName: string | null; createdAt: Date }
+export interface Agency { id: string; name: string; plan: AgencyPlan; members: AgencyMember[]; brands: AgencyBrand[]; totalCreditsUsed: number; totalCreditsRemaining: number; monthlySpend: number; createdAt: Date }
