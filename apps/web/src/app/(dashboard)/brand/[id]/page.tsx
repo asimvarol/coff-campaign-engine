@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { Button, Card, Badge } from '@repo/ui'
 import { ArrowLeft, Download, Sparkles, Upload, RotateCcw, ExternalLink } from 'lucide-react'
@@ -32,8 +32,19 @@ export default function BrandDetailPage() {
   const brandId = params.id as string
   const [brand, setBrand] = useState<Brand | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const leftRef = useRef<HTMLDivElement>(null)
+  const [leftHeight, setLeftHeight] = useState<number>(0)
 
   useEffect(() => { fetchBrand() }, [brandId])
+
+  useEffect(() => {
+    if (!leftRef.current) return
+    const ro = new ResizeObserver(([entry]) => {
+      setLeftHeight(entry.contentRect.height)
+    })
+    ro.observe(leftRef.current)
+    return () => ro.disconnect()
+  }, [brand])
 
   const fetchBrand = async () => {
     try {
@@ -81,11 +92,10 @@ export default function BrandDetailPage() {
       </div>
 
       {/* Bento Grid */}
-      <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_1fr] items-start">
 
         {/* === LEFT COLUMN === */}
-        <div className="space-y-5">
-
+        <div ref={leftRef} className="space-y-5">
           {/* Brand Name + URL */}
           <Card className="p-6">
             <h1 className="text-2xl font-bold">{brand.name}</h1>
@@ -98,14 +108,11 @@ export default function BrandDetailPage() {
 
           {/* Logo + Fonts Row */}
           <div className="grid grid-cols-2 gap-5">
-            {/* Logo */}
             <Card className="flex aspect-square items-center justify-center overflow-hidden bg-[#f0ede6] p-8">
               <div className="relative h-full w-full">
                 <Image src={brand.logo.primary} alt={brand.name} fill className="object-contain" unoptimized />
               </div>
             </Card>
-
-            {/* Fonts */}
             <Card className="flex flex-col justify-center p-6">
               <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Fonts</div>
               <div className="text-7xl font-bold leading-none" style={{ fontFamily: brand.typography.heading }}>Aa</div>
@@ -131,13 +138,10 @@ export default function BrandDetailPage() {
 
           {/* Tagline + Values Row */}
           <div className="grid grid-cols-2 gap-5">
-            {/* Tagline */}
             <Card className="p-6">
               <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Tagline</div>
               <p className="text-base italic leading-relaxed">{brand.voice.sampleTexts?.[0] || brand.summary}</p>
             </Card>
-
-            {/* Brand Values */}
             <Card className="p-6">
               <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand values</div>
               <div className="flex flex-wrap gap-2">
@@ -148,15 +152,12 @@ export default function BrandDetailPage() {
 
           {/* Aesthetic + Tone Row */}
           <div className="grid grid-cols-2 gap-5">
-            {/* Aesthetic */}
             <Card className="p-6">
               <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand aesthetic</div>
               <div className="flex flex-wrap gap-2">
                 {brand.aesthetic.map((a, i) => <Badge key={i} variant="outline" className="text-xs">{a}</Badge>)}
               </div>
             </Card>
-
-            {/* Tone of Voice */}
             <Card className="p-6">
               <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand tone of voice</div>
               <div className="flex flex-wrap gap-2">
@@ -166,27 +167,25 @@ export default function BrandDetailPage() {
           </div>
         </div>
 
-        {/* === RIGHT COLUMN — Images === */}
-        <Card className="overflow-hidden p-6">
+        {/* === RIGHT COLUMN — Images (matches left height with fade) === */}
+        <Card
+          className="relative overflow-hidden p-6"
+          style={leftHeight > 0 ? { maxHeight: leftHeight } : undefined}
+        >
           <h2 className="text-xl font-bold mb-5">Images</h2>
-          <div className="space-y-5">
 
           {/* Top: Small Grid + Promo */}
-          <div className="grid grid-cols-2 gap-5">
-            {/* 3x3 Mini Grid */}
+          <div className="grid grid-cols-2 gap-5 mb-5">
             <div className="grid grid-cols-3 gap-1.5">
               {(allImages.length >= 9 ? allImages.slice(0, 9) : allImages.slice(0, Math.min(allImages.length, 9))).map((img, i) => (
                 <div key={i} className="aspect-square overflow-hidden rounded-md bg-muted">
                   <Image src={img} alt="" width={150} height={150} className="h-full w-full object-cover" unoptimized />
                 </div>
               ))}
-              {/* Fill remaining slots with placeholders */}
               {allImages.length < 9 && Array.from({ length: 9 - Math.min(allImages.length, 9) }).map((_, i) => (
                 <div key={`ph-${i}`} className="aspect-square rounded-md bg-muted" />
               ))}
             </div>
-
-            {/* Promo Card */}
             <div className="flex flex-col justify-center rounded-lg border p-6">
               <h3 className="mb-2 text-lg font-bold">Endless creatives, ready in minutes</h3>
               <p className="mb-4 text-sm text-muted-foreground">Generate professional product photos with AI-powered backgrounds</p>
@@ -197,7 +196,7 @@ export default function BrandDetailPage() {
           </div>
 
           {/* Upload Card */}
-          <div className="flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors hover:border-primary/50">
+          <div className="mb-5 flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors hover:border-primary/50">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Upload className="h-6 w-6" />
               <span className="text-sm font-medium">Upload Images</span>
@@ -215,10 +214,12 @@ export default function BrandDetailPage() {
             </div>
           )}
 
-          {/* Reset Button */}
-          <div className="flex justify-end pt-2">
-            <Button onClick={handleReanalyze}><RotateCcw className="mr-2 h-4 w-4" />Reset Business DNA</Button>
-          </div>
+          {/* Fade overlay + Reset button pinned to bottom */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 flex justify-center pb-5">
+            <Button onClick={handleReanalyze} className="pointer-events-auto shadow-lg">
+              <RotateCcw className="mr-2 h-4 w-4" />Reset Business DNA
+            </Button>
           </div>
         </Card>
       </div>
