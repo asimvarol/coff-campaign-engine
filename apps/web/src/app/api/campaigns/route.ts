@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { brandStore } from '../brands/data-store'
 
 const OBJECTIVES = ['AWARENESS', 'PRODUCT_LAUNCH', 'SEASONAL', 'ENGAGEMENT', 'CONVERSION'] as const
@@ -54,10 +54,11 @@ function generateCampaignsForBrand(brand: ReturnType<typeof brandStore.get>) {
   return campaigns
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const brands = brandStore.getAll()
-    const allCampaigns = brands.flatMap(b => generateCampaignsForBrand(b))
+    const brandId = request.nextUrl.searchParams.get('brandId')
+    const brands = brandId ? [brandStore.get(brandId)].filter(Boolean) : brandStore.getAll()
+    const allCampaigns = brands.flatMap(b => generateCampaignsForBrand(b!))
     return NextResponse.json({ data: allCampaigns })
   } catch (error) {
     console.error('Error fetching campaigns:', error)

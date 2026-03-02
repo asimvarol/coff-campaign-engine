@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@repo/ui'
+import Image from 'next/image'
+import { useBrand } from '@/lib/brand-context'
+import { Plus, ChevronDown, Check } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Sparkles01Icon,
   Target03Icon,
@@ -11,7 +15,6 @@ import {
   Analytics01Icon,
   Lightning01Icon,
   Building03Icon,
-  Menu01Icon,
   Link01Icon,
   ClockIcon,
 } from '@/lib/icons'
@@ -37,6 +40,20 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { brands, selectedBrand, selectedBrandId, selectBrand } = useBrand()
+  const [brandMenuOpen, setBrandMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setBrandMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   return (
     <div className="flex w-64 flex-col border-r border-border bg-card">
@@ -46,6 +63,67 @@ export function Sidebar() {
           <Sparkles01Icon className="h-4 w-4" />
         </div>
         <span className="text-lg font-semibold">Coff Campaign</span>
+      </div>
+
+      {/* Brand Selector */}
+      <div ref={menuRef} className="relative border-b border-border p-3">
+        <button
+          onClick={() => setBrandMenuOpen(!brandMenuOpen)}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted"
+        >
+          {selectedBrand ? (
+            <>
+              <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-md bg-muted">
+                <Image src={selectedBrand.logo.primary} alt={selectedBrand.name} fill unoptimized className="object-contain" />
+              </div>
+              <span className="flex-1 truncate text-left font-medium">{selectedBrand.name}</span>
+            </>
+          ) : (
+            <>
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted">
+                <Sparkles01Icon className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <span className="flex-1 text-left text-muted-foreground">Select a brand</span>
+            </>
+          )}
+          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", brandMenuOpen && "rotate-180")} />
+        </button>
+
+        {/* Dropdown */}
+        {brandMenuOpen && (
+          <div className="absolute inset-x-3 top-full z-50 mt-1 overflow-hidden rounded-lg border border-border bg-card shadow-lg">
+            {brands.length > 0 && (
+              <div className="max-h-48 overflow-y-auto p-1">
+                {brands.map((brand) => (
+                  <button
+                    key={brand.id}
+                    onClick={() => { selectBrand(brand.id); setBrandMenuOpen(false) }}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                      brand.id === selectedBrandId ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                    )}
+                  >
+                    <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded bg-muted">
+                      <Image src={brand.logo.primary} alt={brand.name} fill unoptimized className="object-contain" />
+                    </div>
+                    <span className="flex-1 truncate text-left">{brand.name}</span>
+                    {brand.id === selectedBrandId && <Check className="h-4 w-4 shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="border-t border-border p-1">
+              <Link
+                href="/brand/new"
+                onClick={() => setBrandMenuOpen(false)}
+                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <Plus className="h-4 w-4" />
+                Add new brand
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}

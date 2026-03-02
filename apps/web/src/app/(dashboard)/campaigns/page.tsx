@@ -6,6 +6,7 @@ import { Add01Icon, Target03Icon } from '@/lib/icons'
 import Link from 'next/link'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
+import { useBrand } from '@/lib/brand-context'
 
 interface Campaign {
   id: string
@@ -40,14 +41,17 @@ const objectiveLabels: Record<string, string> = {
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { selectedBrandId } = useBrand()
 
   useEffect(() => {
-    fetch('/api/campaigns')
+    setIsLoading(true)
+    const url = selectedBrandId ? `/api/campaigns?brandId=${selectedBrandId}` : '/api/campaigns'
+    fetch(url)
       .then(res => res.json())
       .then(data => setCampaigns(data.data || []))
       .catch(console.error)
       .finally(() => setIsLoading(false))
-  }, [])
+  }, [selectedBrandId])
 
   const stats = {
     total: campaigns.length,
