@@ -1,8 +1,13 @@
 {
   "name": "coff-campaign-engine",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.1.0",
-  "description": "AI-powered campaign management and optimization platform",
+  "description": "AI-powered marketing campaign management platform",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/coff-campaign-engine"
+  },
+  "license": "MIT",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -10,30 +15,28 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "start": "turbo run start",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "type-check": "turbo run type-check",
-    "clean": "turbo run clean && rm -rf node_modules",
-    "test": "turbo run test",
-    "db:migrate": "cd packages/db && bunx prisma migrate dev",
-    "db:generate": "cd packages/db && bunx prisma generate",
-    "db:studio": "cd packages/db && bunx prisma studio",
-    "db:push": "cd packages/db && bunx prisma db push"
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "check-env": "bun run scripts/check-env.ts",
+    "db:migrate": "cd packages/db && npx prisma migrate dev",
+    "db:generate": "cd packages/db && npx prisma generate",
+    "db:studio": "cd packages/db && npx prisma studio",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "prepare": "husky install || true"
   },
   "devDependencies": {
     "@turbo/gen": "^2.3.3",
     "prettier": "^3.4.2",
-    "turbo": "^2.3.3",
-    "typescript": "^5.7.2"
+    "turbo": "^2.3.3"
   },
   "packageManager": "bun@1.1.42",
   "engines": {
-    "node": ">=20.0.0"
-  },
-  "dependencies": {
-    "@auth/core": "^0.34.3",
-    "autoprefixer": "^10.4.27",
-    "next-auth": "^4.24.13",
-    "tailwindcss": "^3"
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
   }
 }
