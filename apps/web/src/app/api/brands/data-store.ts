@@ -30,6 +30,12 @@ export interface MockBrandDNA {
   industry: string
   targetAudience: string
   summary: string
+  images?: {
+    scraped: string[]
+    uploaded: string[]
+    products: string[]
+  }
+  socialProfiles?: Record<string, string | undefined>
   competitors: string[]
   createdAt: string
   updatedAt: string
