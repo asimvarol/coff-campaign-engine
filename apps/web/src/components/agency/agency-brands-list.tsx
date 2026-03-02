@@ -1,7 +1,7 @@
 'use client'
 
-import { Card, CardContent } from '@repo/ui'
-import { Badge } from '@repo/ui'
+import Image from 'next/image'
+import { Card, CardContent, Badge } from '@repo/ui'
 import type { AgencyBrand } from '@repo/types'
 
 export function AgencyBrandsList({ brands }: { brands: AgencyBrand[] }) {
@@ -11,7 +11,7 @@ export function AgencyBrandsList({ brands }: { brands: AgencyBrand[] }) {
         <Card key={brand.id} className="transition-colors hover:border-primary/50">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <img src={brand.logoUrl} alt={brand.name} className="h-12 w-12 shrink-0 rounded-lg bg-muted object-cover" />
+              <Image src={brand.logoUrl} alt={brand.name} width={48} height={48} className="h-12 w-12 shrink-0 rounded-lg bg-muted object-cover" unoptimized />
               <div className="min-w-0 flex-1">
                 <h3 className="truncate font-semibold leading-tight" title={brand.name}>{brand.name}</h3>
                 <p className="truncate text-xs text-muted-foreground">{brand.industry}</p>

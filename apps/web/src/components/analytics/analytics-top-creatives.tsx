@@ -1,7 +1,7 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
-import { Badge } from '@repo/ui'
+import Image from 'next/image'
+import { Card, CardContent, CardHeader, CardTitle, Badge } from '@repo/ui'
 import type { CreativePerformanceView } from '@repo/types'
 
 function scoreColor(label: string) {
@@ -23,7 +23,7 @@ export function AnalyticsTopCreatives({ creatives }: { creatives: CreativePerfor
       <CardContent className="space-y-4">
         {creatives.slice(0, 5).map((c) => (
           <div key={c.id} className="flex gap-3 items-start">
-            <img src={c.thumbnailUrl} alt={c.name} className="h-14 w-14 rounded-lg object-cover bg-muted" />
+            <Image src={c.thumbnailUrl} alt={c.name} width={56} height={56} className="h-14 w-14 rounded-lg object-cover bg-muted" unoptimized />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium truncate">{c.name}</span>

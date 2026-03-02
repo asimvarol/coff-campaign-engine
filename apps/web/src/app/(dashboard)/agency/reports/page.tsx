@@ -1,7 +1,7 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
-import { Button } from '@repo/ui'
+import Image from 'next/image'
+import { Card, CardContent, CardHeader, CardTitle, Button } from '@repo/ui'
 import { mockAgencyBrands } from '@/lib/mock-data/agency'
 
 export default function AgencyReportsPage() {
@@ -16,7 +16,7 @@ export default function AgencyReportsPage() {
           <Card key={brand.id}>
             <CardHeader className="pb-2">
               <div className="flex items-center gap-3">
-                <img src={brand.logoUrl} alt={brand.name} className="h-10 w-10 rounded-lg bg-muted object-cover" />
+                <Image src={brand.logoUrl} alt={brand.name} width={40} height={40} className="h-10 w-10 rounded-lg bg-muted object-cover" unoptimized />
                 <CardTitle className="text-sm">{brand.name}</CardTitle>
               </div>
             </CardHeader>
