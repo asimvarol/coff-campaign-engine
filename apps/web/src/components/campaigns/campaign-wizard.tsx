@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Textarea, Progress } from '@repo/ui'
 import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons'
 import { CampaignObjective } from '@repo/types'
-import { mockBrands, generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
+import { generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
+import { useBrand } from '@/lib/brand-context'
 import type { CampaignConcept } from '@repo/types'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
@@ -50,10 +51,18 @@ interface WizardState {
 }
 
 export function CampaignWizard() {
+  const { brands, selectedBrandId } = useBrand()
   const [step, setStep] = useState(1)
+
+  // Auto-set brand from sidebar selection
+  useEffect(() => {
+    if (selectedBrandId && !state.brandId) {
+      updateState({ brandId: selectedBrandId })
+    }
+  }, [selectedBrandId])
   const [isGenerating, setIsGenerating] = useState(false)
   const [state, setState] = useState<WizardState>({
-    brandId: '',
+    brandId: selectedBrandId || '',
     campaignName: '',
     objective: '',
     platforms: [],
@@ -66,6 +75,31 @@ export function CampaignWizard() {
     generatingProgress: 0,
     approvedCreatives: [],
   })
+
+  const saveCampaign = async (status: string) => {
+    try {
+      const brand = brands.find(b => b.id === state.brandId)
+      await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: state.campaignName,
+          brandId: state.brandId,
+          brandName: brand?.name || '',
+          brandLogo: brand?.logo?.primary || '',
+          objective: state.objective,
+          status,
+          platforms: state.platforms,
+          creativeCount: state.approvedCreatives.length,
+          description: state.description,
+          conceptName: state.selectedConcept?.name || '',
+        }),
+      })
+      window.location.href = '/campaigns'
+    } catch (err) {
+      console.error('Failed to save campaign:', err)
+    }
+  }
 
   const updateState = (updates: Partial<WizardState>) => {
     setState(prev => ({ ...prev, ...updates }))
@@ -86,7 +120,7 @@ export function CampaignWizard() {
     setIsGenerating(true)
     setStep(3)
     
-    const brand = mockBrands.find(b => b.id === state.brandId)
+    const brand = brands.find(b => b.id === state.brandId)
     if (!brand) return
     
     // Simulate staggered generation
@@ -184,7 +218,7 @@ export function CampaignWizard() {
                 onChange={(e) => updateState({ brandId: e.target.value })}
               >
                 <option value="">Select brand...</option>
-                {mockBrands.map(brand => (
+                {brands.map(brand => (
                   <option key={brand.id} value={brand.id}>{brand.name}</option>
                 ))}
               </select>
@@ -497,10 +531,10 @@ export function CampaignWizard() {
                 <Download04Icon className="mr-2 h-4 w-4" />
                 Download All
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => saveCampaign('DRAFT')}>
                 Save as Draft
               </Button>
-              <Button className="w-full">
+              <Button className="w-full" onClick={() => saveCampaign('PUBLISHED')}>
                 Schedule & Publish
               </Button>
             </div>
