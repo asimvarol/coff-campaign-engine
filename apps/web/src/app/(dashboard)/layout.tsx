@@ -1,5 +1,6 @@
 import { MobileSidebar } from '@/components/mobile-sidebar'
 import { BrandProvider } from '@/lib/brand-context'
+import { PageTransition } from '@/components/page-transition'
 
 export default function DashboardLayout({
   children,
@@ -11,7 +12,7 @@ export default function DashboardLayout({
       <div className="flex min-h-screen">
         <MobileSidebar />
         <main className="flex-1 overflow-y-auto bg-background">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </main>
       </div>
     </BrandProvider>
