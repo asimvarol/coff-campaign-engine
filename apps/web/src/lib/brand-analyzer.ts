@@ -47,11 +47,25 @@ function extractDomain(url: string): string {
 }
 
 function extractBrandName(html: string, domain: string): string {
-  const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i)
-  let name = titleMatch?.[1] || ''
-  name = name.replace(/\s*[-|–]\s*(Home|Official|Website|Site).*$/i, '')
-  name = name.replace(/^\s*(Home|Welcome to)\s+/i, '')
+  // Try og:title first (usually cleaner)
+  const ogTitle = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i)?.[1]
+  // Try og:site_name (best for brand name)
+  const siteName = html.match(/<meta\s+property=["']og:site_name["']\s+content=["']([^"']+)["']/i)?.[1]
+  
+  if (siteName) return siteName.trim()
+  
+  let name = ogTitle || ''
   if (!name) {
+    const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i)
+    name = titleMatch?.[1] || ''
+  }
+  
+  // Clean up title
+  name = name.replace(/\s*[-|–—:]\s*(Home|Official|Website|Site|Welcome|Homepage|Main).*$/i, '')
+  name = name.replace(/^\s*(Home|Welcome to|Official)\s+[-|–—:]?\s*/i, '')
+  name = name.replace(/\s*[-|–—]\s*$/, '')
+  
+  if (!name || name.length > 60) {
     name = domain.split('.')[0].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
   }
   return name.trim() || 'Brand'
@@ -183,6 +197,39 @@ function extractMeta(html: string): { description: string; keywords: string[] } 
   }
 }
 
+
+function extractImages(html: string, baseUrl: string): string[] {
+  const images: string[] = []
+  const makeAbsolute = (url: string) => {
+    if (!url) return ''
+    if (url.startsWith('data:')) return ''
+    if (url.startsWith('http')) return url
+    if (url.startsWith('//')) return 'https:' + url
+    if (url.startsWith('/')) { try { return new URL(url, baseUrl).href } catch { return '' } }
+    try { return new URL(url, baseUrl).href } catch { return '' }
+  }
+
+  // OG images
+  const ogMatches = html.matchAll(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/gi)
+  for (const m of ogMatches) { const u = makeAbsolute(m[1]); if (u) images.push(u) }
+
+  // Product/content images (skip tiny icons, svgs, tracking pixels)
+  const imgMatches = html.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*/gi)
+  for (const m of imgMatches) {
+    const src = m[1]
+    if (src.includes('.svg') || src.includes('pixel') || src.includes('tracking') || src.includes('1x1') || src.includes('data:')) continue
+    // Check for width/height hints - skip tiny images
+    const full = m[0]
+    const widthMatch = full.match(/width=["']?(\d+)/)
+    if (widthMatch && parseInt(widthMatch[1]) < 50) continue
+    const u = makeAbsolute(src)
+    if (u) images.push(u)
+  }
+
+  // Dedupe and limit
+  return [...new Set(images)].slice(0, 20)
+}
+
 function extractSocial(html: string): Record<string, string | undefined> {
   const socials: Record<string, string | undefined> = {}
   const patterns = {
@@ -282,7 +329,7 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
     targetAudience: 'Modern consumers aged 25-45',
     summary: meta.description || `${name} is a modern brand focused on quality and innovation.`,
     images: {
-      scraped: [`https://picsum.photos/seed/${domain}/800/600`],
+      scraped: html ? extractImages(html, baseUrl) : [`https://picsum.photos/seed/${domain}/800/600`],
       uploaded: [],
       products: []
     },
