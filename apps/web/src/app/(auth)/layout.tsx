@@ -1,7 +1,45 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
+
+// Custom hook for counting animation
+function useCountUp(end: number, duration: number = 2000, decimals: number = 0) {
+  const [count, setCount] = useState(0)
+  const [started, setStarted] = useState(false)
+
+  useEffect(() => {
+    if (!started) return
+
+    let startTime: number | null = null
+    const startValue = 0
+
+    const animate = (currentTime: number) => {
+      if (startTime === null) startTime = currentTime
+      const progress = Math.min((currentTime - startTime) / duration, 1)
+
+      // Easing function (easeOutExpo)
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)
+      
+      const currentCount = startValue + (end - startValue) * easeProgress
+      setCount(currentCount)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        setCount(end)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [end, duration, started])
+
+  const formattedCount = decimals > 0 
+    ? count.toFixed(decimals)
+    : Math.floor(count).toLocaleString()
+
+  return { count: formattedCount, start: () => setStarted(true) }
+}
 
 // Sample images for masonry background
 const MASONRY_IMAGES = [
@@ -77,6 +115,39 @@ function AnimatedMasonryBackground() {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function AnimatedStat({ value, suffix, label }: { value: number; suffix: string; label: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { count, start } = useCountUp(value, 2000, suffix === '%' ? 1 : 0)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isVisible) {
+          setIsVisible(true)
+          start()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (ref.current) {
+      observer.observe(ref.current)
+    }
+
+    return () => observer.disconnect()
+  }, [isVisible, start])
+
+  return (
+    <div ref={ref} className="space-y-1">
+      <div className="text-3xl font-bold text-primary">
+        {count}{suffix}
+      </div>
+      <div className="text-sm text-muted-foreground">{label}</div>
     </div>
   )
 }
