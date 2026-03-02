@@ -15,6 +15,7 @@ interface BrandContextType {
   selectBrand: (id: string | null) => void
   selectedBrand: BrandSummary | null
   refreshBrands: () => Promise<void>
+  deleteBrand: (id: string) => Promise<boolean>
   isLoading: boolean
 }
 
@@ -24,6 +25,7 @@ const BrandContext = createContext<BrandContextType>({
   selectBrand: () => {},
   selectedBrand: null,
   refreshBrands: async () => {},
+  deleteBrand: async () => false,
   isLoading: true,
 })
 
@@ -51,11 +53,24 @@ export function BrandProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { fetchBrands() }, [])
 
+  const deleteBrand = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/brands/${id}`, { method: 'DELETE' })
+      if (!res.ok) return false
+      await fetchBrands()
+      if (selectedBrandId === id) {
+        const remaining = brands.filter(b => b.id !== id)
+        setSelectedBrandId(remaining.length > 0 ? remaining[0].id : null)
+      }
+      return true
+    } catch { return false }
+  }
+
   const selectBrand = (id: string | null) => setSelectedBrandId(id)
   const selectedBrand = brands.find(b => b.id === selectedBrandId) || null
 
   return (
-    <BrandContext.Provider value={{ brands, selectedBrandId, selectBrand, selectedBrand, refreshBrands: fetchBrands, isLoading }}>
+    <BrandContext.Provider value={{ brands, selectedBrandId, selectBrand, selectedBrand, refreshBrands: fetchBrands, deleteBrand, isLoading }}>
       {children}
     </BrandContext.Provider>
   )

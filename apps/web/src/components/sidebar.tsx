@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@repo/ui'
 import Image from 'next/image'
 import { useBrand } from '@/lib/brand-context'
-import { Plus, ChevronDown, Check } from 'lucide-react'
+import { Plus, ChevronDown, Check, Trash2 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import {
   Sparkles01Icon,
@@ -40,7 +40,7 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { brands, selectedBrand, selectedBrandId, selectBrand } = useBrand()
+  const { brands, selectedBrand, selectedBrandId, selectBrand, deleteBrand } = useBrand()
   const [brandMenuOpen, setBrandMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -99,7 +99,7 @@ export function Sidebar() {
                     key={brand.id}
                     onClick={() => { selectBrand(brand.id); setBrandMenuOpen(false) }}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                      "group/item flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                       brand.id === selectedBrandId ? "bg-primary/10 text-primary" : "hover:bg-muted"
                     )}
                   >
@@ -108,6 +108,13 @@ export function Sidebar() {
                     </div>
                     <span className="flex-1 truncate text-left">{brand.name}</span>
                     {brand.id === selectedBrandId && <Check className="h-4 w-4 shrink-0" />}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); deleteBrand(brand.id); }}
+                      className="ml-1 shrink-0 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover/item:opacity-100"
+                      title="Delete brand"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </button>
                 ))}
               </div>
