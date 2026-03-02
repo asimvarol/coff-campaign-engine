@@ -117,7 +117,7 @@ export default function BrandDetailPage() {
           </Card>
 
           {/* Logo + Fonts Row */}
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Card className="flex aspect-square items-center justify-center overflow-hidden bg-[#f0ede6] p-8">
               <div className="relative h-full w-full">
                 <Image src={brand.logo.primary} alt={brand.name} fill className="object-contain" unoptimized />
@@ -147,7 +147,7 @@ export default function BrandDetailPage() {
           </Card>
 
           {/* Tagline + Values Row */}
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Card className="p-6">
               <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Tagline</div>
               <p className="text-base italic leading-relaxed">{brand.voice.sampleTexts?.[0] || brand.summary}</p>
@@ -161,7 +161,7 @@ export default function BrandDetailPage() {
           </div>
 
           {/* Aesthetic + Tone Row */}
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Card className="p-6">
               <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand aesthetic</div>
               <div className="flex flex-wrap gap-2">
@@ -185,7 +185,7 @@ export default function BrandDetailPage() {
           <h2 className="text-xl font-bold mb-5">Images</h2>
 
           {/* Top: Small Grid + Promo */}
-          <div className="grid grid-cols-2 gap-5 mb-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             <div className="grid grid-cols-3 gap-1.5">
               {(allImages.length >= 9 ? allImages.slice(0, 9) : allImages.slice(0, Math.min(allImages.length, 9))).map((img, i) => (
                 <div key={i} className="aspect-square overflow-hidden rounded-md bg-muted">
