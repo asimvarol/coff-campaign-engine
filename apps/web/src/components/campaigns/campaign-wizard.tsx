@@ -93,6 +93,12 @@ export function CampaignWizard() {
           creativeCount: state.approvedCreatives.length,
           description: state.description,
           conceptName: state.selectedConcept?.name || '',
+          creatives: state.generatedCreatives.map(cr => ({
+            id: cr.id,
+            platform: cr.platform,
+            format: cr.format,
+            imageUrl: cr.imageUrl,
+          })),
         }),
       })
       window.location.href = '/campaigns'
