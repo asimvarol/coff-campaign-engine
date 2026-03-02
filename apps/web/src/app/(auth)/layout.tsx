@@ -31,7 +31,7 @@ function AnimatedMasonryBackground() {
         {[...MASONRY_IMAGES.slice(0, 2), ...MASONRY_IMAGES.slice(0, 2)].map((src, i) => (
           <div
             key={i}
-            className="relative rounded-2xl overflow-hidden"
+            className="relative rounded-lg overflow-hidden shadow-lg"
             style={{ width: '200px', height: i % 2 === 0 ? '300px' : '250px' }}
           >
             <Image src={src} alt="" fill className="object-cover" unoptimized />
@@ -44,7 +44,7 @@ function AnimatedMasonryBackground() {
         {[...MASONRY_IMAGES.slice(2, 4), ...MASONRY_IMAGES.slice(2, 4)].map((src, i) => (
           <div
             key={i}
-            className="relative rounded-2xl overflow-hidden"
+            className="relative rounded-lg overflow-hidden shadow-lg"
             style={{ width: '180px', height: i % 2 === 0 ? '280px' : '220px' }}
           >
             <Image src={src} alt="" fill className="object-cover" unoptimized />
@@ -57,7 +57,7 @@ function AnimatedMasonryBackground() {
         {[...MASONRY_IMAGES.slice(4, 6), ...MASONRY_IMAGES.slice(4, 6)].map((src, i) => (
           <div
             key={i}
-            className="relative rounded-2xl overflow-hidden"
+            className="relative rounded-lg overflow-hidden shadow-lg"
             style={{ width: '190px', height: i % 2 === 0 ? '260px' : '290px' }}
           >
             <Image src={src} alt="" fill className="object-cover" unoptimized />
@@ -70,7 +70,7 @@ function AnimatedMasonryBackground() {
         {[...MASONRY_IMAGES.slice(6, 8), ...MASONRY_IMAGES.slice(6, 8)].map((src, i) => (
           <div
             key={i}
-            className="relative rounded-2xl overflow-hidden"
+            className="relative rounded-lg overflow-hidden shadow-lg"
             style={{ width: '200px', height: i % 2 === 0 ? '240px' : '270px' }}
           >
             <Image src={src} alt="" fill className="object-cover" unoptimized />
