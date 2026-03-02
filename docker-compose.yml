@@ -3,24 +3,22 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: coff-postgres
     environment:
-      POSTGRES_USER: coff
-      POSTGRES_PASSWORD: coff_dev_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: coff_campaign_engine
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U coff']
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: coff-redis
     ports:
       - '6379:6379'
     volumes:
@@ -28,8 +26,25 @@ services:
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
-      timeout: 3s
+      timeout: 5s
       retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/coff_campaign_engine
+      REDIS_URL: redis://redis:6379
+      NEXTAUTH_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
