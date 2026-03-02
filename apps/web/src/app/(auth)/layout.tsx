@@ -43,22 +43,22 @@ function useCountUp(end: number, duration: number = 2000, decimals: number = 0) 
 
 // Sample images and videos for masonry background
 const MASONRY_ITEMS = [
-  { type: 'image', src: 'https://images.unsplash.com/photo-1557821552-17105176677c?w=400&h=600' },
-  { type: 'video', src: 'https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0fd273d2c6d9a064f3ae35579b2bbdf&profile_id=164&oauth2_token_id=57447761' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=400' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=500' },
-  { type: 'video', src: 'https://player.vimeo.com/external/373164988.sd.mp4?s=0c6acb8f0a7df2d0b1b944c4b0d6b67b2a8d4c8b&profile_id=164&oauth2_token_id=57447761' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=450' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?w=400&h=550' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1611926653670-2c5e16fc60d2?w=400&h=400' },
-  { type: 'video', src: 'https://player.vimeo.com/external/391085690.sd.mp4?s=77d7f8e7f8f1e1c1a8c8b2e7b7b7b7b7b7b7b7b7&profile_id=164&oauth2_token_id=57447761' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=500' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=400&h=450' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=400&h=500' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&h=450' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=550' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1590650153855-d9e808231d41?w=400&h=400' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=400&h=500' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1557821552-17105176677c?w=400&h=600&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=400&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=500&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=450&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?w=400&h=550&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1611926653670-2c5e16fc60d2?w=400&h=400&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=500&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=400&h=450&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=400&h=500&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&h=450&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=550&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1590650153855-d9e808231d41?w=400&h=400&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=400&h=500&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400&h=450&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=550&fit=crop' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=500&fit=crop' },
 ]
 
 function AnimatedMasonryBackground() {
