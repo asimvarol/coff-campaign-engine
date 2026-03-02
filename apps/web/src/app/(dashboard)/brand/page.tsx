@@ -99,6 +99,7 @@ export default function BrandPage() {
                         alt={brand.name}
                         width={48}
                         height={48}
+                        unoptimized
                         className="object-contain"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement

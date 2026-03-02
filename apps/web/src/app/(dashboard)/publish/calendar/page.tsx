@@ -24,7 +24,7 @@ type ViewMode = 'month' | 'week'
 
 export default function PublishCalendarPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('month')
-  const [currentDate, setCurrentDate] = useState(new Date('2026-02-27'))
+  const [currentDate, setCurrentDate] = useState(() => new Date())
   const [selectedPost, setSelectedPost] = useState<typeof mockScheduledPosts[0] | null>(null)
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -40,7 +40,7 @@ export default function PublishCalendarPage() {
   }
 
   const goToToday = () => {
-    setCurrentDate(new Date('2026-02-27'))
+    setCurrentDate(new Date())
   }
 
   const getMonthDays = () => {
@@ -92,7 +92,7 @@ export default function PublishCalendarPage() {
   }
 
   const isToday = (date: Date) => {
-    const today = new Date('2026-02-27')
+    const today = new Date()
     return (
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&

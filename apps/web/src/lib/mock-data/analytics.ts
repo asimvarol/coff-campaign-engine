@@ -60,8 +60,8 @@ export const mockTimeSeriesData = Array.from({ length: 30 }, (_, i) => {
   const base = 300 + Math.sin(i / 4) * 150
   return {
     date: date.toISOString().split('T')[0],
-    reach: Math.round(base + Math.random() * 200),
-    engagement: Math.round((base + Math.random() * 200) * 0.07),
+    reach: Math.round(base + ((i * 137 + 43) % 200)),
+    engagement: Math.round((base + ((i * 89 + 67) % 200)) * 0.07),
   }
 })
 

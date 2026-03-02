@@ -65,6 +65,7 @@ export function PhotoshootCard({ photoshoot }: PhotoshootCardProps) {
                 src={photoshoot.productImageUrl}
                 alt={`${photoshoot.name} product image`}
                 fill
+                unoptimized
                 className="object-cover"
                 sizes="(max-width: 768px) 50vw, 25vw"
               />
@@ -78,6 +79,7 @@ export function PhotoshootCard({ photoshoot }: PhotoshootCardProps) {
                   src={variant.imageUrl}
                   alt={`${photoshoot.name} variant ${index + 1}`}
                   fill
+                  unoptimized
                   className="object-cover"
                   sizes="(max-width: 768px) 25vw, 12vw"
                 />

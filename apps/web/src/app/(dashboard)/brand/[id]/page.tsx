@@ -250,6 +250,7 @@ export default function BrandDetailPage() {
                   alt={brand.name}
                   width={64}
                   height={64}
+                  unoptimized
                   className="object-contain"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
@@ -515,6 +516,7 @@ export default function BrandDetailPage() {
                     alt={`Brand image ${i + 1}`}
                     width={200}
                     height={200}
+                    unoptimized
                     className="object-cover w-full h-full"
                   />
                 </div>

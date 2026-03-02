@@ -355,6 +355,7 @@ export function CampaignWizard() {
                         src={creative.imageUrl}
                         alt={creative.header.text}
                         fill
+                        unoptimized
                         className="object-cover"
                       />
                     </div>
@@ -403,6 +404,7 @@ export function CampaignWizard() {
                         src={creative.imageUrl}
                         alt={creative.header.text}
                         fill
+                        unoptimized
                         className="object-cover"
                       />
                       {isApproved && (

@@ -99,6 +99,7 @@ export default function CampaignsPage() {
                           src={campaign.brandLogo}
                           alt={campaign.brandName}
                           fill
+                          unoptimized
                           className="object-cover"
                         />
                       </div>

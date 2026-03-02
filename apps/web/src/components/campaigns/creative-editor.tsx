@@ -100,6 +100,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
               src={editedCreative.imageUrl}
               alt="Creative preview"
               fill
+              unoptimized
               className="object-cover"
             />
             
@@ -210,6 +211,7 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                       alt="Background"
                       width={300}
                       height={200}
+                      unoptimized
                       className="h-full w-full object-cover"
                     />
                   </div>

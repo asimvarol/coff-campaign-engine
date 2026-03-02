@@ -54,6 +54,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 src={campaign.brandLogo}
                 alt={campaign.brandName}
                 fill
+                unoptimized
                 className="object-cover"
               />
             </div>
@@ -164,6 +165,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                       src={creative.imageUrl}
                       alt={creative.header.text}
                       fill
+                      unoptimized
                       className="object-cover"
                     />
                   </div>
@@ -204,6 +206,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                         alt={creative.header.text}
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                     </div>
                     <div className="p-4">

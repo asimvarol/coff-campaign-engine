@@ -122,6 +122,7 @@ export function ImageUpload({ value, onChange, onError }: ImageUploadProps) {
         <Button
           variant="destructive"
           size="sm"
+          unoptimized
           className="absolute right-2 top-2"
           onClick={handleRemove}
           aria-label="Remove image"
