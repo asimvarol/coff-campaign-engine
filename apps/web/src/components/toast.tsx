@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
-import { CheckCircleIcon, AlertCircleIcon, InfoCircleIcon, CancelCircleIcon } from '@hugeicons/react'
+import { CheckCircleIcon, AlertCircleIcon, InformationCircleIcon, CancelCircleIcon } from '@hugeicons/react'
 
 type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -59,7 +59,7 @@ function ToastItem({ toast }: { toast: Toast }) {
   const icons = {
     success: CheckCircleIcon,
     error: CancelCircleIcon,
-    info: InfoCircleIcon,
+    info: InformationCircleIcon,
     warning: AlertCircleIcon,
   }
 
