@@ -308,7 +308,7 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
       }
     })
     html = await res.text()
-    console.log('[brand-analyzer] Fetched ' + url + ': ' + html.length + ' chars')
+    // Debug: console.log('[brand-analyzer] Fetched ' + url + ': ' + html.length + ' chars')
   } catch (err) {
     console.error('[brand-analyzer] Fetch failed for ' + url + ':', err)
     // Fetch failed, use fallback generation
