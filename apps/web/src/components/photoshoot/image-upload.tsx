@@ -116,13 +116,13 @@ export function ImageUpload({ value, onChange, onError }: ImageUploadProps) {
           src={value}
           alt="Product image preview"
           fill
+          unoptimized
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
         />
         <Button
           variant="destructive"
           size="sm"
-          unoptimized
           className="absolute right-2 top-2"
           onClick={handleRemove}
           aria-label="Remove image"

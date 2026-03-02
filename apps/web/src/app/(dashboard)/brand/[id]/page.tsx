@@ -68,7 +68,7 @@ interface Brand {
   industry: string
   targetAudience: string
   summary: string
-  images: {
+  images?: {
     scraped: string[]
     uploaded: string[]
     products: string[]
@@ -507,9 +507,9 @@ export default function BrandDetailPage() {
             <ImageIcon className="h-5 w-5" />
             Brand Images
           </h2>
-          {brand.images.scraped.length > 0 ? (
+          {brand.images?.scraped?.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {brand.images.scraped.map((img, i) => (
+              {brand.images?.scraped?.map((img, i) => (
                 <div key={i} className="aspect-square rounded-lg overflow-hidden bg-muted">
                   <Image
                     src={img}

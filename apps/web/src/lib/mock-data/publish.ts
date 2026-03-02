@@ -171,7 +171,7 @@ export const mockConnectedAccounts: ConnectedAccount[] = [
 ]
 
 // Generate mock scheduled posts for next 2 weeks
-const now = new Date('2026-02-27T20:00:00Z')
+const now = new Date()
 const creativeThumbnails = [
   'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=200&fit=crop',
   'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=200&h=200&fit=crop',
