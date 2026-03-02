@@ -3,6 +3,7 @@
  */
 
 import { env } from './env'
+import { ReactNode } from 'react'
 
 export const features = {
   // Core features
@@ -36,8 +37,8 @@ export function FeatureGate({
   fallback,
 }: {
   feature: FeatureFlag
-  children: React.ReactNode
-  fallback?: React.ReactNode
+  children: ReactNode
+  fallback?: ReactNode
 }) {
   if (!isFeatureEnabled(feature)) {
     return fallback || null
