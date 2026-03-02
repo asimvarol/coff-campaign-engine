@@ -187,19 +187,12 @@ export default function AuthLayout({
           <p className="text-lg text-muted-foreground">
             AI-powered campaign management and optimization platform. Create stunning campaigns in minutes, not days.
           </p>
+          
+          {/* Animated Stats */}
           <div className="grid grid-cols-3 gap-4 pt-8">
-            <div className="space-y-1">
-              <div className="text-3xl font-bold text-primary">50K+</div>
-              <div className="text-sm text-muted-foreground">Campaigns</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold text-primary">200K+</div>
-              <div className="text-sm text-muted-foreground">Creatives</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold text-primary">99.9%</div>
-              <div className="text-sm text-muted-foreground">Uptime</div>
-            </div>
+            <AnimatedStat value={50} suffix="K+" label="Campaigns" />
+            <AnimatedStat value={200} suffix="K+" label="Creatives" />
+            <AnimatedStat value={99.9} suffix="%" label="Uptime" />
           </div>
         </div>
       </div>
