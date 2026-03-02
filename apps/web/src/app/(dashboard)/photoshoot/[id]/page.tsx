@@ -45,12 +45,13 @@ const PHOTOSHOOTS = {
   },
 }
 
-export default function PhotoshootDetailPage({
+export default async function PhotoshootDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const photoshoot = PHOTOSHOOTS[params.id as keyof typeof PHOTOSHOOTS]
+  const { id } = await params
+  const photoshoot = PHOTOSHOOTS[id as keyof typeof PHOTOSHOOTS]
 
   if (!photoshoot) {
     notFound()
