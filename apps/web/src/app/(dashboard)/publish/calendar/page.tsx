@@ -205,7 +205,7 @@ export default function PublishCalendarPage() {
                           <div className="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-muted">
                             <img
                               src={post.creativeThumbnail}
-                              alt=""
+                              alt="Post preview image"
                               className="h-full w-full object-cover"
                             />
                           </div>
@@ -284,7 +284,7 @@ export default function PublishCalendarPage() {
                         <div className="h-20 w-full overflow-hidden rounded bg-muted">
                           <img
                             src={post.creativeThumbnail}
-                            alt=""
+                            alt="Post preview image"
                             className="h-full w-full object-cover"
                           />
                         </div>

@@ -194,7 +194,7 @@ export default function BrandDetailPage() {
             <div className="grid grid-cols-3 gap-1.5">
               {(allImages.length >= 9 ? allImages.slice(0, 9) : allImages.slice(0, Math.min(allImages.length, 9))).map((img, i) => (
                 <div key={i} className="aspect-square overflow-hidden rounded-md bg-muted">
-                  <Image src={img} alt="" width={150} height={150} className="h-full w-full object-cover" unoptimized />
+                  <Image src={img} alt={`Brand image ${i + 1}`} width={150} height={150} className="h-full w-full object-cover" unoptimized />
                 </div>
               ))}
               {allImages.length < 9 && Array.from({ length: 9 - Math.min(allImages.length, 9) }).map((_, i) => (
