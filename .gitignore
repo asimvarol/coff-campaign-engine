@@ -1,19 +1,21 @@
 # Dependencies
-node_modules
+node_modules/
 .pnp
 .pnp.js
 
 # Testing
-coverage
+coverage/
+.nyc_output/
 
 # Next.js
 .next/
 out/
-build
+build/
 dist/
 
 # Production
-build
+.vercel/
+.turbo/
 
 # Misc
 .DS_Store
@@ -23,27 +25,28 @@ build
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
 
-# Env
+# Local env files
 .env
 .env*.local
 .env.production
 
-# Turbo
-.turbo
-
-# Vercel
-.vercel
-
-# Prisma
-prisma/migrations/dev.db*
-
-# IDE
-.vscode
-.idea
+# IDEs
+.idea/
+.vscode/
 *.swp
 *.swo
 *~
 
-# Bun
-.bun
+# OS
+Thumbs.db
+
+# Prisma
+*.db
+*.db-journal
+
+# Logs
+logs/
+*.log
