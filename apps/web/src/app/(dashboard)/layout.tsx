@@ -1,6 +1,6 @@
-import { Sidebar } from '@/components/sidebar'
-import { MobileSidebar } from '@/components/mobile-sidebar'
 import { BrandProvider } from '@/lib/brand-context'
+import { AppSidebar } from '@/components/app-sidebar'
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '@repo/ui/sidebar'
 
 export default function DashboardLayout({
   children,
@@ -9,13 +9,18 @@ export default function DashboardLayout({
 }) {
   return (
     <BrandProvider>
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <MobileSidebar />
-        <main className="flex-1 overflow-y-auto bg-background">
-          {children}
-        </main>
-      </div>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger />
+            <div className="flex-1" />
+          </header>
+          <main className="flex-1 overflow-y-auto p-4">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
     </BrandProvider>
   )
 }
