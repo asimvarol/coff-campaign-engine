@@ -24,6 +24,7 @@ export interface BrandDNA {
   summary: string
   images: { scraped: string[]; uploaded: string[]; products: string[] }
   socialProfiles?: Record<string, string | undefined>
+  products?: string[]
 }
 
 export type AnalysisStep = 'scanning' | 'extracting-colors' | 'analyzing-typography' | 'learning-voice' | 'generating-summary'
@@ -230,6 +231,32 @@ function extractImages(html: string, baseUrl: string): string[] {
   return [...new Set(images)].slice(0, 20)
 }
 
+
+function extractProducts(html: string): string[] {
+  const products: string[] = []
+  
+  // Look for product/collection links
+  const linkMatches = html.matchAll(/href=["'][^"']*(?:product|collection|shop|kategori|urun|koleksiyon)[^"']*["'][^>]*>([^<]+)</gi)
+  for (const m of linkMatches) {
+    const text = m[1].trim()
+    if (text && text.length > 2 && text.length < 60 && !text.match(/^[\s<>{}]+$/)) {
+      products.push(text)
+    }
+  }
+  
+  // Look for h2/h3 headings that might be product names
+  const headingMatches = html.matchAll(/<h[23][^>]*>([^<]{3,50})<\/h[23]>/gi)
+  for (const m of headingMatches) {
+    const text = m[1].trim()
+    if (text && !text.match(/menu|nav|footer|cookie|privacy|about|contact/i)) {
+      products.push(text)
+    }
+  }
+  
+  // Dedupe
+  return [...new Set(products)].slice(0, 10)
+}
+
 function extractSocial(html: string): Record<string, string | undefined> {
   const socials: Record<string, string | undefined> = {}
   const patterns = {
@@ -296,6 +323,7 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
   const logo = html ? extractLogo(html, baseUrl, domain) : `https://logo.clearbit.com/${domain}`
   const meta = html ? extractMeta(html) : { description: '', keywords: [] }
   const socials = html ? extractSocial(html) : {}
+  const products = html ? extractProducts(html) : []
   
   // Step 5: Summary
   await delay(300)
@@ -333,7 +361,8 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
       uploaded: [],
       products: []
     },
-    socialProfiles: socials
+    socialProfiles: socials,
+    products
   }
   
   await delay(200)

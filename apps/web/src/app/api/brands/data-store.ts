@@ -36,6 +36,7 @@ export interface MockBrandDNA {
     products: string[]
   }
   socialProfiles?: Record<string, string | undefined>
+  products?: string[]
   competitors: string[]
   createdAt: string
   updatedAt: string
@@ -60,6 +61,7 @@ const demoBrands: MockBrandDNA[] = [
     industry: 'Jewellery & Luxury',
     targetAudience: 'Affluent professionals aged 30-55',
     summary: 'A premium jewellery brand blending Turkish heritage with modern luxury craftsmanship.',
+    products: ['Heritage Collection', 'Ottoman Gold Series', 'Diamond Drops', 'Bridal Sets'],
     competitors: ['Cartier', 'Tiffany & Co', 'Bvlgari', 'Van Cleef & Arpels'],
     createdAt: new Date('2026-02-01').toISOString(),
     updatedAt: new Date('2026-02-01').toISOString(),
@@ -77,6 +79,7 @@ const demoBrands: MockBrandDNA[] = [
     industry: 'Fitness & Wellness',
     targetAudience: 'Active adults aged 20-40',
     summary: 'A bold fitness brand inspiring urban athletes to push their limits.',
+    products: ['Pro Training Gear', 'Recovery Line', 'Athleisure Wear', 'Supplements Range'],
     competitors: ['Nike Training', 'Gymshark', 'Lululemon', 'Under Armour'],
     createdAt: new Date('2026-02-15').toISOString(),
     updatedAt: new Date('2026-02-15').toISOString(),

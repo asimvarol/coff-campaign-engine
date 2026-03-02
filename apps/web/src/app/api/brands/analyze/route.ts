@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
       industry: result.industry,
       targetAudience: result.targetAudience,
       summary: result.summary,
+      products: result.products || [],
       images: result.images,
       socialProfiles: result.socialProfiles,
       competitors: [],
