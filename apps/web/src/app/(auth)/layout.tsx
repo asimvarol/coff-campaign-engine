@@ -27,7 +27,7 @@ function AnimatedMasonryBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden opacity-50">
       {/* Column 1 */}
-      <div className="absolute left-[5%] top-0 flex flex-col gap-1 animate-[scroll-up_25s_linear_infinite]">
+      <div className="absolute left-[5%] top-0 flex flex-col gap-3 animate-[scroll-up_25s_linear_infinite]">
         {[...MASONRY_IMAGES.slice(0, 2), ...MASONRY_IMAGES.slice(0, 2)].map((src, i) => (
           <div
             key={i}
@@ -40,7 +40,7 @@ function AnimatedMasonryBackground() {
       </div>
 
       {/* Column 2 */}
-      <div className="absolute left-[30%] top-0 flex flex-col gap-1 animate-[scroll-down_30s_linear_infinite]">
+      <div className="absolute left-[30%] top-0 flex flex-col gap-3 animate-[scroll-down_30s_linear_infinite]">
         {[...MASONRY_IMAGES.slice(2, 4), ...MASONRY_IMAGES.slice(2, 4)].map((src, i) => (
           <div
             key={i}
@@ -53,7 +53,7 @@ function AnimatedMasonryBackground() {
       </div>
 
       {/* Column 3 */}
-      <div className="absolute left-[55%] top-0 flex flex-col gap-1 animate-[scroll-up_35s_linear_infinite]">
+      <div className="absolute left-[55%] top-0 flex flex-col gap-3 animate-[scroll-up_35s_linear_infinite]">
         {[...MASONRY_IMAGES.slice(4, 6), ...MASONRY_IMAGES.slice(4, 6)].map((src, i) => (
           <div
             key={i}
@@ -66,7 +66,7 @@ function AnimatedMasonryBackground() {
       </div>
 
       {/* Column 4 */}
-      <div className="absolute left-[80%] top-0 flex flex-col gap-1 animate-[scroll-down_28s_linear_infinite]">
+      <div className="absolute left-[80%] top-0 flex flex-col gap-3 animate-[scroll-down_28s_linear_infinite]">
         {[...MASONRY_IMAGES.slice(6, 8), ...MASONRY_IMAGES.slice(6, 8)].map((src, i) => (
           <div
             key={i}
