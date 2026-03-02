@@ -1,6 +1,13 @@
 'use client'
 
+import type { Metadata } from 'next'
 import { useState } from 'react'
+
+export const metadata: Metadata = {
+  title: 'Login | Coff Campaign Engine',
+  description: 'Sign in to your Coff Campaign Engine account',
+}
+
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
