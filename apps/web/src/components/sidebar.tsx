@@ -38,7 +38,7 @@ const navigation = [
   { name: 'Agency', href: '/agency', icon: Building03Icon },
 ]
 
-export function Sidebar() {
+export function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const { brands, selectedBrand, selectedBrandId, selectBrand, deleteBrand } = useBrand()
   const [brandMenuOpen, setBrandMenuOpen] = useState(false)
@@ -62,7 +62,14 @@ export function Sidebar() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <Sparkles01Icon className="h-4 w-4" />
         </div>
-        <span className="text-lg font-semibold">Coff Campaign</span>
+        <span className="flex-1 text-lg font-semibold">Coff Campaign</span>
+        {onClose && (
+          <button onClick={onClose} className="md:hidden text-muted-foreground hover:text-foreground">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Brand Selector */}

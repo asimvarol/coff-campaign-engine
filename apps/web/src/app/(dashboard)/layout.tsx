@@ -1,4 +1,4 @@
-import { Sidebar } from '@/components/sidebar'
+import { MobileSidebar } from '@/components/mobile-sidebar'
 import { BrandProvider } from '@/lib/brand-context'
 
 export default function DashboardLayout({
@@ -9,8 +9,8 @@ export default function DashboardLayout({
   return (
     <BrandProvider>
       <div className="flex h-screen overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-background">
+        <MobileSidebar />
+        <main className="flex-1 overflow-y-auto bg-background pt-14 md:pt-0">
           <div className="mx-auto max-w-[1200px]">
             {children}
           </div>
