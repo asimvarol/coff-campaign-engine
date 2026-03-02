@@ -16,9 +16,11 @@ export * from './components/progress-stepper'
 export * from './components/progress'
 export * from './components/slider'
 export * from './components/tabs'
-
-// Utils
-export * from './lib/utils'
 export * from './components/sheet'
 export * from './components/dropdown-menu'
 export * from './components/alert-dialog'
+export * from './components/sidebar'
+export * from './components/tooltip'
+
+// Utils
+export * from './lib/utils'
