@@ -41,16 +41,24 @@ function useCountUp(end: number, duration: number = 2000, decimals: number = 0) 
   return { count: formattedCount, start: () => setStarted(true) }
 }
 
-// Sample images for masonry background
-const MASONRY_IMAGES = [
-  'https://images.unsplash.com/photo-1557821552-17105176677c?w=400&h=600', // Campaign creative
-  'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=400', // Social media
-  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=500', // Analytics
-  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=450', // Charts
-  'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?w=400&h=550', // Marketing
-  'https://images.unsplash.com/photo-1611926653670-2c5e16fc60d2?w=400&h=400', // Brand
-  'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=500', // Creative
-  'https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=400&h=450', // Design
+// Sample images and videos for masonry background
+const MASONRY_ITEMS = [
+  { type: 'image', src: 'https://images.unsplash.com/photo-1557821552-17105176677c?w=400&h=600' },
+  { type: 'video', src: 'https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0fd273d2c6d9a064f3ae35579b2bbdf&profile_id=164&oauth2_token_id=57447761' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=400' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=500' },
+  { type: 'video', src: 'https://player.vimeo.com/external/373164988.sd.mp4?s=0c6acb8f0a7df2d0b1b944c4b0d6b67b2a8d4c8b&profile_id=164&oauth2_token_id=57447761' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=450' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?w=400&h=550' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1611926653670-2c5e16fc60d2?w=400&h=400' },
+  { type: 'video', src: 'https://player.vimeo.com/external/391085690.sd.mp4?s=77d7f8e7f8f1e1c1a8c8b2e7b7b7b7b7b7b7b7b7&profile_id=164&oauth2_token_id=57447761' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=500' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=400&h=450' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=400&h=500' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&h=450' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=550' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1590650153855-d9e808231d41?w=400&h=400' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=400&h=500' },
 ]
 
 function AnimatedMasonryBackground() {
@@ -66,52 +74,96 @@ function AnimatedMasonryBackground() {
     <div className="absolute inset-0 overflow-hidden opacity-50">
       {/* Column 1 */}
       <div className="absolute left-[5%] top-0 flex flex-col gap-3 animate-[scroll-up_25s_linear_infinite]">
-        {[...MASONRY_IMAGES.slice(0, 2), ...MASONRY_IMAGES.slice(0, 2)].map((src, i) => (
+        {[...MASONRY_ITEMS.slice(0, 4), ...MASONRY_ITEMS.slice(0, 4)].map((item, i) => (
           <div
             key={i}
             className="relative rounded-lg overflow-hidden shadow-lg"
-            style={{ width: '200px', height: i % 2 === 0 ? '300px' : '250px' }}
+            style={{ width: '200px', height: i % 3 === 0 ? '300px' : i % 3 === 1 ? '250px' : '280px' }}
           >
-            <Image src={src} alt="" fill className="object-cover" unoptimized />
+            {item.type === 'video' ? (
+              <video
+                src={item.src}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Image src={item.src} alt="" fill className="object-cover" unoptimized />
+            )}
           </div>
         ))}
       </div>
 
       {/* Column 2 */}
       <div className="absolute left-[30%] top-0 flex flex-col gap-3 animate-[scroll-down_30s_linear_infinite]">
-        {[...MASONRY_IMAGES.slice(2, 4), ...MASONRY_IMAGES.slice(2, 4)].map((src, i) => (
+        {[...MASONRY_ITEMS.slice(4, 8), ...MASONRY_ITEMS.slice(4, 8)].map((item, i) => (
           <div
             key={i}
             className="relative rounded-lg overflow-hidden shadow-lg"
-            style={{ width: '180px', height: i % 2 === 0 ? '280px' : '220px' }}
+            style={{ width: '180px', height: i % 3 === 0 ? '280px' : i % 3 === 1 ? '220px' : '260px' }}
           >
-            <Image src={src} alt="" fill className="object-cover" unoptimized />
+            {item.type === 'video' ? (
+              <video
+                src={item.src}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Image src={item.src} alt="" fill className="object-cover" unoptimized />
+            )}
           </div>
         ))}
       </div>
 
       {/* Column 3 */}
       <div className="absolute left-[55%] top-0 flex flex-col gap-3 animate-[scroll-up_35s_linear_infinite]">
-        {[...MASONRY_IMAGES.slice(4, 6), ...MASONRY_IMAGES.slice(4, 6)].map((src, i) => (
+        {[...MASONRY_ITEMS.slice(8, 12), ...MASONRY_ITEMS.slice(8, 12)].map((item, i) => (
           <div
             key={i}
             className="relative rounded-lg overflow-hidden shadow-lg"
-            style={{ width: '190px', height: i % 2 === 0 ? '260px' : '290px' }}
+            style={{ width: '190px', height: i % 3 === 0 ? '260px' : i % 3 === 1 ? '290px' : '240px' }}
           >
-            <Image src={src} alt="" fill className="object-cover" unoptimized />
+            {item.type === 'video' ? (
+              <video
+                src={item.src}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Image src={item.src} alt="" fill className="object-cover" unoptimized />
+            )}
           </div>
         ))}
       </div>
 
       {/* Column 4 */}
       <div className="absolute left-[80%] top-0 flex flex-col gap-3 animate-[scroll-down_28s_linear_infinite]">
-        {[...MASONRY_IMAGES.slice(6, 8), ...MASONRY_IMAGES.slice(6, 8)].map((src, i) => (
+        {[...MASONRY_ITEMS.slice(12, 16), ...MASONRY_ITEMS.slice(12, 16)].map((item, i) => (
           <div
             key={i}
             className="relative rounded-lg overflow-hidden shadow-lg"
-            style={{ width: '200px', height: i % 2 === 0 ? '240px' : '270px' }}
+            style={{ width: '200px', height: i % 3 === 0 ? '240px' : i % 3 === 1 ? '270px' : '300px' }}
           >
-            <Image src={src} alt="" fill className="object-cover" unoptimized />
+            {item.type === 'video' ? (
+              <video
+                src={item.src}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Image src={item.src} alt="" fill className="object-cover" unoptimized />
+            )}
           </div>
         ))}
       </div>

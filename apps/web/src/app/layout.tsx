@@ -4,6 +4,7 @@ import '@fontsource/google-sans-flex/500.css'
 import '@fontsource/google-sans-flex/600.css'
 import '@fontsource/google-sans-flex/700.css'
 import './globals.css'
+import { AuthProvider } from '@/lib/auth-provider'
 
 export const metadata: Metadata = {
   title: 'Coff Campaign Engine',
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="font-sans antialiased">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   )
