@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Sidebar } from './sidebar'
-import { Menu, X } from 'lucide-react'
+import { Menu } from 'lucide-react'
+import { Sheet, SheetContent } from '@repo/ui'
 
 export function MobileSidebar() {
   const [open, setOpen] = useState(false)
@@ -26,22 +27,12 @@ export function MobileSidebar() {
         </button>
       </div>
 
-      {/* Backdrop */}
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 md:hidden"
-          onClick={() => setOpen(false)}
-        />
-      )}
-
-      {/* Mobile sidebar drawer */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 md:hidden ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <Sidebar onClose={() => setOpen(false)} />
-      </div>
+      {/* Mobile sidebar using Sheet */}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden">
+          <Sidebar onClose={() => setOpen(false)} />
+        </SheetContent>
+      </Sheet>
 
       {/* Desktop sidebar */}
       <div className="hidden md:block">

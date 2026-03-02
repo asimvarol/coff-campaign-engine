@@ -19,3 +19,4 @@ export * from './components/tabs'
 
 // Utils
 export * from './lib/utils'
+export * from './components/sheet'
