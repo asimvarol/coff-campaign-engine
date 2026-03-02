@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Button, Card, Badge } from '@repo/ui'
+import { Button, Card, Badge, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@repo/ui'
 import { ArrowLeft, Download, Sparkles, Upload, RotateCcw, ExternalLink, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -37,6 +37,7 @@ export default function BrandDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const leftRef = useRef<HTMLDivElement>(null)
   const [leftHeight, setLeftHeight] = useState<number>(0)
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
 
   useEffect(() => { fetchBrand() }, [brandId])
 
@@ -66,10 +67,14 @@ export default function BrandDetailPage() {
     } catch (err) { console.error(err) }
   }
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this brand?')) return
+  const handleDeleteClick = () => {
+    setDeleteAlertOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
     const ok = await deleteBrand(brandId)
     if (ok) router.push('/brand')
+    setDeleteAlertOpen(false)
   }
 
   if (isLoading) return <div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>
@@ -97,7 +102,7 @@ export default function BrandDetailPage() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Download className="mr-2 h-4 w-4" />Download Kit</Button>
           <Button variant="outline" size="sm" onClick={handleReanalyze}><Sparkles className="mr-2 h-4 w-4" />Re-analyze</Button>
-          <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleDelete}><Trash2 className="mr-2 h-4 w-4" />Delete</Button>
+          <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleDeleteClick}><Trash2 className="mr-2 h-4 w-4" />Delete</Button>
         </div>
       </div>
 
@@ -233,6 +238,24 @@ export default function BrandDetailPage() {
           </div>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Brand</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this brand? This action cannot be undone and will remove all associated campaigns and creatives.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

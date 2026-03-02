@@ -6,12 +6,21 @@ import { cn } from '@repo/ui'
 import Image from 'next/image'
 import { useBrand } from '@/lib/brand-context'
 import { Plus, ChevronDown, Check, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@repo/ui'
 import {
   Sparkles01Icon,
@@ -47,6 +56,22 @@ const navigation = [
 export function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const { brands, selectedBrand, selectedBrandId, selectBrand, deleteBrand } = useBrand()
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
+  const [brandToDelete, setBrandToDelete] = useState<string | null>(null)
+
+  const handleDeleteClick = (brandId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setBrandToDelete(brandId)
+    setDeleteAlertOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (brandToDelete) {
+      await deleteBrand(brandToDelete)
+      setBrandToDelete(null)
+    }
+    setDeleteAlertOpen(false)
+  }
 
   return (
     <div className="flex w-64 flex-col border-r border-border bg-card">
@@ -106,10 +131,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     <span className="flex-1 truncate">{brand.name}</span>
                     {brand.id === selectedBrandId && <Check className="h-4 w-4 shrink-0" />}
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        deleteBrand(brand.id)
-                      }}
+                      onClick={(e) => handleDeleteClick(brand.id, e)}
                       className="ml-1 shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive"
                       title="Delete brand"
                     >
@@ -185,6 +207,24 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           <p className="text-muted-foreground">Upgrade for unlimited</p>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Brand</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this brand? This action cannot be undone and will remove all associated campaigns and creatives.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
