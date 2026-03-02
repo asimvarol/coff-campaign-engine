@@ -26,6 +26,12 @@ export default function NewBrandPage() {
       return
     }
 
+    // Normalize URL: add https:// if missing
+    let normalizedUrl = url.trim()
+    if (!normalizedUrl.match(/^https?:\/\//i)) {
+      normalizedUrl = 'https://' + normalizedUrl
+    }
+
     setError('')
     setIsAnalyzing(true)
     setCurrentStep(0)
@@ -41,7 +47,7 @@ export default function NewBrandPage() {
       const response = await fetch('/api/brands/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: normalizedUrl }),
       })
 
       const data = await response.json()
@@ -78,7 +84,7 @@ export default function NewBrandPage() {
               <div>
                 <Input
                   type="url"
-                  placeholder="https://example.com"
+                  placeholder="example.com or www.example.com"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
