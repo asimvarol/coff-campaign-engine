@@ -142,25 +142,30 @@ function extractColors(html: string, domain: string): string[] {
 function extractLogo(html: string, baseUrl: string, domain: string): string {
   const makeAbsolute = (url: string) => {
     if (!url) return ''
-    if (url.startsWith('http')) return url
-    if (url.startsWith('//')) return 'https:' + url
-    if (url.startsWith('/')) return new URL(url, baseUrl).href
-    return new URL(url, baseUrl).href
+    try {
+      if (url.startsWith('http')) return url
+      if (url.startsWith('//')) return 'https:' + url
+      return new URL(url, baseUrl).href
+    } catch { return '' }
   }
   
-  // OG image
-  const ogMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i)
-  if (ogMatch?.[1]) return makeAbsolute(ogMatch[1])
-  
-  // Apple touch icon
-  const appleMatch = html.match(/<link\s+rel=["']apple-touch-icon["'][^>]+href=["']([^"']+)["']/i)
+  // 1. Apple touch icon (best for logos — always square, high-res)
+  const appleMatch = html.match(/<link\s+[^>]*rel=["']apple-touch-icon["'][^>]+href=["']([^"']+)["']/i)
+    || html.match(/<link\s+[^>]*href=["']([^"']+)["'][^>]*rel=["']apple-touch-icon["']/i)
   if (appleMatch?.[1]) return makeAbsolute(appleMatch[1])
   
-  // Standard favicon
-  const faviconMatch = html.match(/<link\s+rel=["'](?:icon|shortcut icon)["'][^>]+href=["']([^"']+)["']/i)
-  if (faviconMatch?.[1]) return makeAbsolute(faviconMatch[1])
+  // 2. Large favicon (SVG or 32+ px)
+  const iconMatches = [...html.matchAll(/<link\s+[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["'][^>]*/gi)]
+  const svgIcon = iconMatches.find(m => m[1].includes('.svg'))
+  if (svgIcon?.[1]) return makeAbsolute(svgIcon[1])
+  const largeIcon = iconMatches.find(m => {
+    const sizes = m[0].match(/sizes=["'](\d+)/i)
+    return sizes && parseInt(sizes[1]) >= 32
+  })
+  if (largeIcon?.[1]) return makeAbsolute(largeIcon[1])
+  if (iconMatches[0]?.[1]) return makeAbsolute(iconMatches[0][1])
   
-  // Fallback to Clearbit
+  // 3. Clearbit (reliable logo API)
   return `https://logo.clearbit.com/${domain}`
 }
 
