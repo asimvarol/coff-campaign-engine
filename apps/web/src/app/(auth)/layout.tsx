@@ -41,7 +41,7 @@ function useCountUp(end: number, duration: number = 2000, decimals: number = 0) 
   return { count: formattedCount, start: () => setStarted(true) }
 }
 
-// Sample images and videos for masonry background
+// Sample images for masonry background (all working Unsplash images)
 const MASONRY_ITEMS = [
   { type: 'image', src: 'https://images.unsplash.com/photo-1557821552-17105176677c?w=400&h=600&fit=crop' },
   { type: 'image', src: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=400&fit=crop' },
@@ -80,18 +80,7 @@ function AnimatedMasonryBackground() {
             className="relative rounded-lg overflow-hidden shadow-lg"
             style={{ width: '200px', height: i % 3 === 0 ? '300px' : i % 3 === 1 ? '250px' : '280px' }}
           >
-            {item.type === 'video' ? (
-              <video
-                src={item.src}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Image src={item.src} alt="" fill className="object-cover" unoptimized />
-            )}
+            <Image src={item.src} alt="" fill className="object-cover" unoptimized />
           </div>
         ))}
       </div>
@@ -104,18 +93,7 @@ function AnimatedMasonryBackground() {
             className="relative rounded-lg overflow-hidden shadow-lg"
             style={{ width: '180px', height: i % 3 === 0 ? '280px' : i % 3 === 1 ? '220px' : '260px' }}
           >
-            {item.type === 'video' ? (
-              <video
-                src={item.src}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Image src={item.src} alt="" fill className="object-cover" unoptimized />
-            )}
+            <Image src={item.src} alt="" fill className="object-cover" unoptimized />
           </div>
         ))}
       </div>
@@ -128,18 +106,7 @@ function AnimatedMasonryBackground() {
             className="relative rounded-lg overflow-hidden shadow-lg"
             style={{ width: '190px', height: i % 3 === 0 ? '260px' : i % 3 === 1 ? '290px' : '240px' }}
           >
-            {item.type === 'video' ? (
-              <video
-                src={item.src}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Image src={item.src} alt="" fill className="object-cover" unoptimized />
-            )}
+            <Image src={item.src} alt="" fill className="object-cover" unoptimized />
           </div>
         ))}
       </div>
@@ -152,18 +119,7 @@ function AnimatedMasonryBackground() {
             className="relative rounded-lg overflow-hidden shadow-lg"
             style={{ width: '200px', height: i % 3 === 0 ? '240px' : i % 3 === 1 ? '270px' : '300px' }}
           >
-            {item.type === 'video' ? (
-              <video
-                src={item.src}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Image src={item.src} alt="" fill className="object-cover" unoptimized />
-            )}
+            <Image src={item.src} alt="" fill className="object-cover" unoptimized />
           </div>
         ))}
       </div>
