@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
-import { CheckIcon, AlertCircleIcon, InformationCircleIcon, CancelCircleIcon } from '@/lib/icons'
+import { CheckIcon, AlertCircleIcon, XCircleIcon } from '@/lib/icons'
 
 type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -58,8 +58,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 function ToastItem({ toast }: { toast: Toast }) {
   const icons = {
     success: CheckIcon,
-    error: CancelCircleIcon,
-    info: InformationCircleIcon,
+    error: XCircleIcon,
+    info: CheckIcon,
     warning: AlertCircleIcon,
   }
 
