@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Sidebar } from './sidebar'
-import { Menu } from 'lucide-react'
+import { MenuIcon } from '@/lib/icons'
 import { Sheet, SheetContent } from '@repo/ui'
 
 export function MobileSidebar() {
@@ -23,7 +23,7 @@ export function MobileSidebar() {
           className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
           aria-label="Open menu"
         >
-          <Menu className="h-5 w-5" />
+          <MenuIcon className="h-5 w-5" />
         </button>
       </div>
 

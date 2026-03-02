@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Input, Card, ProgressStepper, type Step } from '@repo/ui'
-import { ArrowRight, Loader2, Sparkles } from 'lucide-react'
+import { ArrowRight01Icon, Loader2Icon, Sparkles01Icon } from '@/lib/icons'
 
 const ANALYSIS_STEPS: Step[] = [
   { label: 'Scanning website...', description: 'Analyzing page structure and content' },
@@ -72,7 +72,7 @@ export default function NewBrandPage() {
           <Card className="p-12">
             <div className="text-center mb-8">
               <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                <Sparkles className="h-8 w-8 text-primary" />
+                <Sparkles01Icon className="h-8 w-8 text-primary" />
               </div>
               <h1 className="text-3xl font-bold mb-2">Create Brand DNA</h1>
               <p className="text-muted-foreground">
@@ -102,7 +102,7 @@ export default function NewBrandPage() {
                 onClick={handleAnalyze}
               >
                 Analyze Brand
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight01Icon className="ml-2 h-5 w-5" />
               </Button>
 
               <p className="text-sm text-muted-foreground text-center">
@@ -114,7 +114,7 @@ export default function NewBrandPage() {
           <Card className="p-12">
             <div className="text-center mb-8">
               <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                <Loader2Icon className="h-8 w-8 text-primary animate-spin" />
               </div>
               <h1 className="text-2xl font-bold mb-2">Analyzing Brand DNA</h1>
               <p className="text-muted-foreground">

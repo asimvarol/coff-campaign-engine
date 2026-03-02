@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button, Card, Badge, Skeleton } from '@repo/ui'
-import { Plus, Sparkles, ExternalLink } from 'lucide-react'
+import { PlusIcon, Sparkles01Icon, ExternalLinkIcon } from '@/lib/icons'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -37,7 +37,7 @@ export default function BrandPage() {
           <p className="text-muted-foreground">Extract and manage your brand identities</p>
         </div>
         <Link href="/brand/new">
-          <Button size="lg"><Plus className="mr-2 h-4 w-4" />Add Brand</Button>
+          <Button size="lg"><PlusIcon className="mr-2 h-4 w-4" />Add Brand</Button>
         </Link>
       </div>
 
@@ -54,14 +54,14 @@ export default function BrandPage() {
       ) : brands.length === 0 ? (
         <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed border-border p-12 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-            <Sparkles className="h-8 w-8 text-muted-foreground" />
+            <Sparkles01Icon className="h-8 w-8 text-muted-foreground" />
           </div>
           <h3 className="mt-4 text-lg font-semibold">No brands yet</h3>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
             Create your first brand by analyzing a website. We'll extract colors, fonts, voice, and more.
           </p>
           <Link href="/brand/new" className="mt-6">
-            <Button><Plus className="mr-2 h-4 w-4" />Add Your First Brand</Button>
+            <Button><PlusIcon className="mr-2 h-4 w-4" />Add Your First Brand</Button>
           </Link>
         </div>
       ) : (
@@ -84,7 +84,7 @@ export default function BrandPage() {
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center">
-                          <Sparkles className="h-12 w-12 text-muted-foreground" />
+                          <Sparkles01Icon className="h-12 w-12 text-muted-foreground" />
                         </div>
                       )}
                     </div>
@@ -100,7 +100,7 @@ export default function BrandPage() {
                       {brand.url && (
                         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground truncate">
                           {brand.url.replace(/^https?:\/\//, '').replace(/^www\./, '')}
-                          <ExternalLink className="h-3 w-3 shrink-0" />
+                          <ExternalLinkIcon className="h-3 w-3 shrink-0" />
                         </p>
                       )}
                       {brand.typography && (

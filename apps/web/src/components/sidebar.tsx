@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@repo/ui'
 import Image from 'next/image'
 import { useBrand } from '@/lib/brand-context'
-import { Plus, ChevronDown, Check, Trash2 } from 'lucide-react'
+import { PlusIcon, ChevronDownIcon, CheckIcon, Trash2Icon } from '@/lib/icons'
 import { useState } from 'react'
 import {
   DropdownMenu,
@@ -110,7 +110,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                   <span className="flex-1 text-left text-muted-foreground">Select a brand</span>
                 </>
               )}
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[232px]">
@@ -129,13 +129,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                       <Image src={brand.logo.primary} alt={brand.name} fill unoptimized className="object-contain" />
                     </div>
                     <span className="flex-1 truncate">{brand.name}</span>
-                    {brand.id === selectedBrandId && <Check className="h-4 w-4 shrink-0" />}
+                    {brand.id === selectedBrandId && <CheckIcon className="h-4 w-4 shrink-0" />}
                     <button
                       onClick={(e) => handleDeleteClick(brand.id, e)}
                       className="ml-1 shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive"
                       title="Delete brand"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2Icon className="h-3.5 w-3.5" />
                     </button>
                   </DropdownMenuItem>
                 ))}
@@ -144,7 +144,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             )}
             <DropdownMenuItem asChild>
               <Link href="/brand/new" className="flex items-center gap-3 px-3 py-2 text-muted-foreground">
-                <Plus className="h-4 w-4" />
+                <PlusIcon className="h-4 w-4" />
                 Add new brand
               </Link>
             </DropdownMenuItem>

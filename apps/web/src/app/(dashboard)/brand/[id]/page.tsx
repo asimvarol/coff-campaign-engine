@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button, Card, Badge, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@repo/ui'
-import { ArrowLeft, Download, Sparkles, Upload, RotateCcw, ExternalLink, Trash2 } from 'lucide-react'
+import { ArrowLeft01Icon, Download04Icon, Sparkles01Icon, Upload04Icon, RotateCcwIcon, ExternalLinkIcon, Trash2Icon } from '@/lib/icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useBrand } from '@/lib/brand-context'
@@ -96,13 +96,13 @@ export default function BrandDetailPage() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/brand" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft01Icon className="h-4 w-4" />
           Back to Brands
         </Link>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm"><Download className="mr-2 h-4 w-4" />Download Kit</Button>
-          <Button variant="outline" size="sm" onClick={handleReanalyze}><Sparkles className="mr-2 h-4 w-4" />Re-analyze</Button>
-          <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleDeleteClick}><Trash2 className="mr-2 h-4 w-4" />Delete</Button>
+          <Button variant="outline" size="sm"><Download04Icon className="mr-2 h-4 w-4" />Download Kit</Button>
+          <Button variant="outline" size="sm" onClick={handleReanalyze}><Sparkles01Icon className="mr-2 h-4 w-4" />Re-analyze</Button>
+          <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleDeleteClick}><Trash2Icon className="mr-2 h-4 w-4" />Delete</Button>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export default function BrandDetailPage() {
             <a href={brand.url} target="_blank" rel="noopener noreferrer"
               className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
               {brand.url.replace(/^https?:\/\//, '')}
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLinkIcon className="h-3 w-3" />
             </a>
           </Card>
 
@@ -205,7 +205,7 @@ export default function BrandDetailPage() {
               <h3 className="mb-2 text-lg font-bold">Endless creatives, ready in minutes</h3>
               <p className="mb-4 text-sm text-muted-foreground">Generate professional product photos with AI-powered backgrounds</p>
               <Link href="/photoshoot">
-                <Button className="w-full"><Sparkles className="mr-2 h-4 w-4" />Try Photoshoot</Button>
+                <Button className="w-full"><Sparkles01Icon className="mr-2 h-4 w-4" />Try Photoshoot</Button>
               </Link>
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function BrandDetailPage() {
           {/* Upload Card */}
           <div className="mb-5 flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors hover:border-primary/50">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <Upload className="h-6 w-6" />
+              <Upload04Icon className="h-6 w-6" />
               <span className="text-sm font-medium">Upload Images</span>
             </div>
           </div>
@@ -233,7 +233,7 @@ export default function BrandDetailPage() {
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card to-transparent" />
           <div className="absolute inset-x-0 bottom-0 flex justify-center pb-5">
             <Button onClick={handleReanalyze} className="pointer-events-auto shadow-lg">
-              <RotateCcw className="mr-2 h-4 w-4" />Reset Business DNA
+              <RotateCcwIcon className="mr-2 h-4 w-4" />Reset Business DNA
             </Button>
           </div>
         </Card>

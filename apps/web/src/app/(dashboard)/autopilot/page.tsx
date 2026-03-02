@@ -1,5 +1,5 @@
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge } from '@repo/ui'
-import { Plus, Zap, AlertCircle, TrendingUp } from 'lucide-react'
+import { PlusIcon, ZapIcon, AlertCircleIcon, TrendingUpIcon } from '@/lib/icons'
 
 export default function AutopilotPage() {
   return (
@@ -10,7 +10,7 @@ export default function AutopilotPage() {
           <p className="text-muted-foreground">Automatic campaign optimization</p>
         </div>
         <Button size="lg">
-          <Plus className="mr-2 h-4 w-4" />
+          <PlusIcon className="mr-2 h-4 w-4" />
           New Rule
         </Button>
       </div>
@@ -42,7 +42,7 @@ export default function AutopilotPage() {
           <Card>
             <CardContent className="flex items-start gap-4 p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                <AlertCircle className="h-5 w-5 text-destructive" />
+                <AlertCircleIcon className="h-5 w-5 text-destructive" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -62,7 +62,7 @@ export default function AutopilotPage() {
           <Card>
             <CardContent className="flex items-start gap-4 p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
-                <Zap className="h-5 w-5 text-accent" />
+                <ZapIcon className="h-5 w-5 text-accent" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -82,7 +82,7 @@ export default function AutopilotPage() {
           <Card>
             <CardContent className="flex items-start gap-4 p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <TrendingUp className="h-5 w-5 text-primary" />
+                <TrendingUpIcon className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
