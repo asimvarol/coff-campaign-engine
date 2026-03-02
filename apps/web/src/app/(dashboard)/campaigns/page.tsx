@@ -61,7 +61,7 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1200px] p-8">
+    <div className="p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Campaigns</h1>

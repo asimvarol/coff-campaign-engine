@@ -78,7 +78,7 @@ export default function BrandDetailPage() {
     : [brand.colors.primary, brand.colors.secondary, brand.colors.accent, brand.colors.background]
 
   return (
-    <div className="mx-auto max-w-[1200px] p-6">
+    <div className="p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/brand" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
