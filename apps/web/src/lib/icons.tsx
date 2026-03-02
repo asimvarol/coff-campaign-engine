@@ -69,12 +69,15 @@ function createIcon(iconSvg: IconSvgElement) {
 export const Add01Icon = createIcon(Add01IconSvg)
 export const Target03Icon = createIcon(Target03IconSvg)
 export const ArrowLeft01Icon = createIcon(ArrowLeft01IconSvg)
+export const ArrowLeftIcon = createIcon(ArrowLeft01IconSvg) // Alias
 export const ArrowRight01Icon = createIcon(ArrowRight01IconSvg)
 export const SparklesIcon = createIcon(SparklesIconSvg)
 export const Sparkles01Icon = createIcon(SparklesIconSvg) // Alias
 export const Image01Icon = createIcon(Image01IconSvg)
+export const ImageAddIcon = createIcon(Image01IconSvg) // Alias
 export const Edit02Icon = createIcon(Edit02IconSvg)
 export const Download04Icon = createIcon(Download04IconSvg)
+export const Download01Icon = createIcon(Download04IconSvg) // Alias
 export const RefreshIcon = createIcon(RefreshIconSvg)
 export const ClockIcon = createIcon(Clock01IconSvg)
 export const Clock01Icon = createIcon(Clock01IconSvg)
