@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Button, Card, Badge } from '@repo/ui'
-import { ArrowLeft, Download, Sparkles, Upload, RotateCcw, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Download, Sparkles, Upload, RotateCcw, ExternalLink, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useBrand } from '@/lib/brand-context'
 
 interface Brand {
   id: string
@@ -30,6 +31,8 @@ interface Brand {
 export default function BrandDetailPage() {
   const params = useParams()
   const brandId = params.id as string
+  const router = useRouter()
+  const { deleteBrand } = useBrand()
   const [brand, setBrand] = useState<Brand | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const leftRef = useRef<HTMLDivElement>(null)
@@ -63,6 +66,12 @@ export default function BrandDetailPage() {
     } catch (err) { console.error(err) }
   }
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this brand?')) return
+    const ok = await deleteBrand(brandId)
+    if (ok) router.push('/brand')
+  }
+
   if (isLoading) return <div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>
 
   if (!brand) return (
@@ -88,6 +97,7 @@ export default function BrandDetailPage() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Download className="mr-2 h-4 w-4" />Download Kit</Button>
           <Button variant="outline" size="sm" onClick={handleReanalyze}><Sparkles className="mr-2 h-4 w-4" />Re-analyze</Button>
+          <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleDelete}><Trash2 className="mr-2 h-4 w-4" />Delete</Button>
         </div>
       </div>
 
