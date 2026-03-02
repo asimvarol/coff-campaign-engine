@@ -167,8 +167,9 @@ export default function BrandDetailPage() {
         </div>
 
         {/* === RIGHT COLUMN — Images === */}
-        <div className="space-y-5">
-          <h2 className="text-xl font-bold">Images</h2>
+        <Card className="overflow-hidden p-6">
+          <h2 className="text-xl font-bold mb-5">Images</h2>
+          <div className="space-y-5">
 
           {/* Top: Small Grid + Promo */}
           <div className="grid grid-cols-2 gap-5">
@@ -186,22 +187,22 @@ export default function BrandDetailPage() {
             </div>
 
             {/* Promo Card */}
-            <Card className="flex flex-col justify-center border-2 p-6">
+            <div className="flex flex-col justify-center rounded-lg border p-6">
               <h3 className="mb-2 text-lg font-bold">Endless creatives, ready in minutes</h3>
               <p className="mb-4 text-sm text-muted-foreground">Generate professional product photos with AI-powered backgrounds</p>
               <Link href="/photoshoot">
                 <Button className="w-full"><Sparkles className="mr-2 h-4 w-4" />Try Photoshoot</Button>
               </Link>
-            </Card>
+            </div>
           </div>
 
           {/* Upload Card */}
-          <Card className="flex h-32 cursor-pointer items-center justify-center border-2 border-dashed transition-colors hover:border-primary/50">
+          <div className="flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors hover:border-primary/50">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Upload className="h-6 w-6" />
               <span className="text-sm font-medium">Upload Images</span>
             </div>
-          </Card>
+          </div>
 
           {/* Image Grid */}
           {allImages.length > 0 && (
@@ -218,7 +219,8 @@ export default function BrandDetailPage() {
           <div className="flex justify-end pt-2">
             <Button onClick={handleReanalyze}><RotateCcw className="mr-2 h-4 w-4" />Reset Business DNA</Button>
           </div>
-        </div>
+          </div>
+        </Card>
       </div>
     </div>
   )
