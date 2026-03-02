@@ -145,7 +145,7 @@ export function CampaignWizard() {
       'campaign-new',
       concept,
       state.platforms,
-      brand.colors
+      brand.colors || { primary: '#000', secondary: '#666', accent: '#999', background: '#fff', text: '#000', palette: [] }
     )
     
     clearInterval(interval)

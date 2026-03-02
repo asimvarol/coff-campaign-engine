@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { brandStore } from '../brands/data-store'
+import { brandStore, type MockBrandDNA } from '../brands/data-store'
 
 // In-memory campaign store (persists across HMR)
 const g = globalThis as Record<string, unknown>
@@ -16,9 +16,9 @@ const PLATFORMS_SETS = [
   ['facebook', 'instagram', 'tiktok', 'pinterest'],
 ]
 
-function generateCampaignsForBrand(brand: ReturnType<typeof brandStore.get>) {
+function generateCampaignsForBrand(brand: MockBrandDNA | undefined) {
   if (!brand) return []
-  const products = (brand as Record<string, unknown>).products as string[] | undefined
+  const products = brand.products
   const campaigns = []
   const campaignNames = products && products.length > 0
     ? products.slice(0, 4).map((p, i) => {

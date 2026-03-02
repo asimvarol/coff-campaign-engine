@@ -7,6 +7,14 @@ interface BrandSummary {
   name: string
   logo: { primary: string }
   url?: string
+  colors?: {
+    primary: string
+    secondary: string
+    accent: string
+    background: string
+    text: string
+    palette: string[]
+  }
 }
 
 interface BrandContextType {
