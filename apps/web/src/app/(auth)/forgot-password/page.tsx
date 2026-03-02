@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
 
   if (emailSent) {
     return (
-      <Card className="border-border/50">
+      <Card className="border-border/50 bg-card/40 backdrop-blur-2xl shadow-2xl">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <CheckmarkCircle02Icon className="h-6 w-6 text-primary" />
@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <Card className="border-border/50">
+    <Card className="border-border/50 bg-card/40 backdrop-blur-2xl shadow-2xl">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold">Forgot password?</CardTitle>
         <CardDescription>

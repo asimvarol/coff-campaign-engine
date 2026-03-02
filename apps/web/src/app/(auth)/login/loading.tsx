@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, Skeleton } from '@repo/ui'
 
 export default function LoginLoading() {
   return (
-    <Card className="border-border/50">
+    <Card className="border-border/50 bg-card/40 backdrop-blur-2xl shadow-2xl">
       <CardHeader className="space-y-3">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />

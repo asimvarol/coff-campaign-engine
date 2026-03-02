@@ -26,7 +26,7 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="border-border/50">
+    <Card className="border-border/50 bg-card/40 backdrop-blur-2xl shadow-2xl">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
         <CardDescription>
