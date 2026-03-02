@@ -294,14 +294,23 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
   await delay(300)
   onProgress?.({ step: 'scanning', progress: 20, message: 'Scanning website...' })
   
+  // Normalize URL
+  if (!url.startsWith('http')) url = 'https://' + url
+  
   let html = ''
   try {
     const res = await fetch(url, { 
-      signal: AbortSignal.timeout(5000),
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CoffBot/1.0)' }
+      signal: AbortSignal.timeout(10000),
+      headers: { 
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Accept-Language': 'en-US,en;q=0.9',
+      }
     })
     html = await res.text()
-  } catch {
+    console.log('[brand-analyzer] Fetched ' + url + ': ' + html.length + ' chars')
+  } catch (err) {
+    console.error('[brand-analyzer] Fetch failed for ' + url + ':', err)
     // Fetch failed, use fallback generation
   }
   
