@@ -16,6 +16,7 @@
     "@hugeicons/react": "^1.0.0",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
+    "framer-motion": "^12.34.4",
     "next": "15.5.12",
     "next-auth": "^4.24.13",
     "react": "^19.0.0",
