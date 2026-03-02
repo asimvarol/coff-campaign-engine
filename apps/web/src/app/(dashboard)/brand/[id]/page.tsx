@@ -1,43 +1,11 @@
-"use client"
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import {
-  Button,
-  Card,
-  Input,
-  Textarea,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  TagInput,
-  ColorPicker,
-  Skeleton,
-  Badge,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@repo/ui'
-import {
-  ArrowLeft,
-  Save,
-  RefreshCw,
-  Download,
-  Trash2,
-  ExternalLink,
-  Palette,
-  Type,
-  MessageSquare,
-  Sparkles,
-  Image as ImageIcon,
-} from 'lucide-react'
-import Link from 'next/link'
+import { Button, Card, Badge } from '@repo/ui'
+import { ArrowLeft, Download, Sparkles, Upload, RotateCcw, ExternalLink } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface Brand {
   id: string
@@ -52,48 +20,16 @@ interface Brand {
     text: string
     palette: string[]
   }
-  typography: {
-    heading: string
-    body: string
-    accent?: string
-  }
-  voice: {
-    tone: string[]
-    personality: string[]
-    keywords: string[]
-    sampleTexts: string[]
-  }
+  typography: { heading: string; body: string; accent?: string }
+  voice: { tone: string[]; personality: string[]; keywords: string[]; sampleTexts: string[] }
   values: string[]
   aesthetic: string[]
   industry: string
   targetAudience: string
   summary: string
-  images?: {
-    scraped: string[]
-    uploaded: string[]
-    products: string[]
-  }
+  images?: { scraped: string[]; uploaded: string[]; products: string[] }
   socialProfiles?: Record<string, string>
 }
-
-const GOOGLE_FONTS = [
-  'Inter',
-  'Roboto',
-  'Open Sans',
-  'Lato',
-  'Montserrat',
-  'Playfair Display',
-  'Merriweather',
-  'Raleway',
-  'Oswald',
-  'Source Sans Pro',
-  'PT Sans',
-  'Nunito',
-  'Lora',
-  'DM Sans',
-  'Work Sans',
-  'Plus Jakarta Sans',
-]
 
 export default function BrandDetailPage() {
   const params = useParams()
@@ -102,10 +38,6 @@ export default function BrandDetailPage() {
 
   const [brand, setBrand] = useState<Brand | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isReanalyzing, setIsReanalyzing] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [hasChanges, setHasChanges] = useState(false)
 
   useEffect(() => {
     fetchBrand()
@@ -113,461 +45,246 @@ export default function BrandDetailPage() {
 
   const fetchBrand = async () => {
     try {
-      const response = await fetch(`/api/brands/${brandId}`)
-      const data = await response.json()
-      if (data.data) {
-        setBrand(data.data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch brand:', error)
+      const res = await fetch(`/api/brands/${brandId}`)
+      const data = await res.json()
+      if (data.data) setBrand(data.data)
+    } catch (err) {
+      console.error(err)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleSave = async () => {
-    if (!brand) return
-
-    setIsSaving(true)
-    try {
-      const response = await fetch(`/api/brands/${brandId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(brand),
-      })
-
-      if (response.ok) {
-        setHasChanges(false)
-        // Show success toast (you can add toast notification library)
-      }
-    } catch (error) {
-      console.error('Failed to save brand:', error)
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
   const handleReanalyze = async () => {
-    setIsReanalyzing(true)
+    if (!brand) return
     try {
-      const response = await fetch(`/api/brands/${brandId}/analyze`, {
-        method: 'POST',
-      })
-
-      if (response.ok) {
-        await fetchBrand()
-        setHasChanges(false)
-      }
-    } catch (error) {
-      console.error('Failed to re-analyze brand:', error)
-    } finally {
-      setIsReanalyzing(false)
+      await fetch(`/api/brands/${brandId}/analyze`, { method: 'POST' })
+      await fetchBrand()
+    } catch (err) {
+      console.error(err)
     }
-  }
-
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(`/api/brands/${brandId}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        router.push('/brand')
-      }
-    } catch (error) {
-      console.error('Failed to delete brand:', error)
-    }
-  }
-
-  const updateBrand = (updates: Partial<Brand>) => {
-    if (!brand) return
-    setBrand({ ...brand, ...updates })
-    setHasChanges(true)
-  }
-
-  const updateColors = (key: string, value: string) => {
-    if (!brand) return
-    updateBrand({
-      colors: { ...brand.colors, [key]: value },
-    })
-  }
-
-  const updateTypography = (key: string, value: string) => {
-    if (!brand) return
-    updateBrand({
-      typography: { ...brand.typography, [key]: value },
-    })
   }
 
   if (isLoading) {
-    return (
-      <div className="p-8">
-        <Skeleton className="h-8 w-64 mb-8" />
-        <div className="space-y-6">
-          <Card className="p-6">
-            <Skeleton className="h-6 w-32 mb-4" />
-            <Skeleton className="h-10 w-full" />
-          </Card>
-          <Card className="p-6">
-            <Skeleton className="h-6 w-32 mb-4" />
-            <Skeleton className="h-32 w-full" />
-          </Card>
-        </div>
-      </div>
-    )
+    return <div className="flex h-screen items-center justify-center">Loading...</div>
   }
 
   if (!brand) {
     return (
-      <div className="p-8">
-        <div className="text-center">
-          <p className="text-muted-foreground">Brand not found</p>
-          <Link href="/brand">
-            <Button className="mt-4">Back to Brands</Button>
-          </Link>
-        </div>
+      <div className="flex h-screen flex-col items-center justify-center gap-4">
+        <h1 className="text-2xl font-bold">Brand not found</h1>
+        <Link href="/brand">
+          <Button>Back to Brands</Button>
+        </Link>
       </div>
     )
   }
 
-  return (
-    <div className="p-8 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <Link href="/brand">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Brands
-          </Button>
-        </Link>
+  const allImages = [
+    ...(brand.images?.scraped || []),
+    ...(brand.images?.uploaded || []),
+    ...(brand.images?.products || []),
+  ]
 
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            {brand.logo.primary && (
-              <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+  return (
+    <div className="min-h-screen p-6">
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <Link href="/brand" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Brands
+        </Link>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            Download Kit
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleReanalyze}>
+            <Sparkles className="mr-2 h-4 w-4" />
+            Re-analyze
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Grid */}
+      <div className="grid gap-6 lg:grid-cols-[40%_1fr]">
+        {/* Left Column - Brand Info */}
+        <div className="space-y-4">
+          {/* Brand Name & URL */}
+          <Card className="p-6">
+            <h1 className="text-3xl font-bold">{brand.name}</h1>
+            <a
+              href={brand.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              {brand.url.replace(/^https?:\/\//, '')}
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </Card>
+
+          {/* Logo & Font Row */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Logo Preview */}
+            <Card className="flex aspect-square items-center justify-center bg-[#f7f7f5] p-6">
+              <div className="relative h-full w-full">
                 <Image
                   src={brand.logo.primary}
-                  alt={brand.name}
-                  width={64}
-                  height={64}
-                  unoptimized
+                  alt={`${brand.name} logo`}
+                  fill
                   className="object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                  }}
+                  unoptimized
                 />
               </div>
-            )}
-            <div>
-              <h1 className="text-3xl font-bold">{brand.name}</h1>
-              {brand.url && (
-                <a
-                  href={brand.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1 mt-1"
-                >
-                  {brand.url.replace(/^https?:\/\//, '').replace(/^www\./, '')}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              )}
-            </div>
+            </Card>
+
+            {/* Fonts */}
+            <Card className="flex flex-col justify-center p-6">
+              <div className="text-sm font-medium text-muted-foreground mb-3">Fonts</div>
+              <div className="text-6xl font-bold" style={{ fontFamily: brand.typography.heading }}>
+                Aa
+              </div>
+              <div className="mt-2 text-sm text-muted-foreground">{brand.typography.heading}</div>
+            </Card>
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleReanalyze}
-              disabled={isReanalyzing}
-            >
-              <RefreshCw className={`mr-2 h-4 w-4 ${isReanalyzing ? 'animate-spin' : ''}`} />
-              {isReanalyzing ? 'Analyzing...' : 'Re-analyze'}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                // TODO: Implement download brand kit
-                alert('Download Brand Kit - Coming soon!')
-              }}
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Download Kit
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges || isSaving}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              {isSaving ? 'Saving...' : 'Save Changes'}
+          {/* Colors */}
+          <Card className="p-6">
+            <div className="text-sm font-medium text-muted-foreground mb-4">Colors</div>
+            <div className="grid grid-cols-4 gap-4">
+              {brand.colors.palette.slice(0, 4).map((color, i) => (
+                <div key={i} className="flex flex-col items-center gap-2">
+                  <div
+                    className="h-16 w-16 rounded-full border border-border"
+                    style={{ backgroundColor: color }}
+                  />
+                  <div className="text-xs font-mono text-muted-foreground">{color}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Tagline */}
+          {brand.voice.sampleTexts[0] && (
+            <Card className="p-6">
+              <div className="text-sm font-medium text-muted-foreground mb-3">Tagline</div>
+              <p className="italic text-lg">{brand.voice.sampleTexts[0]}</p>
+            </Card>
+          )}
+
+          {/* Brand Values */}
+          {brand.values.length > 0 && (
+            <Card className="p-6">
+              <div className="text-sm font-medium text-muted-foreground mb-3">Brand values</div>
+              <div className="flex flex-wrap gap-2">
+                {brand.values.map((value, i) => (
+                  <Badge key={i} variant="outline">
+                    {value}
+                  </Badge>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Brand Aesthetic */}
+          {brand.aesthetic.length > 0 && (
+            <Card className="p-6">
+              <div className="text-sm font-medium text-muted-foreground mb-3">Brand aesthetic</div>
+              <div className="flex flex-wrap gap-2">
+                {brand.aesthetic.map((aes, i) => (
+                  <Badge key={i} variant="outline">
+                    {aes}
+                  </Badge>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Tone of Voice */}
+          {brand.voice.tone.length > 0 && (
+            <Card className="p-6">
+              <div className="text-sm font-medium text-muted-foreground mb-3">Brand tone of voice</div>
+              <div className="flex flex-wrap gap-2">
+                {brand.voice.tone.map((tone, i) => (
+                  <Badge key={i} variant="outline">
+                    {tone}
+                  </Badge>
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
+
+        {/* Right Column - Images */}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Images</h2>
+
+            {/* Promo Card + Small Grid */}
+            <div className="grid gap-4 sm:grid-cols-2 mb-6">
+              {/* 3x3 Small Grid */}
+              {allImages.length >= 9 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {allImages.slice(0, 9).map((img, i) => (
+                    <div key={i} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                      <Image src={img} alt="" width={200} height={200} className="h-full w-full object-cover" unoptimized />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Promo Card */}
+              <Card className="flex flex-col justify-center p-6 border-2">
+                <h3 className="text-xl font-bold mb-2">Endless creatives, ready in minutes</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Generate professional product photos with AI-powered backgrounds
+                </p>
+                <Link href="/photoshoot">
+                  <Button className="w-full">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Try Photoshoot
+                  </Button>
+                </Link>
+              </Card>
+            </div>
+
+            {/* Upload Button */}
+            <Card className="mb-6 flex aspect-video items-center justify-center border-2 border-dashed cursor-pointer hover:border-primary/50 transition-colors">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Upload className="h-8 w-8" />
+                <span className="text-sm font-medium">Upload Images</span>
+              </div>
+            </Card>
+
+            {/* Large Image Grid */}
+            {allImages.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {allImages.map((img, i) => (
+                  <div key={i} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                    <Image
+                      src={img}
+                      alt={`Brand image ${i + 1}`}
+                      width={400}
+                      height={400}
+                      className="h-full w-full object-cover"
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Reset Button */}
+          <div className="flex justify-end">
+            <Button onClick={handleReanalyze}>
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset Business DNA
             </Button>
           </div>
         </div>
       </div>
-
-      {/* Brand DNA Content */}
-      <div className="space-y-6">
-        {/* Basic Info */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
-            Basic Information
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Brand Name</label>
-              <Input
-                value={brand.name}
-                onChange={(e) => updateBrand({ name: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Website URL</label>
-              <Input
-                value={brand.url}
-                onChange={(e) => updateBrand({ url: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Industry</label>
-              <Input
-                value={brand.industry || ''}
-                onChange={(e) => updateBrand({ industry: e.target.value })}
-                placeholder="e.g. fashion, technology, food"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Target Audience</label>
-              <Input
-                value={brand.targetAudience}
-                onChange={(e) => updateBrand({ targetAudience: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Brand Summary</label>
-              <Textarea
-                value={brand.summary}
-                onChange={(e) => updateBrand({ summary: e.target.value })}
-                rows={4}
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Colors */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Palette className="h-5 w-5" />
-            Color Palette
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Primary Color</label>
-              <ColorPicker
-                value={brand.colors.primary}
-                onChange={(value) => updateColors('primary', value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Secondary Color</label>
-              <ColorPicker
-                value={brand.colors.secondary}
-                onChange={(value) => updateColors('secondary', value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Accent Color</label>
-              <ColorPicker
-                value={brand.colors.accent}
-                onChange={(value) => updateColors('accent', value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Text Color</label>
-              <ColorPicker
-                value={brand.colors.text}
-                onChange={(value) => updateColors('text', value)}
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Typography */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Type className="h-5 w-5" />
-            Typography
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Heading Font</label>
-              <Select
-                value={brand.typography.heading}
-                onValueChange={(value) => updateTypography('heading', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {GOOGLE_FONTS.map((font) => (
-                    <SelectItem key={font} value={font}>
-                      {font}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Body Font</label>
-              <Select
-                value={brand.typography.body}
-                onValueChange={(value) => updateTypography('body', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {GOOGLE_FONTS.map((font) => (
-                    <SelectItem key={font} value={font}>
-                      {font}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </Card>
-
-        {/* Brand Voice */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Brand Voice
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Tone of Voice</label>
-              <TagInput
-                value={brand.voice.tone}
-                onChange={(tags) =>
-                  updateBrand({ voice: { ...brand.voice, tone: tags } })
-                }
-                placeholder="Add tone keywords (e.g. Professional, Friendly)"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Personality</label>
-              <TagInput
-                value={brand.voice.personality}
-                onChange={(tags) =>
-                  updateBrand({ voice: { ...brand.voice, personality: tags } })
-                }
-                placeholder="Add personality traits"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Keywords</label>
-              <TagInput
-                value={brand.voice.keywords}
-                onChange={(tags) =>
-                  updateBrand({ voice: { ...brand.voice, keywords: tags } })
-                }
-                placeholder="Add brand keywords"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Brand Values & Aesthetic */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Values & Aesthetic</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Brand Values</label>
-              <TagInput
-                value={brand.values}
-                onChange={(tags) => updateBrand({ values: tags })}
-                placeholder="Add brand values (e.g. Sustainability, Quality)"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Aesthetic</label>
-              <TagInput
-                value={brand.aesthetic}
-                onChange={(tags) => updateBrand({ aesthetic: tags })}
-                placeholder="Add aesthetic styles (e.g. modern minimalism)"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Brand Images */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <ImageIcon className="h-5 w-5" />
-            Brand Images
-          </h2>
-          {brand.images?.scraped?.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {brand.images?.scraped?.map((img, i) => (
-                <div key={i} className="aspect-square rounded-lg overflow-hidden bg-muted">
-                  <Image
-                    src={img}
-                    alt={`Brand image ${i + 1}`}
-                    width={200}
-                    height={200}
-                    unoptimized
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No images available</p>
-          )}
-        </Card>
-
-        {/* Danger Zone */}
-        <Card className="p-6 border-destructive/50">
-          <h2 className="text-xl font-semibold mb-4 text-destructive">Danger Zone</h2>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Delete this brand</p>
-              <p className="text-sm text-muted-foreground">
-                This action cannot be undone. All campaigns will also be deleted.
-              </p>
-            </div>
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Brand
-            </Button>
-          </div>
-        </Card>
-      </div>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Are you sure?</DialogTitle>
-            <DialogDescription>
-              This will permanently delete <strong>{brand.name}</strong> and all associated campaigns.
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete Brand
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
