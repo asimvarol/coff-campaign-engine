@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Textarea, Progress } from '@repo/ui'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Textarea, Progress, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui'
 import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons'
 import { CampaignObjective } from '@repo/types'
 import { generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
@@ -217,17 +217,18 @@ export function CampaignWizard() {
 
             <div className="space-y-2">
               <Label htmlFor="brand">Brand *</Label>
-              <select
-                id="brand"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={state.brandId}
-                onChange={(e) => updateState({ brandId: e.target.value })}
-              >
-                <option value="">Select brand...</option>
-                {brands.map(brand => (
-                  <option key={brand.id} value={brand.id}>{brand.name}</option>
-                ))}
-              </select>
+              <Select value={state.brandId} onValueChange={(value) => updateState({ brandId: value })}>
+                <SelectTrigger id="brand">
+                  <SelectValue placeholder="Select brand..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {brands.map(brand => (
+                    <SelectItem key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
