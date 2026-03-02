@@ -25,9 +25,9 @@ function AnimatedMasonryBackground() {
   if (!mounted) return null
 
   return (
-    <div className="absolute inset-0 overflow-hidden opacity-20">
+    <div className="absolute inset-0 overflow-hidden opacity-50">
       {/* Column 1 */}
-      <div className="absolute left-[5%] top-0 flex flex-col gap-4 animate-[scroll-up_25s_linear_infinite]">
+      <div className="absolute left-[5%] top-0 flex flex-col gap-1 animate-[scroll-up_25s_linear_infinite]">
         {[...MASONRY_IMAGES.slice(0, 2), ...MASONRY_IMAGES.slice(0, 2)].map((src, i) => (
           <div
             key={i}
@@ -40,7 +40,7 @@ function AnimatedMasonryBackground() {
       </div>
 
       {/* Column 2 */}
-      <div className="absolute left-[30%] top-0 flex flex-col gap-4 animate-[scroll-down_30s_linear_infinite]">
+      <div className="absolute left-[30%] top-0 flex flex-col gap-1 animate-[scroll-down_30s_linear_infinite]">
         {[...MASONRY_IMAGES.slice(2, 4), ...MASONRY_IMAGES.slice(2, 4)].map((src, i) => (
           <div
             key={i}
@@ -53,7 +53,7 @@ function AnimatedMasonryBackground() {
       </div>
 
       {/* Column 3 */}
-      <div className="absolute left-[55%] top-0 flex flex-col gap-4 animate-[scroll-up_35s_linear_infinite]">
+      <div className="absolute left-[55%] top-0 flex flex-col gap-1 animate-[scroll-up_35s_linear_infinite]">
         {[...MASONRY_IMAGES.slice(4, 6), ...MASONRY_IMAGES.slice(4, 6)].map((src, i) => (
           <div
             key={i}
@@ -66,7 +66,7 @@ function AnimatedMasonryBackground() {
       </div>
 
       {/* Column 4 */}
-      <div className="absolute left-[80%] top-0 flex flex-col gap-4 animate-[scroll-down_28s_linear_infinite]">
+      <div className="absolute left-[80%] top-0 flex flex-col gap-1 animate-[scroll-down_28s_linear_infinite]">
         {[...MASONRY_IMAGES.slice(6, 8), ...MASONRY_IMAGES.slice(6, 8)].map((src, i) => (
           <div
             key={i}
@@ -94,7 +94,7 @@ export default function AuthLayout({
         <AnimatedMasonryBackground />
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/95 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background/85 via-background/80 to-background/85" />
 
         {/* Form Card */}
         <div className="relative z-10 w-full max-w-md">
