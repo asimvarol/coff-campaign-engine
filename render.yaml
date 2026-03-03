@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: coff-campaign-engine
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: apps/web
+    buildCommand: cd ../.. && npm install -g bun && bun install && bun run build --filter=@repo/web
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://mock:mock@localhost:5432/mock
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: ENABLE_AUTOPILOT
+        value: true
+      - key: ENABLE_AGENCY_MODE
+        value: true
