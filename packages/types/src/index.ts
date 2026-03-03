@@ -236,6 +236,13 @@ export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
   message?: string
+  code?: string
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
 }
 
 export interface PaginatedResponse<T> {
