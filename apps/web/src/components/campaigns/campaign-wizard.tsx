@@ -5,6 +5,7 @@ import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Inpu
 import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons'
 import { CampaignObjective } from '@repo/types'
 import { generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
+import { PLATFORM_FORMATS } from '@/lib/mock-data/creative-formats'
 import { useBrand } from '@/lib/brand-context'
 import type { CampaignConcept } from '@repo/types'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
@@ -125,35 +126,147 @@ export function CampaignWizard() {
     updateState({ selectedConcept: concept })
     setIsGenerating(true)
     setStep(3)
-    
+
     const brand = brands.find(b => b.id === state.brandId)
     if (!brand) return
-    
-    // Simulate staggered generation
-    let progress = 0
-    const totalCreatives = state.platforms.length * 2 // 2 creatives per platform avg
-    const interval = setInterval(() => {
-      progress += 1
-      updateState({ generatingProgress: Math.min(100, (progress / totalCreatives) * 100) })
-      if (progress >= totalCreatives) {
-        clearInterval(interval)
+
+    const brandColors = brand.colors || { primary: '#000', secondary: '#666', accent: '#999', background: '#fff', text: '#000', palette: [] }
+
+    // Build generation tasks per platform
+    const sizeMap: Record<string, string> = {
+      instagram: 'square_hd',
+      facebook: 'landscape_16_9',
+      tiktok: 'portrait_16_9',
+      linkedin: 'landscape_4_3',
+      x: 'landscape_16_9',
+      pinterest: 'portrait_4_3',
+    }
+
+    const formatMap: Record<string, string> = {
+      instagram: 'feed',
+      facebook: 'feed',
+      tiktok: 'video',
+      linkedin: 'post',
+      x: 'post',
+      pinterest: 'pin',
+    }
+
+    const tasks = state.platforms.map(platform => {
+      const format = formatMap[platform] || 'feed'
+      if (!PLATFORM_FORMATS[platform]?.[format]) {
+        console.warn(`Missing format definition for ${platform}:${format}`)
       }
+      return {
+        platform,
+        format,
+        imageSize: sizeMap[platform] || 'square_hd',
+      }
+    })
+
+    const totalTasks = tasks.length
+
+    // Animate progress bar while generation runs
+    let progressDone = false
+    let fakeProgress = 0
+    const progressInterval = setInterval(() => {
+      if (progressDone) return
+      fakeProgress = Math.min(fakeProgress + 2, 90)
+      updateState({ generatingProgress: fakeProgress })
     }, 300)
-    
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    const creatives = await generateMockCreatives(
-      'campaign-new',
-      concept,
-      state.platforms,
-      brand.colors || { primary: '#000', secondary: '#666', accent: '#999', background: '#fff', text: '#000', palette: [] }
-    )
-    
-    clearInterval(interval)
-    updateState({ generatedCreatives: creatives, generatingProgress: 100 })
-    setIsGenerating(false)
-    
-    // Auto-advance after a moment
-    setTimeout(() => setStep(4), 500)
+
+    // Build creative metadata (shared between success and fallback)
+    const buildCreative = (task: typeof tasks[0], imageUrl: string): MockCreative => {
+      const platformFormat = PLATFORM_FORMATS[task.platform]?.[task.format]
+      const width = platformFormat?.width || 1080
+      const height = platformFormat?.height || 1080
+      return {
+        id: `creative-${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${task.platform}`,
+        campaignId: 'campaign-new',
+        platform: task.platform,
+        format: task.format,
+        width,
+        height,
+        imageUrl,
+        header: {
+          text: concept.name.toUpperCase(),
+          font: 'Playfair Display',
+          size: 42,
+          color: '#ffffff',
+          position: { x: 50, y: 100 },
+          visible: true,
+        },
+        description: {
+          text: concept.description.substring(0, 60) + '...',
+          font: 'Outfit',
+          size: 16,
+          color: brandColors.secondary,
+          position: { x: 50, y: 170 },
+          visible: true,
+        },
+        cta: { text: 'Shop Now', style: 'primary', url: 'https://example.com', visible: true },
+        overlay: { color: '#000000', opacity: 0.3 },
+        version: 1,
+        status: 'DRAFT',
+        createdAt: new Date(),
+      }
+    }
+
+    const placeholderUrl = (task: typeof tasks[0]) => {
+      const pf = PLATFORM_FORMATS[task.platform]?.[task.format]
+      const w = pf?.width || 1080
+      const h = pf?.height || 1080
+      const fg = brandColors.primary.replace(/^#/, '')
+      const bg = brandColors.accent.replace(/^#/, '')
+      return `https://placehold.co/${w}x${h}/${fg}/${bg}?text=${encodeURIComponent(task.platform)}`
+    }
+
+    const imageGenEnabled = process.env.NEXT_PUBLIC_ENABLE_IMAGE_GEN !== 'false'
+    const imageGenEndpoint = process.env.NEXT_PUBLIC_IMAGE_GEN_ENDPOINT || '/api/generate-image'
+
+    // Generate all platforms in parallel with error boundary
+    try {
+      const results = await Promise.allSettled(
+        tasks.map(async (task) => {
+          if (!imageGenEnabled) {
+            return buildCreative(task, placeholderUrl(task))
+          }
+          try {
+            const res = await fetch(imageGenEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                prompt: `Marketing campaign visual for "${concept.name}": ${concept.description}. ${concept.colorMood}. Professional, eye-catching, modern design, using ${brandColors.primary} and ${brandColors.accent} color scheme`,
+                negative_prompt: 'text, watermark, logo, blurry, low quality, ugly',
+                image_size: task.imageSize,
+                num_images: 1,
+              }),
+            })
+
+            if (!res.ok) throw new Error('Generation failed')
+            const data = await res.json()
+            const imageUrl = data?.images?.[0]?.url
+            if (!imageUrl || typeof imageUrl !== 'string') throw new Error('Invalid response')
+
+            return buildCreative(task, imageUrl)
+          } catch (error) {
+            console.warn(`Fal.ai failed for ${task.platform}:`, error instanceof Error ? error.message : 'Unknown error')
+            return buildCreative(task, placeholderUrl(task))
+          }
+        })
+      )
+
+      const creatives = results.map(r => r.status === 'fulfilled' ? r.value : r.reason)
+      updateState({ generatedCreatives: creatives, generatingProgress: 100 })
+    } catch (criticalError) {
+      console.error('Critical generation failure:', criticalError)
+      const fallbackCreatives = tasks.map(task => buildCreative(task, placeholderUrl(task)))
+      updateState({ generatedCreatives: fallbackCreatives, generatingProgress: 100 })
+    } finally {
+      progressDone = true
+      clearInterval(progressInterval)
+      setIsGenerating(false)
+      setTimeout(() => setStep(4), 500)
+    }
   }
 
   const handleApproveAll = () => {

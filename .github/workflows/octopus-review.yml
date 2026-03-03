@@ -1,0 +1,17 @@
+name: Trigger Octopus Review
+
+on:
+  pull_request:
+    types: [synchronize]
+
+jobs:
+  trigger-review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comment @octopus to trigger review
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: "@octopus"
