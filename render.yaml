@@ -1,11 +1,11 @@
 services:
   - type: web
     name: coff-campaign-engine
-    runtime: docker
+    runtime: node
     region: oregon
     plan: starter
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    buildCommand: npm install -g bun && bun install && bun run build --filter=@repo/web...
+    startCommand: cd apps/web && node server.js || cd apps/web && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,6 +13,8 @@ services:
         value: postgresql://mock:mock@localhost:5432/mock
       - key: NEXTAUTH_SECRET
         value: GGStHu/mRalq+bDTJtMKdRoMrDNffEhGoKZMHqfEpqo=
+      - key: NEXTAUTH_URL
+        sync: false
       - key: FAL_AI_KEY
         value: 8032b3eb-a441-42ab-9ab0-1578262d8fbc:ed5717a6db5d5c8983c009f1fa5cf8de
       - key: GOOGLE_CLIENT_ID
