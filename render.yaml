@@ -1,20 +1,27 @@
 services:
   - type: web
     name: coff-campaign-engine
-    runtime: node
+    runtime: docker
     region: oregon
-    plan: free
-    rootDir: apps/web
-    buildCommand: cd ../.. && npm install -g bun && bun install && bun run build --filter=@repo/web
-    startCommand: npm start
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
         value: postgresql://mock:mock@localhost:5432/mock
       - key: NEXTAUTH_SECRET
-        generateValue: true
+        value: GGStHu/mRalq+bDTJtMKdRoMrDNffEhGoKZMHqfEpqo=
+      - key: FAL_AI_KEY
+        value: 8032b3eb-a441-42ab-9ab0-1578262d8fbc:ed5717a6db5d5c8983c009f1fa5cf8de
+      - key: GOOGLE_CLIENT_ID
+        value: 1052642071406-gcfutdscdp8cmf524nkp41p7k0nqiq3g.apps.googleusercontent.com
+      - key: GOOGLE_CLIENT_SECRET
+        value: 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
       - key: ENABLE_AUTOPILOT
         value: true
       - key: ENABLE_AGENCY_MODE
         value: true
+      - key: PORT
+        value: 3000
