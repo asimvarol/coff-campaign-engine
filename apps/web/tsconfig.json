@@ -17,6 +17,7 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "incremental": true,
+    "types": ["node", "react", "react-dom"],
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"]
