@@ -43,11 +43,11 @@ import {
   AlertCircleIcon as AlertCircle01IconSvg,
   CheckmarkCircle01Icon as CheckmarkCircle01IconSvg,
   ArrowUpRight01Icon as TrendingUpIconSvg,
-  ArrowUp as ArrowUp01IconSvg,
-  ArrowDown as ArrowDown01IconSvg,
-  FileText as FileText01IconSvg,
-  Lightbulb as Lightbulb01IconSvg,
-  Eye as Eye01IconSvg,
+  ArrowUp01Icon as ArrowUp01IconSvg,
+  ArrowDown01Icon as ArrowDown01IconSvg,
+  File01Icon as FileText01IconSvg,
+  BulbIcon as Lightbulb01IconSvg,
+  EyeIcon as Eye01IconSvg,
 } from '@hugeicons/core-free-icons'
 
 interface IconProps {

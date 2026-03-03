@@ -14,7 +14,7 @@ import {
   mockTopCreatives,
   mockTimeSeriesData,
   mockCampaignAnalytics,
-  mockAIInsights,
+  mockAIInsightsLegacy,
 } from '@/lib/mock-data/analytics'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { TrendUp01Icon, TrendDown01Icon, AlertCircle01Icon } from '@/lib/icons'
@@ -197,7 +197,7 @@ export default function AnalyticsPage() {
       </div>
 
       <AnalyticsCampaignComparison campaigns={mockCampaignAnalytics} />
-      <AnalyticsAIInsights insights={mockAIInsights} />
+      <AnalyticsAIInsights insights={mockAIInsightsLegacy} />
 
       {/* Underperforming Alerts */}
       {underperformingCreatives.length > 0 && (
