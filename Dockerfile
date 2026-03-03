@@ -6,12 +6,11 @@ WORKDIR /app
 # Copy everything first (simpler for monorepo)
 COPY . .
 
-# Install dependencies
-RUN bun install
+# Install ALL dependencies from root (includes workspaces)
+RUN bun install --frozen-lockfile || bun install
 
-# Build the web app (skip turbo, build directly)
-WORKDIR /app/apps/web
-RUN bun run build
+# Build the web app from root (so workspace deps are available)
+RUN cd apps/web && bun run build
 
 # Production stage
 FROM oven/bun:1-slim
