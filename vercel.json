@@ -1,5 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "turbo run build --filter=@repo/web...",
+  "installCommand": "npm install -g pnpm && pnpm install",
+  "buildCommand": "pnpm turbo run build --filter=@repo/web...",
   "outputDirectory": "apps/web/.next"
 }
