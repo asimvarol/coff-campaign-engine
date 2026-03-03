@@ -31,7 +31,7 @@ export default function AutopilotPage() {
         <Card>
           <CardHeader>
             <CardDescription>Savings</CardDescription>
-            <CardTitle className="text-2xl">€342</CardTitle>
+            <CardTitle className="text-2xl">$342</CardTitle>
           </CardHeader>
         </Card>
       </div>

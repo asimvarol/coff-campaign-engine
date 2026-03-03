@@ -1,23 +1,54 @@
-import { Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger, Skeleton } from '@repo/ui'
 import { Edit02Icon, Copy01Icon, Delete02Icon, Download04Icon, Add01Icon } from '@/lib/icons'
-import { mockCampaigns, mockCreatives } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { use } from 'react'
 
-const statusConfig = {
-  DRAFT: { label: 'Draft', variant: 'secondary' as const },
-  GENERATING: { label: 'Generating', variant: 'default' as const },
-  REVIEW: { label: 'Review', variant: 'default' as const },
-  APPROVED: { label: 'Approved', variant: 'default' as const },
-  PUBLISHED: { label: 'Published', variant: 'default' as const },
-  PAUSED: { label: 'Paused', variant: 'outline' as const },
-  COMPLETED: { label: 'Completed', variant: 'secondary' as const },
-  ARCHIVED: { label: 'Archived', variant: 'outline' as const },
+interface Campaign {
+  id: string
+  name: string
+  brandId: string
+  brandName: string
+  brandLogo: string
+  objective: string
+  status: string
+  platforms: string[]
+  creativeCount: number
+  creatives?: Creative[]
+  createdAt: string
+  updatedAt: string
 }
 
-const objectiveLabels = {
+interface Creative {
+  id: string
+  campaignId: string
+  platform: string
+  format: string
+  width: number
+  height: number
+  imageUrl: string
+  header: { text: string }
+  version: number
+  createdAt: string
+}
+
+const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+  DRAFT: { label: 'Draft', variant: 'secondary' },
+  GENERATING: { label: 'Generating', variant: 'default' },
+  REVIEW: { label: 'Review', variant: 'default' },
+  APPROVED: { label: 'Approved', variant: 'default' },
+  PUBLISHED: { label: 'Published', variant: 'default' },
+  PAUSED: { label: 'Paused', variant: 'outline' },
+  COMPLETED: { label: 'Completed', variant: 'secondary' },
+  ARCHIVED: { label: 'Archived', variant: 'outline' },
+}
+
+const objectiveLabels: Record<string, string> = {
   AWARENESS: 'Awareness',
   ENGAGEMENT: 'Engagement',
   CONVERSION: 'Conversion',
@@ -26,22 +57,60 @@ const objectiveLabels = {
   SEASONAL: 'Seasonal',
 }
 
-export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const campaign = mockCampaigns.find(c => c.id === id)
-  
-  if (!campaign) {
+export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  const [campaign, setCampaign] = useState<Campaign | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isNotFound, setIsNotFound] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/campaigns')
+      .then(res => res.json())
+      .then(data => {
+        const allCampaigns: Campaign[] = data.data || []
+        const found = allCampaigns.find(c => c.id === id)
+        if (found) {
+          setCampaign(found)
+        } else {
+          setIsNotFound(true)
+        }
+      })
+      .catch(() => setIsNotFound(true))
+      .finally(() => setIsLoading(false))
+  }, [id])
+
+  if (isNotFound) {
     notFound()
   }
 
-  const campaignCreatives = mockCreatives.filter(c => c.campaignId === campaign.id)
-  const statusInfo = statusConfig[campaign.status]
+  if (isLoading || !campaign) {
+    return (
+      <div className="p-8 space-y-6">
+        <div className="flex items-start gap-4">
+          <Skeleton className="h-16 w-16 rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-24 rounded-lg" />
+          ))}
+        </div>
+        <Skeleton className="h-64 rounded-lg" />
+      </div>
+    )
+  }
+
+  const campaignCreatives: Creative[] = campaign.creatives || []
+  const statusInfo = statusConfig[campaign.status] || statusConfig.DRAFT
 
   // Group creatives by platform
   const creativesByPlatform = campaign.platforms.reduce((acc, platform) => {
     acc[platform] = campaignCreatives.filter(c => c.platform === platform)
     return acc
-  }, {} as Record<string, typeof campaignCreatives>)
+  }, {} as Record<string, Creative[]>)
 
   return (
     <div className="p-8">
@@ -66,7 +135,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <span>{campaign.brandName}</span>
                 <span>•</span>
-                <span>{objectiveLabels[campaign.objective]}</span>
+                <span>{objectiveLabels[campaign.objective] || campaign.objective}</span>
                 <span>•</span>
                 <span>{campaign.creativeCount} creatives</span>
                 <span>•</span>
@@ -140,61 +209,22 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           </Link>
         </div>
 
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList>
-            <TabsTrigger value="all">
-              All ({campaignCreatives.length})
-            </TabsTrigger>
-            {campaign.platforms.map(platform => (
-              <TabsTrigger key={platform} value={platform}>
-                {PLATFORM_LABELS[platform]} ({creativesByPlatform[platform]?.length || 0})
+        {campaignCreatives.length > 0 ? (
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList>
+              <TabsTrigger value="all">
+                All ({campaignCreatives.length})
               </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value="all" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-              {campaignCreatives.map(creative => (
-                <Link
-                  key={creative.id}
-                  href={`/campaigns/${campaign.id}/${creative.id}`}
-                  className="group overflow-hidden rounded-lg border bg-card transition-all hover:border-primary hover:shadow-lg"
-                >
-                  <div className="relative" style={{ aspectRatio: `${creative.width}/${creative.height}` }}>
-                    <Image
-                      src={creative.imageUrl}
-                      alt={creative.header.text}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-medium">
-                        {PLATFORM_LABELS[creative.platform]}
-                      </span>
-                      <Badge variant="outline" className="text-xs">
-                        {creative.format}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-1">
-                      {creative.header.text}
-                    </p>
-                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                      <span>v{creative.version}</span>
-                      <span>{new Date(creative.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </Link>
+              {campaign.platforms.map(platform => (
+                <TabsTrigger key={platform} value={platform}>
+                  {PLATFORM_LABELS[platform] || platform} ({creativesByPlatform[platform]?.length || 0})
+                </TabsTrigger>
               ))}
-            </div>
-          </TabsContent>
+            </TabsList>
 
-          {campaign.platforms.map(platform => (
-            <TabsContent key={platform} value={platform} className="mt-6">
+            <TabsContent value="all" className="mt-6">
               <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-                {(creativesByPlatform[platform] || []).map(creative => (
+                {campaignCreatives.map(creative => (
                   <Link
                     key={creative.id}
                     href={`/campaigns/${campaign.id}/${creative.id}`}
@@ -205,27 +235,74 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                         src={creative.imageUrl}
                         alt={creative.header.text}
                         fill
-                        className="object-cover"
                         unoptimized
+                        className="object-cover"
                       />
                     </div>
                     <div className="p-4">
                       <div className="mb-2 flex items-center justify-between">
-                        <span className="text-sm font-medium">{creative.format}</span>
+                        <span className="text-sm font-medium">
+                          {PLATFORM_LABELS[creative.platform] || creative.platform}
+                        </span>
                         <Badge variant="outline" className="text-xs">
-                          {creative.width}×{creative.height}
+                          {creative.format}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-1">
                         {creative.header.text}
                       </p>
+                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                        <span>v{creative.version}</span>
+                        <span>{new Date(creative.createdAt).toLocaleDateString()}</span>
+                      </div>
                     </div>
                   </Link>
                 ))}
               </div>
             </TabsContent>
-          ))}
-        </Tabs>
+
+            {campaign.platforms.map(platform => (
+              <TabsContent key={platform} value={platform} className="mt-6">
+                <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+                  {(creativesByPlatform[platform] || []).map(creative => (
+                    <Link
+                      key={creative.id}
+                      href={`/campaigns/${campaign.id}/${creative.id}`}
+                      className="group overflow-hidden rounded-lg border bg-card transition-all hover:border-primary hover:shadow-lg"
+                    >
+                      <div className="relative" style={{ aspectRatio: `${creative.width}/${creative.height}` }}>
+                        <Image
+                          src={creative.imageUrl}
+                          alt={creative.header.text}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                      <div className="p-4">
+                        <div className="mb-2 flex items-center justify-between">
+                          <span className="text-sm font-medium">{creative.format}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {creative.width}×{creative.height}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-1">
+                          {creative.header.text}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        ) : (
+          <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-border p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No creatives generated yet. Click "Generate More" to create creatives for this campaign.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

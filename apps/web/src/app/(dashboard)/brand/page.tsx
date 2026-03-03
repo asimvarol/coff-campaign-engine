@@ -42,8 +42,8 @@ export default function BrandPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[1, 2].map(i => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
             <Card key={i} className="p-6">
               <Skeleton className="h-40 w-full rounded-lg mb-4" />
               <Skeleton className="h-6 w-32 mb-2" />
@@ -65,7 +65,7 @@ export default function BrandPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {brands.map((brand) => (
             <Link key={brand.id} href={`/brand/${brand.id}`}>
               <Card className="overflow-hidden transition-all hover:border-primary hover:shadow-lg cursor-pointer group">

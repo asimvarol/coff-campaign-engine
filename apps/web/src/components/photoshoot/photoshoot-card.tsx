@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import type { Photoshoot } from '@repo/types'
-import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
+import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, cn } from '@repo/ui'
 
 import { CheckmarkCircle02Icon, Loading03Icon, XCircleIcon } from '@/lib/icons'
 
@@ -53,7 +53,7 @@ export function PhotoshootCard({ photoshoot }: PhotoshootCardProps) {
               </CardDescription>
             </div>
             <Badge variant={status.variant} className="gap-1.5">
-              {StatusIcon && <StatusIcon className="h-3 w-3" />}
+              {StatusIcon && <StatusIcon className={cn("h-3 w-3", photoshoot.status === 'GENERATING' && "animate-spin")} />}
               {status.label}
             </Badge>
           </div>
@@ -87,8 +87,8 @@ export function PhotoshootCard({ photoshoot }: PhotoshootCardProps) {
             ))}
             {photoshoot.variants.length === 0 && (
               <>
-                <div className="aspect-square rounded-md bg-muted" />
-                <div className="aspect-square rounded-md bg-muted" />
+                <div className="aspect-square rounded-md bg-muted animate-pulse" />
+                <div className="aspect-square rounded-md bg-muted animate-pulse" />
               </>
             )}
           </div>
