@@ -220,43 +220,53 @@ export function CampaignWizard() {
       return `https://placehold.co/${w}x${h}/${fg}/${bg}?text=${encodeURIComponent(task.platform)}`
     }
 
-    // Generate all platforms in parallel, then update state as results arrive
-    const results = await Promise.allSettled(
-      tasks.map(async (task) => {
-        try {
-          const res = await fetch('/api/generate-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              prompt: `Marketing campaign visual for "${concept.name}": ${concept.description}. ${concept.colorMood}. Professional, eye-catching, modern design, using ${brandColors.primary} and ${brandColors.accent} color scheme`,
-              negative_prompt: 'text, watermark, logo, blurry, low quality, ugly',
-              image_size: task.imageSize,
-              num_images: 1,
-            }),
-          })
+    const imageGenEnabled = process.env.NEXT_PUBLIC_ENABLE_IMAGE_GEN !== 'false'
+    const imageGenEndpoint = process.env.NEXT_PUBLIC_IMAGE_GEN_ENDPOINT || '/api/generate-image'
 
-          if (!res.ok) throw new Error('Generation failed')
-          const data = await res.json()
-          const imageUrl = data?.images?.[0]?.url
-          if (!imageUrl || typeof imageUrl !== 'string') throw new Error('Invalid response')
+    // Generate all platforms in parallel with error boundary
+    try {
+      const results = await Promise.allSettled(
+        tasks.map(async (task) => {
+          if (!imageGenEnabled) {
+            return buildCreative(task, placeholderUrl(task))
+          }
+          try {
+            const res = await fetch(imageGenEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                prompt: `Marketing campaign visual for "${concept.name}": ${concept.description}. ${concept.colorMood}. Professional, eye-catching, modern design, using ${brandColors.primary} and ${brandColors.accent} color scheme`,
+                negative_prompt: 'text, watermark, logo, blurry, low quality, ugly',
+                image_size: task.imageSize,
+                num_images: 1,
+              }),
+            })
 
-          return buildCreative(task, imageUrl)
-        } catch (error) {
-          console.warn(`Fal.ai failed for ${task.platform}:`, error instanceof Error ? error.message : 'Unknown error')
-          return buildCreative(task, placeholderUrl(task))
-        }
-      })
-    )
+            if (!res.ok) throw new Error('Generation failed')
+            const data = await res.json()
+            const imageUrl = data?.images?.[0]?.url
+            if (!imageUrl || typeof imageUrl !== 'string') throw new Error('Invalid response')
 
-    progressDone = true
-    clearInterval(progressInterval)
+            return buildCreative(task, imageUrl)
+          } catch (error) {
+            console.warn(`Fal.ai failed for ${task.platform}:`, error instanceof Error ? error.message : 'Unknown error')
+            return buildCreative(task, placeholderUrl(task))
+          }
+        })
+      )
 
-    const creatives = results.map(r => r.status === 'fulfilled' ? r.value : r.reason)
-    updateState({ generatedCreatives: creatives, generatingProgress: 100 })
-    setIsGenerating(false)
-
-    // Auto-advance after a moment
-    setTimeout(() => setStep(4), 500)
+      const creatives = results.map(r => r.status === 'fulfilled' ? r.value : r.reason)
+      updateState({ generatedCreatives: creatives, generatingProgress: 100 })
+    } catch (criticalError) {
+      console.error('Critical generation failure:', criticalError)
+      const fallbackCreatives = tasks.map(task => buildCreative(task, placeholderUrl(task)))
+      updateState({ generatedCreatives: fallbackCreatives, generatingProgress: 100 })
+    } finally {
+      progressDone = true
+      clearInterval(progressInterval)
+      setIsGenerating(false)
+      setTimeout(() => setStep(4), 500)
+    }
   }
 
   const handleApproveAll = () => {
