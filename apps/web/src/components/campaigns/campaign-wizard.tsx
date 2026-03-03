@@ -5,6 +5,7 @@ import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Inpu
 import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons'
 import { CampaignObjective } from '@repo/types'
 import { generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
+import { PLATFORM_FORMATS } from '@/lib/mock-data/creative-formats'
 import { useBrand } from '@/lib/brand-context'
 import type { CampaignConcept } from '@repo/types'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
@@ -125,33 +126,144 @@ export function CampaignWizard() {
     updateState({ selectedConcept: concept })
     setIsGenerating(true)
     setStep(3)
-    
+
     const brand = brands.find(b => b.id === state.brandId)
     if (!brand) return
-    
-    // Simulate staggered generation
-    let progress = 0
-    const totalCreatives = state.platforms.length * 2 // 2 creatives per platform avg
-    const interval = setInterval(() => {
-      progress += 1
-      updateState({ generatingProgress: Math.min(100, (progress / totalCreatives) * 100) })
-      if (progress >= totalCreatives) {
-        clearInterval(interval)
+
+    const brandColors = brand.colors || { primary: '#000', secondary: '#666', accent: '#999', background: '#fff', text: '#000', palette: [] }
+
+    // Build generation tasks per platform
+    const sizeMap: Record<string, string> = {
+      instagram: 'square_hd',
+      facebook: 'landscape_16_9',
+      tiktok: 'portrait_16_9',
+      linkedin: 'landscape_4_3',
+      x: 'landscape_16_9',
+      pinterest: 'portrait_4_3',
+    }
+
+    const formatMap: Record<string, string> = {
+      instagram: 'feed',
+      facebook: 'feed',
+      tiktok: 'video',
+      linkedin: 'post',
+      x: 'post',
+      pinterest: 'pin',
+    }
+
+    const tasks = state.platforms.map(platform => ({
+      platform,
+      format: formatMap[platform] || 'feed',
+      imageSize: sizeMap[platform] || 'square_hd',
+    }))
+
+    const totalTasks = tasks.length
+    let completedTasks = 0
+    const creatives: MockCreative[] = []
+
+    // Try real Fal.ai generation, fallback to mock on failure
+    const generateOne = async (task: typeof tasks[0]): Promise<MockCreative> => {
+      const platformFormat = PLATFORM_FORMATS[task.platform]?.[task.format]
+      const width = platformFormat?.width || 1080
+      const height = platformFormat?.height || 1080
+
+      try {
+        const res = await fetch('/api/generate-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: `Marketing campaign visual for "${concept.name}": ${concept.description}. ${concept.colorMood}. Professional, eye-catching, modern design, using ${brandColors.primary} and ${brandColors.accent} color scheme`,
+            negative_prompt: 'text, watermark, logo, blurry, low quality, ugly',
+            image_size: task.imageSize,
+            num_images: 1,
+          }),
+        })
+
+        if (!res.ok) throw new Error(`API error: ${res.status}`)
+        const data = await res.json()
+        const imageUrl = data.images?.[0]?.url
+
+        if (!imageUrl) throw new Error('No image URL returned')
+
+        return {
+          id: `creative-${Date.now()}-${task.platform}-${task.format}`,
+          campaignId: 'campaign-new',
+          platform: task.platform,
+          format: task.format,
+          width,
+          height,
+          imageUrl,
+          header: {
+            text: concept.name.toUpperCase(),
+            font: 'Playfair Display',
+            size: 42,
+            color: '#ffffff',
+            position: { x: 50, y: 100 },
+            visible: true,
+          },
+          description: {
+            text: concept.description.substring(0, 60) + '...',
+            font: 'Outfit',
+            size: 16,
+            color: brandColors.secondary,
+            position: { x: 50, y: 170 },
+            visible: true,
+          },
+          cta: { text: 'Shop Now', style: 'primary', url: 'https://example.com', visible: true },
+          overlay: { color: '#000000', opacity: 0.3 },
+          version: 1,
+          status: 'DRAFT',
+          createdAt: new Date(),
+        }
+      } catch (err) {
+        console.warn(`Fal.ai failed for ${task.platform}, using placeholder:`, err)
+        return {
+          id: `creative-${Date.now()}-${task.platform}-${task.format}`,
+          campaignId: 'campaign-new',
+          platform: task.platform,
+          format: task.format,
+          width,
+          height,
+          imageUrl: `https://placehold.co/${width}x${height}/${brandColors.primary.replace('#', '')}/${brandColors.accent.replace('#', '')}?text=${encodeURIComponent(task.platform)}`,
+          header: {
+            text: concept.name.toUpperCase(),
+            font: 'Playfair Display',
+            size: 42,
+            color: '#ffffff',
+            position: { x: 50, y: 100 },
+            visible: true,
+          },
+          description: {
+            text: concept.description.substring(0, 60) + '...',
+            font: 'Outfit',
+            size: 16,
+            color: brandColors.secondary,
+            position: { x: 50, y: 170 },
+            visible: true,
+          },
+          cta: { text: 'Shop Now', style: 'primary', url: 'https://example.com', visible: true },
+          overlay: { color: '#000000', opacity: 0.3 },
+          version: 1,
+          status: 'DRAFT',
+          createdAt: new Date(),
+        }
       }
-    }, 300)
-    
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    const creatives = await generateMockCreatives(
-      'campaign-new',
-      concept,
-      state.platforms,
-      brand.colors || { primary: '#000', secondary: '#666', accent: '#999', background: '#fff', text: '#000', palette: [] }
-    )
-    
-    clearInterval(interval)
+    }
+
+    // Generate creatives sequentially to show progress
+    for (const task of tasks) {
+      const creative = await generateOne(task)
+      creatives.push(creative)
+      completedTasks++
+      updateState({
+        generatedCreatives: [...creatives],
+        generatingProgress: Math.round((completedTasks / totalTasks) * 100),
+      })
+    }
+
     updateState({ generatedCreatives: creatives, generatingProgress: 100 })
     setIsGenerating(false)
-    
+
     // Auto-advance after a moment
     setTimeout(() => setStep(4), 500)
   }
