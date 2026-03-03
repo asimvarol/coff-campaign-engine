@@ -1,11 +1,11 @@
 services:
   - type: web
     name: coff-campaign-engine
-    runtime: node
+    runtime: docker
     region: oregon
     plan: starter
-    buildCommand: npm install -g bun && bun install && bun run build --filter=@repo/web...
-    startCommand: cd apps/web && node server.js || cd apps/web && npm start
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
       - key: NODE_ENV
         value: production
@@ -14,7 +14,7 @@ services:
       - key: NEXTAUTH_SECRET
         value: GGStHu/mRalq+bDTJtMKdRoMrDNffEhGoKZMHqfEpqo=
       - key: NEXTAUTH_URL
-        sync: false
+        value: https://coff-campaign-engine.onrender.com
       - key: FAL_AI_KEY
         value: 8032b3eb-a441-42ab-9ab0-1578262d8fbc:ed5717a6db5d5c8983c009f1fa5cf8de
       - key: GOOGLE_CLIENT_ID
