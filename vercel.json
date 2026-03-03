@@ -39,10 +39,5 @@
       "permanent": false
     }
   ],
-  "regions": ["iad1"],
-  "functions": {
-    "apps/web/src/app/api/**/*": {
-      "maxDuration": 30
-    }
-  }
+  "regions": ["iad1"]
 }
