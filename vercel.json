@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd ../.. && bun run build --filter=@repo/web",
-  "devCommand": "bun run dev",
+  "buildCommand": "turbo run build --filter=@repo/web",
+  "devCommand": "turbo run dev --filter=@repo/web",
   "installCommand": "bun install",
-  "framework": null,
-  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "outputDirectory": "apps/web/.next",
   "env": {
     "ENABLE_AUTOPILOT": "true",
     "ENABLE_AGENCY_MODE": "true"
