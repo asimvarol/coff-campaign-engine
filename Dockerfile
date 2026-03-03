@@ -9,8 +9,9 @@ COPY . .
 # Install dependencies
 RUN bun install
 
-# Build the web app
-RUN bun run build --filter=@repo/web...
+# Build the web app (skip turbo, build directly)
+WORKDIR /app/apps/web
+RUN bun run build
 
 # Production stage
 FROM oven/bun:1-slim
