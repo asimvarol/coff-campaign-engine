@@ -9,12 +9,6 @@
     "ENABLE_AUTOPILOT": "true",
     "ENABLE_AGENCY_MODE": "true"
   },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_WEB_URL": "@web-url",
-      "NEXT_PUBLIC_API_URL": "@api-url"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
