@@ -62,25 +62,45 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isNotFound, setIsNotFound] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/campaigns')
-      .then(res => res.json())
-      .then(data => {
-        const allCampaigns: Campaign[] = data.data || []
-        const found = allCampaigns.find(c => c.id === id)
-        if (found) {
-          setCampaign(found)
-        } else {
-          setIsNotFound(true)
+    const fetchCampaign = async () => {
+      try {
+        const response = await fetch(`/api/campaigns/${id}`)
+        if (!response.ok) {
+          if (response.status === 404) {
+            setIsNotFound(true)
+          } else {
+            setError('Failed to load campaign')
+          }
+          return
         }
-      })
-      .catch(() => setIsNotFound(true))
-      .finally(() => setIsLoading(false))
+        const data = await response.json()
+        setCampaign(data.data)
+      } catch {
+        setError('Network error. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCampaign()
   }, [id])
 
   if (isNotFound) {
     notFound()
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center p-8 text-center">
+        <p className="text-sm text-destructive">{error}</p>
+        <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
+          Try Again
+        </Button>
+      </div>
+    )
   }
 
   if (isLoading || !campaign) {
