@@ -44,7 +44,7 @@ export default function SchedulePostPage() {
   const mockCreatives = [
     { id: '1', thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=200&fit=crop', name: 'Creative 1' },
     { id: '2', thumbnail: 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=200&h=200&fit=crop', name: 'Creative 2' },
-    { id: '3', thumbnail: 'https://images.unsplash.com/photo-1617957743089-7ee7e39f8943?w=200&h=200&fit=crop', name: 'Creative 3' },
+    { id: '3', thumbnail: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=200&h=200&fit=crop', name: 'Creative 3' },
   ]
 
   const connectedPlatforms = platforms.filter(p => 
