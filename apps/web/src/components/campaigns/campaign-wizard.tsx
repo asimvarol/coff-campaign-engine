@@ -151,11 +151,17 @@ export function CampaignWizard() {
       pinterest: 'pin',
     }
 
-    const tasks = state.platforms.map(platform => ({
-      platform,
-      format: formatMap[platform] || 'feed',
-      imageSize: sizeMap[platform] || 'square_hd',
-    }))
+    const tasks = state.platforms.map(platform => {
+      const format = formatMap[platform] || 'feed'
+      if (!PLATFORM_FORMATS[platform]?.[format]) {
+        console.warn(`Missing format definition for ${platform}:${format}`)
+      }
+      return {
+        platform,
+        format,
+        imageSize: sizeMap[platform] || 'square_hd',
+      }
+    })
 
     const totalTasks = tasks.length
 
@@ -235,8 +241,8 @@ export function CampaignWizard() {
           if (!imageUrl || typeof imageUrl !== 'string') throw new Error('Invalid response')
 
           return buildCreative(task, imageUrl)
-        } catch {
-          console.warn(`Fal.ai failed for ${task.platform}, using placeholder`)
+        } catch (error) {
+          console.warn(`Fal.ai failed for ${task.platform}:`, error instanceof Error ? error.message : 'Unknown error')
           return buildCreative(task, placeholderUrl(task))
         }
       })
