@@ -2,12 +2,10 @@ node_modules
 .next
 .turbo
 dist
-.env.local
-.env*.local
 *.log
+.env*
+!.env.example
 .DS_Store
+coverage
 .git
-.github
-README.md
-*.md
-!CLAUDE.md
+.vercel

@@ -1,46 +1,38 @@
+# Dockerfile for Railway deployment
 FROM oven/bun:1 AS base
 
-# Install dependencies only when needed
-FROM base AS deps
 WORKDIR /app
-
-# Copy package files
-COPY package.json bun.lockb ./
-COPY apps/web/package.json ./apps/web/
-COPY apps/api/package.json ./apps/api/
-COPY packages/*/package.json ./packages/*/
 
 # Install dependencies
+COPY package.json bun.lockb ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/*/package.json ./packages/
+
 RUN bun install --frozen-lockfile
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-
-COPY --from=deps /app/node_modules ./node_modules
+# Copy source
 COPY . .
 
-# Build the app
-ENV NODE_ENV=production
-RUN bun run build
+# Build
+RUN bun run turbo run build --filter=@repo/web...
 
-# Production image
-FROM base AS runner
+# Production stage
+FROM oven/bun:1-slim
+
 WORKDIR /app
+
+# Copy built artifacts
+COPY --from=base /app/apps/web/.next ./apps/web/.next
+COPY --from=base /app/apps/web/public ./apps/web/public
+COPY --from=base /app/apps/web/package.json ./apps/web/
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/packages ./packages
+
+WORKDIR /app/apps/web
+
+EXPOSE 3000
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy built assets
-COPY --from=builder /app/apps/web/.next/standalone ./
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
-
-USER nextjs
-
-EXPOSE 3000
-
-CMD ["bun", "apps/web/server.js"]
+CMD ["bun", "start"]
