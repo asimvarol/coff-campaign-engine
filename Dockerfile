@@ -35,4 +35,4 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 
-CMD ["bun", "run", "start"]
+CMD ["bun", "node_modules/next/dist/bin/next", "start", "--port", "3000"]
