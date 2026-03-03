@@ -19,7 +19,7 @@ import {
   Camera as Camera01IconSvg,
   Calendar as Calendar03IconSvg,
   Analytics as Analytics01IconSvg,
-  Lightning as Lightning01IconSvg,
+  Flash as Lightning01IconSvg,
   Building as Building03IconSvg,
   Menu as Menu01IconSvg,
   Copy as Copy01IconSvg,
