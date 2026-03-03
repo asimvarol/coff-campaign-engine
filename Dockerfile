@@ -25,6 +25,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/package.json ./package.json
 
+# Symlink node_modules so next is resolvable from apps/web
+RUN ln -s /app/node_modules /app/apps/web/node_modules
+
 WORKDIR /app/apps/web
 
 EXPOSE 3000
@@ -32,4 +35,4 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 
-CMD ["/app/node_modules/.bin/next", "start", "--port", "3000"]
+CMD ["bun", "run", "start"]
