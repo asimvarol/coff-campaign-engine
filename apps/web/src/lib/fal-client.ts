@@ -146,10 +146,10 @@ export async function generateBrandAsset(
   brandStyle?: string
 ) {
   const sizeMap = {
-    hero: 'landscape_16_9',
-    banner: 'landscape_16_9',
-    social: 'square_hd',
-    thumbnail: 'portrait_4_3',
+    hero: 'landscape_16_9' as const,
+    banner: 'landscape_16_9' as const,
+    social: 'square_hd' as const,
+    thumbnail: 'portrait_4_3' as const,
   }
 
   return generateImage({
