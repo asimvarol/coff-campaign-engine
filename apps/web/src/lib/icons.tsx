@@ -5,46 +5,44 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import type { IconSvgElement } from '@hugeicons/react'
 import {
-  Add as Add01IconSvg,
-  Target as Target03IconSvg,
-  ArrowLeft as ArrowLeft01IconSvg,
-  ArrowRight as ArrowRight01IconSvg,
-  Sparkles as SparklesIconSvg,
-  Image as Image01IconSvg,
-  Edit as Edit02IconSvg,
-  Download as Download04IconSvg,
-  Refresh as RefreshIconSvg,
-  Clock as Clock01IconSvg,
-  Magic as AiMagicIconSvg,
-  Camera as Camera01IconSvg,
-  Calendar as Calendar03IconSvg,
-  Analytics as Analytics01IconSvg,
-  Flash as Lightning01IconSvg,
-  Building as Building03IconSvg,
-  Menu as Menu01IconSvg,
-  Copy as Copy01IconSvg,
-  Delete as Delete02IconSvg,
+  Add01Icon as Add01IconSvg,
+  Target03Icon as Target03IconSvg,
+  ArrowLeft01Icon as ArrowLeft01IconSvg,
+  ArrowRight01Icon as ArrowRight01IconSvg,
+  SparklesIcon as SparklesIconSvg,
+  Image01Icon as Image01IconSvg,
+  Edit02Icon as Edit02IconSvg,
+  Download04Icon as Download04IconSvg,
+  RefreshIcon as RefreshIconSvg,
+  Clock01Icon as Clock01IconSvg,
+  AiMagicIcon as AiMagicIconSvg,
+  Camera01Icon as Camera01IconSvg,
+  Calendar03Icon as Calendar03IconSvg,
+  Analytics01Icon as Analytics01IconSvg,
+  FlashIcon as Lightning01IconSvg,
+  Building03Icon as Building03IconSvg,
+  Menu01Icon as Menu01IconSvg,
+  Copy01Icon as Copy01IconSvg,
+  Delete02Icon as Delete02IconSvg,
   CheckmarkCircle02Icon as CheckmarkCircle02IconSvg,
-  Checkmark as CheckIconSvg,
-  Plus as PlusSignIconSvg,
-  Upload as Upload04IconSvg,
-  XCircle as XCircleIconSvg,
-  Loading as Loading03IconSvg,
-  Loader as Loader02IconSvg,
-  Search as Search01IconSvg,
-  Filter as Filter01IconSvg,
-  Settings as Settings02IconSvg,
-  Share as Share08IconSvg,
-  Link as Link01IconSvg,
-  ChevronLeft as ChevronLeft01IconSvg,
-  ChevronRight as ChevronRight01IconSvg,
-  ChevronDown as ChevronDown01IconSvg,
-  MoreVertical as MoreVertical01IconSvg,
-  AlertCircle as AlertCircle01IconSvg,
+  Tick01Icon as CheckIconSvg,
+  PlusSignIcon as PlusSignIconSvg,
+  Upload04Icon as Upload04IconSvg,
+  CancelCircleIcon as XCircleIconSvg,
+  Loading03Icon as Loading03IconSvg,
+  Loading02Icon as Loader02IconSvg,
+  Search01Icon as Search01IconSvg,
+  FilterIcon as Filter01IconSvg,
+  Settings02Icon as Settings02IconSvg,
+  Share08Icon as Share08IconSvg,
+  Link01Icon as Link01IconSvg,
+  ArrowLeft01Icon as ChevronLeft01IconSvg,
+  ArrowRight01Icon as ChevronRight01IconSvg,
+  ArrowDown01Icon as ChevronDown01IconSvg,
+  MoreVerticalIcon as MoreVertical01IconSvg,
+  AlertCircleIcon as AlertCircle01IconSvg,
   CheckmarkCircle01Icon as CheckmarkCircle01IconSvg,
-  Refresh as RotateCcwIconSvg,
-  TrendingUp as TrendingUpIconSvg,
-  Delete as Trash2IconSvg,
+  ArrowUpRight01Icon as TrendingUpIconSvg,
 } from '@hugeicons/core-free-icons'
 
 interface IconProps {
@@ -114,8 +112,8 @@ export const MoreVertical01Icon = createIcon(MoreVertical01IconSvg)
 export const AlertCircle01Icon = createIcon(AlertCircle01IconSvg)
 export const AlertCircleIcon = createIcon(AlertCircle01IconSvg) // Alias
 export const CheckmarkCircle01Icon = createIcon(CheckmarkCircle01IconSvg)
-export const RotateCcwIcon = createIcon(RotateCcwIconSvg)
+export const RotateCcwIcon = createIcon(RefreshIconSvg)
 export const TrendingUpIcon = createIcon(TrendingUpIconSvg)
-export const Trash2Icon = createIcon(Trash2IconSvg)
+export const Trash2Icon = createIcon(Delete02IconSvg)
 export const MenuIcon = createIcon(Menu01IconSvg) // Alias
 export const ZapIcon = createIcon(Lightning01IconSvg) // Alias (Lucide name)
