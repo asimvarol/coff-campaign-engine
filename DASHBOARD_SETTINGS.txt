@@ -1,0 +1,13 @@
+📋 VERCEL DASHBOARD SETTINGS (Copy-Paste Ready)
+
+1. Go to: https://vercel.com/asim-weezboocoms-projects/coff-campaign-engine/settings
+
+2. Scroll to "Root Directory" section
+
+3. Set these values:
+   Root Directory: apps/web
+   ☑ Include source files outside of the Root Directory in the Build Step
+
+4. Click SAVE
+
+5. That's it! Come back here for next step.
