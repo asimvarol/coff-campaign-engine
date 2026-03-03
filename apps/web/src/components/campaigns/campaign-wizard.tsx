@@ -158,109 +158,94 @@ export function CampaignWizard() {
     }))
 
     const totalTasks = tasks.length
-    let completedTasks = 0
-    const creatives: MockCreative[] = []
 
-    // Try real Fal.ai generation, fallback to mock on failure
-    const generateOne = async (task: typeof tasks[0]): Promise<MockCreative> => {
+    // Animate progress bar while generation runs
+    let progressDone = false
+    let fakeProgress = 0
+    const progressInterval = setInterval(() => {
+      if (progressDone) return
+      fakeProgress = Math.min(fakeProgress + 2, 90)
+      updateState({ generatingProgress: fakeProgress })
+    }, 300)
+
+    // Build creative metadata (shared between success and fallback)
+    const buildCreative = (task: typeof tasks[0], imageUrl: string): MockCreative => {
       const platformFormat = PLATFORM_FORMATS[task.platform]?.[task.format]
       const width = platformFormat?.width || 1080
       const height = platformFormat?.height || 1080
-
-      try {
-        const res = await fetch('/api/generate-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: `Marketing campaign visual for "${concept.name}": ${concept.description}. ${concept.colorMood}. Professional, eye-catching, modern design, using ${brandColors.primary} and ${brandColors.accent} color scheme`,
-            negative_prompt: 'text, watermark, logo, blurry, low quality, ugly',
-            image_size: task.imageSize,
-            num_images: 1,
-          }),
-        })
-
-        if (!res.ok) throw new Error(`API error: ${res.status}`)
-        const data = await res.json()
-        const imageUrl = data.images?.[0]?.url
-
-        if (!imageUrl) throw new Error('No image URL returned')
-
-        return {
-          id: `creative-${Date.now()}-${task.platform}-${task.format}`,
-          campaignId: 'campaign-new',
-          platform: task.platform,
-          format: task.format,
-          width,
-          height,
-          imageUrl,
-          header: {
-            text: concept.name.toUpperCase(),
-            font: 'Playfair Display',
-            size: 42,
-            color: '#ffffff',
-            position: { x: 50, y: 100 },
-            visible: true,
-          },
-          description: {
-            text: concept.description.substring(0, 60) + '...',
-            font: 'Outfit',
-            size: 16,
-            color: brandColors.secondary,
-            position: { x: 50, y: 170 },
-            visible: true,
-          },
-          cta: { text: 'Shop Now', style: 'primary', url: 'https://example.com', visible: true },
-          overlay: { color: '#000000', opacity: 0.3 },
-          version: 1,
-          status: 'DRAFT',
-          createdAt: new Date(),
-        }
-      } catch (err) {
-        console.warn(`Fal.ai failed for ${task.platform}, using placeholder:`, err)
-        return {
-          id: `creative-${Date.now()}-${task.platform}-${task.format}`,
-          campaignId: 'campaign-new',
-          platform: task.platform,
-          format: task.format,
-          width,
-          height,
-          imageUrl: `https://placehold.co/${width}x${height}/${brandColors.primary.replace('#', '')}/${brandColors.accent.replace('#', '')}?text=${encodeURIComponent(task.platform)}`,
-          header: {
-            text: concept.name.toUpperCase(),
-            font: 'Playfair Display',
-            size: 42,
-            color: '#ffffff',
-            position: { x: 50, y: 100 },
-            visible: true,
-          },
-          description: {
-            text: concept.description.substring(0, 60) + '...',
-            font: 'Outfit',
-            size: 16,
-            color: brandColors.secondary,
-            position: { x: 50, y: 170 },
-            visible: true,
-          },
-          cta: { text: 'Shop Now', style: 'primary', url: 'https://example.com', visible: true },
-          overlay: { color: '#000000', opacity: 0.3 },
-          version: 1,
-          status: 'DRAFT',
-          createdAt: new Date(),
-        }
+      return {
+        id: `creative-${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${task.platform}`,
+        campaignId: 'campaign-new',
+        platform: task.platform,
+        format: task.format,
+        width,
+        height,
+        imageUrl,
+        header: {
+          text: concept.name.toUpperCase(),
+          font: 'Playfair Display',
+          size: 42,
+          color: '#ffffff',
+          position: { x: 50, y: 100 },
+          visible: true,
+        },
+        description: {
+          text: concept.description.substring(0, 60) + '...',
+          font: 'Outfit',
+          size: 16,
+          color: brandColors.secondary,
+          position: { x: 50, y: 170 },
+          visible: true,
+        },
+        cta: { text: 'Shop Now', style: 'primary', url: 'https://example.com', visible: true },
+        overlay: { color: '#000000', opacity: 0.3 },
+        version: 1,
+        status: 'DRAFT',
+        createdAt: new Date(),
       }
     }
 
-    // Generate creatives sequentially to show progress
-    for (const task of tasks) {
-      const creative = await generateOne(task)
-      creatives.push(creative)
-      completedTasks++
-      updateState({
-        generatedCreatives: [...creatives],
-        generatingProgress: Math.round((completedTasks / totalTasks) * 100),
-      })
+    const placeholderUrl = (task: typeof tasks[0]) => {
+      const pf = PLATFORM_FORMATS[task.platform]?.[task.format]
+      const w = pf?.width || 1080
+      const h = pf?.height || 1080
+      const fg = brandColors.primary.replace(/^#/, '')
+      const bg = brandColors.accent.replace(/^#/, '')
+      return `https://placehold.co/${w}x${h}/${fg}/${bg}?text=${encodeURIComponent(task.platform)}`
     }
 
+    // Generate all platforms in parallel, then update state as results arrive
+    const results = await Promise.allSettled(
+      tasks.map(async (task) => {
+        try {
+          const res = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: `Marketing campaign visual for "${concept.name}": ${concept.description}. ${concept.colorMood}. Professional, eye-catching, modern design, using ${brandColors.primary} and ${brandColors.accent} color scheme`,
+              negative_prompt: 'text, watermark, logo, blurry, low quality, ugly',
+              image_size: task.imageSize,
+              num_images: 1,
+            }),
+          })
+
+          if (!res.ok) throw new Error('Generation failed')
+          const data = await res.json()
+          const imageUrl = data?.images?.[0]?.url
+          if (!imageUrl || typeof imageUrl !== 'string') throw new Error('Invalid response')
+
+          return buildCreative(task, imageUrl)
+        } catch {
+          console.warn(`Fal.ai failed for ${task.platform}, using placeholder`)
+          return buildCreative(task, placeholderUrl(task))
+        }
+      })
+    )
+
+    progressDone = true
+    clearInterval(progressInterval)
+
+    const creatives = results.map(r => r.status === 'fulfilled' ? r.value : r.reason)
     updateState({ generatedCreatives: creatives, generatingProgress: 100 })
     setIsGenerating(false)
 
