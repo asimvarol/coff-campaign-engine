@@ -1,11 +1,14 @@
 'use client'
 
+import { useEffect } from 'react'
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@repo/ui'
 import { Download04Icon } from '@/lib/icons'
 import { mockAgencyBrands } from '@/lib/mock-data/agency'
 
 export default function AgencyReportsPage() {
+  useEffect(() => { document.title = 'Agency Reports | Coff' }, [])
+
   return (
     <div className="space-y-6">
       <div>

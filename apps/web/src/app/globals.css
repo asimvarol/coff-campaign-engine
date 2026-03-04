@@ -61,6 +61,7 @@
     --chart-3: 90 40% 50%;
     --chart-4: 160 25% 40%;
     --chart-5: 80 35% 60%;
+    --placeholder: 90 5% 50%;
     --radius: 0.5rem;
   }
 
@@ -72,6 +73,11 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  ::placeholder {
+    color: hsl(var(--placeholder));
+    opacity: 1;
   }
 }
 

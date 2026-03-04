@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { toast } from 'sonner'
 import { FileText01Icon, Download04Icon, Calendar03Icon } from '@/lib/icons'
@@ -11,6 +11,8 @@ import {
 } from '@/lib/mock-data/analytics'
 
 export default function ReportsPage() {
+  useEffect(() => { document.title = 'Reports | Coff' }, [])
+
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
 

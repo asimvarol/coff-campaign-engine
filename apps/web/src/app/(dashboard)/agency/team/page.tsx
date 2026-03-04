@@ -1,10 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Button } from '@repo/ui'
 import { AgencyTeamTable } from '@/components/agency/agency-team-table'
 import { mockAgencyMembers } from '@/lib/mock-data/agency'
 
 export default function AgencyTeamPage() {
+  useEffect(() => { document.title = 'Team | Coff' }, [])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

@@ -25,6 +25,8 @@ interface PhotoshootDetail {
 }
 
 export default function PhotoshootDetailPage() {
+  useEffect(() => { document.title = 'Photoshoot Detail | Coff' }, [])
+
   const params = useParams()
   const id = params.id as string
   const [photoshoot, setPhotoshoot] = useState<PhotoshootDetail | null>(null)

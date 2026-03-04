@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { ScoreGauge } from '@/components/analytics/score-gauge'
@@ -17,6 +17,8 @@ const performanceBadges = {
 }
 
 export default function CreativeAnalyticsPage() {
+  useEffect(() => { document.title = 'Creative Analytics | Coff' }, [])
+
   const [performanceFilter, setPerformanceFilter] = useState<PerformanceFilter>('all')
   const [selectedCreatives, setSelectedCreatives] = useState<string[]>([])
 

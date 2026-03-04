@@ -35,6 +35,8 @@ import {
 } from '@/lib/icons'
 
 export default function PublishQueuePage() {
+  useEffect(() => { document.title = 'Queue | Coff' }, [])
+
   const [posts, setPosts] = useState(mockScheduledPosts)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [filterPlatform, setFilterPlatform] = useState<Platform | '__all__'>('__all__')

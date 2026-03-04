@@ -90,7 +90,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   }
 
   return (
-    <div className="flex w-64 flex-col border-r border-border bg-card h-screen sticky top-0">
+    <aside className="flex w-64 flex-col border-r border-border bg-card h-screen sticky top-0">
       {/* Header */}
       <div className="flex h-16 items-center gap-3 border-b border-border px-6">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -190,7 +190,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               </Link>
               
               {hasSubItems && isActive && (
-                <div className="ml-7 mt-1 space-y-1">
+                <div className="ml-7 mt-1 space-y-1 border-l border-border pl-2">
                   {item.subItems.map((subItem) => {
                     const isSubActive = pathname === subItem.href
                     return (
@@ -241,6 +241,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </aside>
   )
 }

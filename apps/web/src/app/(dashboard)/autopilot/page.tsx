@@ -1,6 +1,8 @@
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge } from '@repo/ui'
 import { PlusIcon, ZapIcon, AlertCircleIcon, TrendingUpIcon } from '@/lib/icons'
 
+export const metadata = { title: 'Autopilot | Coff' }
+
 export default function AutopilotPage() {
   return (
     <div >
@@ -120,6 +122,42 @@ export default function AutopilotPage() {
                 <p className="text-sm text-muted-foreground">CTR &lt; 1% (48h) → Replace + Notify</p>
               </div>
               <Badge>Active</Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="font-medium">High Performer Boost</p>
+                <p className="text-sm text-muted-foreground">CTR &gt; 5% (24h) → Increase budget 2x</p>
+              </div>
+              <Badge>Active</Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="font-medium">Engagement Surge</p>
+                <p className="text-sm text-muted-foreground">Engagement &gt; 10% → Cross-post to other platforms</p>
+              </div>
+              <Badge>Active</Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="font-medium">Budget Cap Alert</p>
+                <p className="text-sm text-muted-foreground">Daily spend &gt; $50 → Pause + Notify</p>
+              </div>
+              <Badge variant="outline">Paused</Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="font-medium">Weekend Schedule</p>
+                <p className="text-sm text-muted-foreground">Sat-Sun → Reduce posting frequency by 50%</p>
+              </div>
+              <Badge variant="outline">Paused</Badge>
             </CardContent>
           </Card>
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@repo/ui'
 import {
   Lightbulb01Icon,
@@ -28,6 +28,8 @@ const severityColors = {
 }
 
 export default function InsightsPage() {
+  useEffect(() => { document.title = 'AI Insights | Coff' }, [])
+
   const [insights, setInsights] = useState<AIInsight[]>(mockAIInsights)
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedInsight, setSelectedInsight] = useState<AIInsight | null>(null)

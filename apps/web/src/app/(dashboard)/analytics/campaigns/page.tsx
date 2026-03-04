@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { ChevronDown01Icon } from '@/lib/icons'
@@ -11,6 +11,8 @@ type SortField = 'campaignName' | 'reach' | 'engagement' | 'ctr' | 'clicks' | 's
 type SortDirection = 'asc' | 'desc'
 
 export default function CampaignAnalyticsPage() {
+  useEffect(() => { document.title = 'Campaign Analytics | Coff' }, [])
+
   const [sortField, setSortField] = useState<SortField>('score')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([])

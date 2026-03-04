@@ -33,6 +33,8 @@ import {
 type ViewMode = 'month' | 'week'
 
 export default function PublishCalendarPage() {
+  useEffect(() => { document.title = 'Content Calendar | Coff' }, [])
+
   const [viewMode, setViewMode] = useState<ViewMode>('month')
   const [currentDate, setCurrentDate] = useState(() => new Date())
   const [posts, setPosts] = useState<ScheduledPost[]>(mockScheduledPosts)
@@ -243,6 +245,7 @@ export default function PublishCalendarPage() {
                         <button
                           key={post.id}
                           onClick={() => setSelectedPost(post)}
+                          title={post.caption}
                           className="flex w-full items-center gap-1 rounded border border-border bg-card p-1 text-xs transition-colors hover:bg-muted"
                         >
                           <div className="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-muted">
@@ -259,6 +262,7 @@ export default function PublishCalendarPage() {
                               minute: '2-digit',
                             })}
                           </span>
+                          <span className="hidden sm:inline truncate">{post.caption.slice(0, 20)}</span>
                         </button>
                       )
                     })}

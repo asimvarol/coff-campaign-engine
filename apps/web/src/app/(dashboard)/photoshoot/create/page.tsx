@@ -18,6 +18,8 @@ import { TemplateSelector } from '@/components/photoshoot/template-selector'
  * Allows users to upload product image and select templates
  */
 export default function CreatePhotoshootPage() {
+  useEffect(() => { document.title = 'Create Photoshoot | Coff' }, [])
+
   const router = useRouter()
   const [productImage, setProductImage] = useState('')
   const [selectedTemplates, setSelectedTemplates] = useState<PhotoshootTemplate[]>([])

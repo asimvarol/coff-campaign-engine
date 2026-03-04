@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { AnalyticsDateRange } from '@repo/types'
 import { AnalyticsCampaignComparison } from '@/components/analytics/analytics-campaign-comparison'
 import { AnalyticsAIInsights } from '@/components/analytics/analytics-ai-insights'
@@ -19,6 +19,8 @@ import { LineChart } from '@/components/analytics/line-chart'
 import { DonutChart } from '@/components/analytics/donut-chart'
 
 export default function AnalyticsPage() {
+  useEffect(() => { document.title = 'Analytics | Coff' }, [])
+
   const [dateRange, setDateRange] = useState<AnalyticsDateRange>('30d')
 
   const overview = mockAnalyticsOverview

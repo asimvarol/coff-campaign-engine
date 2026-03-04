@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
 export default function HomePage() {
-  redirect('/campaigns')
+  // Redirect to login page (or campaigns if authenticated)
+  redirect('/login')
 }

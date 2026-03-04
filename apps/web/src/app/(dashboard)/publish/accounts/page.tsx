@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Button,
   Card,
@@ -29,6 +29,8 @@ import { toast } from 'sonner'
 import { Link01Icon, Delete02Icon, CheckmarkCircle02Icon, AlertCircle01Icon } from '@/lib/icons'
 
 export default function PublishAccountsPage() {
+  useEffect(() => { document.title = 'Connected Accounts | Coff' }, [])
+
   const [accounts, setAccounts] = useState(mockConnectedAccounts)
   const [connectDialogOpen, setConnectDialogOpen] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)

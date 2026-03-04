@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Input, Card, ProgressStepper, type Step } from '@repo/ui'
 import { ArrowRight01Icon, Loader2Icon, Sparkles01Icon } from '@/lib/icons'
@@ -14,6 +14,8 @@ const ANALYSIS_STEPS: Step[] = [
 ]
 
 export default function NewBrandPage() {
+  useEffect(() => { document.title = 'New Brand | Coff' }, [])
+
   const router = useRouter()
   const [url, setUrl] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)

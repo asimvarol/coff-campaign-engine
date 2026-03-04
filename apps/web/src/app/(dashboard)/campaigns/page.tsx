@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
 import { useBrand } from '@/lib/brand-context'
+import { formatDate } from '@/lib/format-date'
 
 interface Campaign {
   id: string
@@ -39,6 +40,8 @@ const objectiveLabels: Record<string, string> = {
 }
 
 export default function CampaignsPage() {
+  useEffect(() => { document.title = 'Campaigns | Coff' }, [])
+
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const { selectedBrandId } = useBrand()
@@ -152,7 +155,7 @@ export default function CampaignsPage() {
 
                   <div className="flex items-center justify-between border-t pt-4 text-sm text-muted-foreground">
                     <span>{campaign.creativeCount} creatives</span>
-                    <span>{new Date(campaign.updatedAt).toLocaleDateString()}</span>
+                    <span>{formatDate(campaign.updatedAt)}</span>
                   </div>
                 </div>
               </Link>

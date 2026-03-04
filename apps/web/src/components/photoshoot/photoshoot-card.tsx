@@ -110,7 +110,7 @@ export function PhotoshootCard({ photoshoot }: PhotoshootCardProps) {
             <span>
               {photoshoot.variants.length > 0
                 ? `${photoshoot.variants.length} variants`
-                : 'Generating...'}
+                : photoshoot.status === 'GENERATING' ? 'Generating... ~30s remaining' : 'Processing...'}
             </span>
             <span>{photoshoot.creditCost} credits</span>
           </div>

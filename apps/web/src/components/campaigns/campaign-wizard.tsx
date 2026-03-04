@@ -10,6 +10,7 @@ import { useBrand } from '@/lib/brand-context'
 import type { CampaignConcept } from '@repo/types'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
+import Link from 'next/link'
 import { toast } from 'sonner'
 
 const OBJECTIVES = [
@@ -303,9 +304,55 @@ export function CampaignWizard() {
     <div className="mx-auto max-w-5xl">
       {/* Progress */}
       <div className="mb-8">
-        <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
-          <span>Step {step} of 5</span>
-          <span>{['Brief', 'Concepts', 'Generation', 'Review', 'Complete'][step - 1]}</span>
+        <div className="mb-4 flex items-center justify-between">
+          {['Brief', 'Concepts', 'Generation', 'Review', 'Complete'].map((name, idx) => {
+            const stepNum = idx + 1
+            const isCompleted = step > stepNum
+            const isCurrent = step === stepNum
+            const isFuture = step < stepNum
+            return (
+              <div key={name} className="flex flex-1 items-center">
+                <div className="flex flex-col items-center gap-1">
+                  {isCompleted ? (
+                    <button
+                      onClick={() => setStep(stepNum)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/80"
+                    >
+                      <CheckmarkCircle02Icon className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+                        isCurrent
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {stepNum}
+                    </div>
+                  )}
+                  <span
+                    className={`text-xs ${
+                      isCompleted
+                        ? 'font-medium text-primary'
+                        : isCurrent
+                          ? 'font-medium text-foreground'
+                          : 'text-muted-foreground'
+                    }`}
+                  >
+                    {name}
+                  </span>
+                </div>
+                {idx < 4 && (
+                  <div
+                    className={`mx-2 h-px flex-1 ${
+                      step > stepNum ? 'bg-primary' : 'bg-border'
+                    }`}
+                  />
+                )}
+              </div>
+            )
+          })}
         </div>
         <Progress value={(step / 5) * 100} className="h-2" />
       </div>
@@ -371,6 +418,7 @@ export function CampaignWizard() {
                 {PLATFORMS.map(platform => (
                   <label
                     key={platform.id}
+                    htmlFor={`platform-${platform.id}`}
                     className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all ${
                       state.platforms.includes(platform.id)
                         ? 'border-primary bg-primary/5'
@@ -378,6 +426,7 @@ export function CampaignWizard() {
                     }`}
                   >
                     <input
+                      id={`platform-${platform.id}`}
                       type="checkbox"
                       checked={state.platforms.includes(platform.id)}
                       onChange={(e) => {
@@ -409,21 +458,31 @@ export function CampaignWizard() {
               />
             </div>
 
-            <div className="flex justify-end gap-3">
-              <Button
-                size="lg"
-                onClick={handleGenerateConcepts}
-                disabled={!canProceed() || isGenerating}
-              >
-                {isGenerating ? (
-                  <>Generating Concepts...</>
-                ) : (
-                  <>
-                    Generate Concepts (5 credits)
-                    <ArrowRight01Icon className="ml-2 h-4 w-4" />
-                  </>
-                )}
+            <div className="flex items-center justify-between gap-3">
+              <Button variant="outline" asChild>
+                <Link href="/campaigns">Cancel</Link>
               </Button>
+              <div className="flex flex-col items-end gap-1">
+                <Button
+                  size="lg"
+                  onClick={handleGenerateConcepts}
+                  disabled={!canProceed() || isGenerating}
+                >
+                  {isGenerating ? (
+                    <>Generating Concepts...</>
+                  ) : (
+                    <>
+                      Generate Concepts (5 credits)
+                      <ArrowRight01Icon className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+                {!canProceed() && (
+                  <p className="text-xs text-muted-foreground">
+                    Select an objective and at least one platform to continue
+                  </p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

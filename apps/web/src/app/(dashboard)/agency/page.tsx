@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Button } from '@repo/ui'
 import { AgencyOverview } from '@/components/agency/agency-overview'
 import { AgencyBrandsList } from '@/components/agency/agency-brands-list'
@@ -7,6 +8,8 @@ import { AgencyActivityLog } from '@/components/agency/agency-activity-log'
 import { mockAgency, mockAgencyBrands, mockTeamActivities } from '@/lib/mock-data/agency'
 
 export default function AgencyPage() {
+  useEffect(() => { document.title = 'Agency | Coff' }, [])
+
   const kpis = [
     { label: 'Client Brands', value: mockAgencyBrands.length, subtitle: 'Unlimited on Pro' },
     { label: 'Team Members', value: mockAgency.members.length, subtitle: 'of 10 slots' },

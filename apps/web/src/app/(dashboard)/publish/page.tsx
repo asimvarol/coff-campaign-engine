@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { Calendar03Icon, Link01Icon, Share08Icon, AlertCircle01Icon } from '@/lib/icons'
 import { getPublishStats, getRecentActivity, getPlatform } from '@/lib/mock-data/publish'
+import { formatDateTime } from '@/lib/format-date'
+
+export const metadata = { title: 'Publish Hub | Coff' }
 
 export default function PublishPage() {
   const stats = getPublishStats()
@@ -122,12 +125,7 @@ export default function PublishPage() {
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {isUpcoming ? 'Scheduled for' : 'Published'}{' '}
-                        {date.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        {formatDateTime(post.scheduledFor)}
                       </span>
                     </div>
                     <p className="line-clamp-2 text-sm text-muted-foreground">
@@ -147,6 +145,11 @@ export default function PublishPage() {
                          post.status === 'failed' ? '✗ Failed' : 
                          '◷ Scheduled'}
                       </span>
+                      {post.status === 'failed' && (
+                        <span className="text-xs text-destructive">
+                          {post.error || 'Connection to platform expired. Reconnect account.'}
+                        </span>
+                      )}
                       {post.postUrl && (
                         <a
                           href={post.postUrl}

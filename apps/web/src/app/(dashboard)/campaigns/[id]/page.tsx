@@ -9,6 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { use } from 'react'
+import { formatDate } from '@/lib/format-date'
 
 interface Campaign {
   id: string
@@ -59,6 +60,8 @@ const objectiveLabels: Record<string, string> = {
 }
 
 export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  useEffect(() => { document.title = 'Campaign Detail | Coff' }, [])
+
   const { id } = use(params)
   const router = useRouter()
   const [campaign, setCampaign] = useState<Campaign | null>(null)
@@ -180,7 +183,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 <span>•</span>
                 <span>{campaignCreatives.length} creatives</span>
                 <span>•</span>
-                <span>Updated {new Date(campaign.updatedAt).toLocaleDateString()}</span>
+                <span>Updated {formatDate(campaign.updatedAt)}</span>
               </div>
             </div>
           </div>
@@ -194,7 +197,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
               <Copy01Icon className="mr-2 h-4 w-4" />
               Duplicate
             </Button>
-            <Button variant="outline" size="sm" aria-label="Download all creatives">
+            <Button variant="outline" size="sm" aria-label="Download all creatives" disabled={campaignCreatives.length === 0} title={campaignCreatives.length === 0 ? 'No creatives to download' : ''}>
               <Download04Icon className="mr-2 h-4 w-4" />
               Download All
             </Button>

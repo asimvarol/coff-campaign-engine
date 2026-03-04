@@ -18,6 +18,8 @@ interface Brand {
 }
 
 export default function BrandPage() {
+  useEffect(() => { document.title = 'Brand DNA | Coff' }, [])
+
   const [brands, setBrands] = useState<Brand[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
