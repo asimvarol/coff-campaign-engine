@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@repo/ui'
 import {
   Lightbulb01Icon,
   AlertCircle01Icon,
   TrendUp01Icon,
   Eye01Icon,
   Magic01Icon,
+  Loading03Icon,
 } from '@/lib/icons'
 import { mockAIInsights } from '@/lib/mock-data/analytics'
 import type { AIInsight } from '@repo/types'
@@ -111,6 +112,14 @@ export default function InsightsPage() {
         </Card>
       </div>
 
+      {/* Loading indicator */}
+      {isGenerating && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loading03Icon className="h-4 w-4 animate-spin" />
+          <span>Generating new insights...</span>
+        </div>
+      )}
+
       {/* Insights List */}
       <div className="space-y-4">
         {insights.map((insight) => {
@@ -203,20 +212,17 @@ export default function InsightsPage() {
         </Card>
       )}
 
-      {/* Detail Modal (simplified) */}
-      {selectedInsight && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-          onClick={() => setSelectedInsight(null)}
-        >
-          <Card className="w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
-            <CardHeader>
-              <CardTitle>{selectedInsight.title}</CardTitle>
-              <CardDescription>
-                {new Date(selectedInsight.createdAt).toLocaleString()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      {/* Detail Modal */}
+      <Dialog open={!!selectedInsight} onOpenChange={() => setSelectedInsight(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedInsight?.title}</DialogTitle>
+            <DialogDescription>
+              {selectedInsight && new Date(selectedInsight.createdAt).toLocaleString()}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedInsight && (
+            <div className="space-y-4">
               <div>
                 <h4 className="mb-2 font-medium">Description</h4>
                 <p className="text-sm text-muted-foreground">{selectedInsight.description}</p>
@@ -237,20 +243,15 @@ export default function InsightsPage() {
               )}
 
               <div className="flex gap-2 pt-4">
-                <button className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                  Take Action
-                </button>
-                <button
-                  onClick={() => setSelectedInsight(null)}
-                  className="rounded-md bg-muted px-4 py-2 text-sm font-medium hover:bg-muted/80"
-                >
+                <Button className="flex-1">Take Action</Button>
+                <Button variant="secondary" onClick={() => setSelectedInsight(null)}>
                   Close
-                </button>
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

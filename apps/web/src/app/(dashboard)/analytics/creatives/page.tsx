@@ -59,7 +59,7 @@ export default function CreativeAnalyticsPage() {
       <div className="mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setPerformanceFilter('all')}
-          className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
             performanceFilter === 'all'
               ? 'border-primary bg-primary text-primary-foreground'
               : 'border-border bg-background hover:bg-muted'
@@ -73,7 +73,7 @@ export default function CreativeAnalyticsPage() {
             <button
               key={filter}
               onClick={() => setPerformanceFilter(filter)}
-              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                 performanceFilter === filter
                   ? performanceBadges[filter].color
                   : 'border-border bg-background hover:bg-muted'

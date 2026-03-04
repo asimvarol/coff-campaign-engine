@@ -226,7 +226,7 @@ export default function PublishCalendarPage() {
                     )}
                   </div>
                   {posts.length === 0 && (
-                    <button className="hidden w-full rounded border-2 border-dashed border-transparent py-2 text-xs text-muted-foreground transition-colors group-hover:border-border group-hover:text-foreground">
+                    <button className="w-full rounded border-2 border-dashed border-transparent py-2 text-xs text-muted-foreground opacity-0 transition-all duration-200 group-hover:border-border group-hover:text-foreground group-hover:opacity-100">
                       + Add Post
                     </button>
                   )}

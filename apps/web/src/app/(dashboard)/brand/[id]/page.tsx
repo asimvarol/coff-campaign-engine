@@ -211,7 +211,13 @@ export default function BrandDetailPage() {
           </div>
 
           {/* Upload Card */}
-          <div className="mb-5 flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors hover:border-primary/50">
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="Upload brand images"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click() } }}
+            className="mb-5 flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Upload04Icon className="h-6 w-6" />
               <span className="text-sm font-medium">Upload Images</span>

@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@repo/ui'
+import { Download04Icon } from '@/lib/icons'
 import { mockAgencyBrands } from '@/lib/mock-data/agency'
 
 export default function AgencyReportsPage() {
@@ -27,8 +28,8 @@ export default function AgencyReportsPage() {
                 <span>{brand.creativeCount} creatives</span>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 text-xs">↓ Weekly</Button>
-                <Button variant="outline" size="sm" className="flex-1 text-xs">↓ Monthly</Button>
+                <Button variant="outline" size="sm" className="flex-1 text-xs"><Download04Icon className="mr-1 h-3 w-3" />Download Weekly</Button>
+                <Button variant="outline" size="sm" className="flex-1 text-xs"><Download04Icon className="mr-1 h-3 w-3" />Download Monthly</Button>
               </div>
             </CardContent>
           </Card>

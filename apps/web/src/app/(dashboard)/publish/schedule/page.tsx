@@ -17,6 +17,7 @@ import {
   Badge,
 } from '@repo/ui'
 import { platforms, mockBestTimes, mockConnectedAccounts, type Platform } from '@/lib/mock-data/publish'
+import { toast } from 'sonner'
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
@@ -73,7 +74,7 @@ export default function SchedulePostPage() {
 
   const handleSchedule = async () => {
     // Mock: Just redirect to queue
-    alert(`Scheduled ${selectedPlatforms.length} post(s)!`)
+    toast.success(`Scheduled ${selectedPlatforms.length} post(s)!`)
     router.push('/publish/queue')
   }
 
@@ -81,7 +82,7 @@ export default function SchedulePostPage() {
     const bestTime = mockBestTimes.find(t => t.platform === platform)
     if (bestTime) {
       setScheduledTime(bestTime.time)
-      alert(`Best time for ${platform}: ${bestTime.time} (${bestTime.reason})`)
+      toast.info(`Best time for ${platform}: ${bestTime.time} (${bestTime.reason})`)
     }
   }
 
