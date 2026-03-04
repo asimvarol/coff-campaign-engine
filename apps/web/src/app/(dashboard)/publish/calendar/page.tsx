@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import {
   Button,
   Card,
@@ -9,9 +10,18 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent as AlertDialogContentUI,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Badge,
 } from '@repo/ui'
-import { mockScheduledPosts, getPlatform } from '@/lib/mock-data/publish'
+import { mockScheduledPosts, getPlatform, type ScheduledPost } from '@/lib/mock-data/publish'
+import { toast } from 'sonner'
 import {
   ChevronLeft01Icon,
   ChevronRight01Icon,
@@ -25,7 +35,25 @@ type ViewMode = 'month' | 'week'
 export default function PublishCalendarPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('month')
   const [currentDate, setCurrentDate] = useState(() => new Date())
-  const [selectedPost, setSelectedPost] = useState<typeof mockScheduledPosts[0] | null>(null)
+  const [posts, setPosts] = useState<ScheduledPost[]>(mockScheduledPosts)
+  const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null)
+  const [cancelAlertOpen, setCancelAlertOpen] = useState(false)
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch('/api/publish/posts')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.data && data.data.length > 0) {
+            setPosts(data.data)
+            return
+          }
+        }
+      } catch {}
+    }
+    fetchPosts()
+  }, [])
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate)
@@ -80,8 +108,21 @@ export default function PublishCalendarPage() {
     return days
   }
 
+  const handleCancelPost = async () => {
+    if (!selectedPost) return
+    try {
+      await fetch(`/api/publish/posts/${selectedPost.id}`, { method: 'DELETE' })
+      setPosts(prev => prev.filter(p => p.id !== selectedPost.id))
+      toast.success('Post cancelled')
+    } catch {
+      toast.error('Failed to cancel post')
+    }
+    setSelectedPost(null)
+    setCancelAlertOpen(false)
+  }
+
   const getPostsForDate = (date: Date) => {
-    return mockScheduledPosts.filter((post) => {
+    return posts.filter((post) => {
       const postDate = new Date(post.scheduledFor)
       return (
         postDate.getFullYear() === date.getFullYear() &&
@@ -104,7 +145,7 @@ export default function PublishCalendarPage() {
   const weekDays = viewMode === 'week' ? getWeekDays() : []
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -154,9 +195,11 @@ export default function PublishCalendarPage() {
             <ChevronRight01Icon className="h-4 w-4" />
           </Button>
         </div>
-        <Button>
-          <Calendar03Icon className="mr-2 h-4 w-4" />
-          Schedule Post
+        <Button asChild>
+          <Link href="/publish/schedule">
+            <Calendar03Icon className="mr-2 h-4 w-4" />
+            Schedule Post
+          </Link>
         </Button>
       </div>
 
@@ -353,11 +396,13 @@ export default function PublishCalendarPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">
-                  <Edit02Icon className="mr-2 h-4 w-4" />
-                  Edit
+                <Button variant="outline" className="flex-1" asChild>
+                  <Link href="/publish/schedule">
+                    <Edit02Icon className="mr-2 h-4 w-4" />
+                    Edit
+                  </Link>
                 </Button>
-                <Button variant="destructive">
+                <Button variant="destructive" onClick={() => setCancelAlertOpen(true)}>
                   <Delete02Icon className="mr-2 h-4 w-4" />
                   Cancel
                 </Button>
@@ -366,6 +411,23 @@ export default function PublishCalendarPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={cancelAlertOpen} onOpenChange={setCancelAlertOpen}>
+        <AlertDialogContentUI>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this scheduled post? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelPost} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Cancel Post
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentUI>
+      </AlertDialog>
     </div>
   )
 }

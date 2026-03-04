@@ -3,7 +3,7 @@ import { PlusIcon, ZapIcon, AlertCircleIcon, TrendingUpIcon } from '@/lib/icons'
 
 export default function AutopilotPage() {
   return (
-    <div className="p-8">
+    <div >
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Autopilot</h1>

@@ -1,6 +1,6 @@
 export default function CampaignsLoading() {
   return (
-    <div className="p-8">
+    <div >
       {/* Header Skeleton */}
       <div className="mb-8 flex items-center justify-between">
         <div>

@@ -1,7 +1,5 @@
 'use client'
 
-import { AnalyticsTopCreatives } from '@/components/analytics/analytics-top-creatives'
-import { mockTopCreatives } from '@/lib/mock-data/analytics'
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
@@ -46,7 +44,7 @@ export default function CreativeAnalyticsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div >
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Creative Analytics</h1>

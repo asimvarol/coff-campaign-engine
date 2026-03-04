@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import {
   Button,
   Card,
@@ -13,8 +14,17 @@ import {
   SelectValue,
   Badge,
   Checkbox,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@repo/ui'
 import { mockScheduledPosts, getPlatform, type PostStatus, type Platform } from '@/lib/mock-data/publish'
+import { toast } from 'sonner'
 import {
   Search01Icon,
   Filter01Icon,
@@ -30,6 +40,25 @@ export default function PublishQueuePage() {
   const [filterPlatform, setFilterPlatform] = useState<Platform | '__all__'>('__all__')
   const [filterStatus, setFilterStatus] = useState<PostStatus | '__all__'>('__all__')
   const [searchQuery, setSearchQuery] = useState('')
+  const [cancelAlertOpen, setCancelAlertOpen] = useState(false)
+  const [cancelTarget, setCancelTarget] = useState<'single' | 'bulk'>('single')
+  const [cancelSingleId, setCancelSingleId] = useState('')
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch('/api/publish/posts')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.data && data.data.length > 0) {
+            setPosts(data.data)
+            return
+          }
+        }
+      } catch {}
+    }
+    fetchPosts()
+  }, [])
 
   const filteredPosts = posts.filter((post) => {
     const platformMatch = filterPlatform === '__all__' || post.platform === filterPlatform
@@ -55,24 +84,44 @@ export default function PublishQueuePage() {
   }
 
   const handleCancelSelected = () => {
-    if (confirm(`Cancel ${selectedIds.length} selected post(s)?`)) {
-      setPosts(posts.filter((p) => !selectedIds.includes(p.id)))
-      setSelectedIds([])
-    }
+    setCancelTarget('bulk')
+    setCancelAlertOpen(true)
   }
 
-  const handleRetry = (id: string) => {
+  const handleConfirmCancel = async () => {
+    if (cancelTarget === 'bulk') {
+      for (const id of selectedIds) {
+        await fetch(`/api/publish/posts/${id}`, { method: 'DELETE' }).catch(() => {})
+      }
+      setPosts(posts.filter((p) => !selectedIds.includes(p.id)))
+      setSelectedIds([])
+      toast.success(`Cancelled ${selectedIds.length} post(s)`)
+    } else {
+      await fetch(`/api/publish/posts/${cancelSingleId}`, { method: 'DELETE' }).catch(() => {})
+      setPosts(posts.filter((p) => p.id !== cancelSingleId))
+      toast.success('Post cancelled')
+    }
+    setCancelAlertOpen(false)
+  }
+
+  const handleRetry = async (id: string) => {
+    await fetch(`/api/publish/posts/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'queued', error: undefined }),
+    }).catch(() => {})
     setPosts(
       posts.map((p) =>
         p.id === id ? { ...p, status: 'queued' as PostStatus, error: undefined } : p
       )
     )
+    toast.success('Post queued for retry')
   }
 
   const handleCancel = (id: string) => {
-    if (confirm('Cancel this scheduled post?')) {
-      setPosts(posts.filter((p) => p.id !== id))
-    }
+    setCancelSingleId(id)
+    setCancelTarget('single')
+    setCancelAlertOpen(true)
   }
 
   const sortedPosts = [...filteredPosts].sort((a, b) => {
@@ -110,7 +159,7 @@ export default function PublishQueuePage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -119,9 +168,11 @@ export default function PublishQueuePage() {
             Manage scheduled and queued posts
           </p>
         </div>
-        <Button>
-          <Calendar03Icon className="mr-2 h-4 w-4" />
-          Schedule Post
+        <Button asChild>
+          <Link href="/publish/schedule">
+            <Calendar03Icon className="mr-2 h-4 w-4" />
+            Schedule Post
+          </Link>
         </Button>
       </div>
 
@@ -176,8 +227,8 @@ export default function PublishQueuePage() {
               {selectedIds.length} post(s) selected
             </span>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                Reschedule
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/publish/schedule">Reschedule</Link>
               </Button>
               <Button
                 variant="destructive"
@@ -293,8 +344,8 @@ export default function PublishQueuePage() {
                     </Button>
                   ) : post.status === 'scheduled' || post.status === 'queued' ? (
                     <>
-                      <Button variant="outline" size="sm">
-                        <Edit02Icon className="h-4 w-4" />
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href="/publish/schedule"><Edit02Icon className="h-4 w-4" /></Link>
                       </Button>
                       <Button
                         variant="destructive"
@@ -323,6 +374,23 @@ export default function PublishQueuePage() {
           )}
         </div>
       </Card>
+
+      <AlertDialog open={cancelAlertOpen} onOpenChange={setCancelAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel {cancelTarget === 'bulk' ? `${selectedIds.length} Post(s)` : 'Post'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel {cancelTarget === 'bulk' ? `${selectedIds.length} selected post(s)` : 'this scheduled post'}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Cancel {cancelTarget === 'bulk' ? 'Selected' : 'Post'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

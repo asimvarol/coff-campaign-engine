@@ -61,7 +61,7 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div >
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Campaigns</h1>

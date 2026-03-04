@@ -2,7 +2,7 @@ import { Card, CardHeader, Skeleton } from '@repo/ui'
 
 export default function PublishLoading() {
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Skeleton className="h-8 w-32" />

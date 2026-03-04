@@ -1,4 +1,6 @@
 import { Metadata, Viewport } from 'next'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { AuthProvider } from '@/lib/auth-provider'
 import { Toaster } from 'sonner'
 import './globals.css'
@@ -78,6 +80,8 @@ export default function RootLayout({
       <body>
         <AuthProvider>{children}</AuthProvider>
         <Toaster richColors />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

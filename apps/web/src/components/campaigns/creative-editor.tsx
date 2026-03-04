@@ -12,6 +12,8 @@ import {
 } from '@/lib/icons'
 import { MockCreative } from '@/lib/mock-data/campaigns'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@repo/ui'
+import { toast } from 'sonner'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -23,6 +25,52 @@ interface CreativeEditorProps {
 export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
   const [editedCreative, setEditedCreative] = useState(creative)
   const [activeTab, setActiveTab] = useState<'image' | 'text' | 'overlay' | 'cta'>('text')
+  const [isRegenerating, setIsRegenerating] = useState(false)
+
+  const handleRegenerate = async () => {
+    setIsRegenerating(true)
+    try {
+      const sizeMap: Record<string, string> = {
+        instagram: 'square_hd', facebook: 'landscape_16_9', tiktok: 'portrait_16_9',
+        linkedin: 'landscape_4_3', x: 'landscape_16_9', pinterest: 'portrait_4_3',
+      }
+      const res = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `Marketing creative: ${editedCreative.header.text}. Professional, modern design.`,
+          negative_prompt: 'text, watermark, logo, blurry, low quality',
+          image_size: sizeMap[editedCreative.platform] || 'square_hd',
+          num_images: 1,
+        }),
+      })
+      if (!res.ok) throw new Error('Generation failed')
+      const data = await res.json()
+      const imageUrl = data?.images?.[0]?.url
+      if (!imageUrl) throw new Error('No image returned')
+      setEditedCreative(prev => ({ ...prev, imageUrl, version: prev.version + 1 }))
+      toast.success('Creative regenerated')
+    } catch {
+      toast.error('Failed to regenerate creative')
+    } finally {
+      setIsRegenerating(false)
+    }
+  }
+
+  const handleDownload = async () => {
+    try {
+      const res = await fetch(editedCreative.imageUrl)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${editedCreative.platform}-${editedCreative.format}-v${editedCreative.version}.png`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      toast.error('Failed to download creative')
+    }
+  }
 
   const updateHeader = (updates: Partial<typeof editedCreative.header>) => {
     setEditedCreative(prev => ({
@@ -73,11 +121,11 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" aria-label="Regenerate creative image">
+            <Button variant="outline" size="sm" aria-label="Regenerate creative image" onClick={handleRegenerate} disabled={isRegenerating}>
               <RefreshIcon className="mr-2 h-4 w-4" />
-              Regenerate
+              {isRegenerating ? 'Regenerating...' : 'Regenerate'}
             </Button>
-            <Button size="sm" aria-label="Download creative">
+            <Button size="sm" aria-label="Download creative" onClick={handleDownload}>
               <Download04Icon className="mr-2 h-4 w-4" />
               Download
             </Button>
@@ -408,10 +456,17 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                     />
                   </div>
 
-                  <Button variant="outline" className="w-full" aria-label="Generate CTA button variations with AI">
-                    <Magic01Icon className="mr-2 h-4 w-4" />
-                    Generate CTA Variations
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" className="w-full" disabled aria-label="Generate CTA button variations with AI">
+                          <Magic01Icon className="mr-2 h-4 w-4" />
+                          Generate CTA Variations
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Coming soon</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
             )}
@@ -455,10 +510,17 @@ export function CreativeEditor({ creative, campaignId }: CreativeEditorProps) {
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full" aria-label="Fix layout with AI">
-                  <Magic01Icon className="mr-2 h-4 w-4" />
-                  Fix Layout (AI)
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" className="w-full" disabled aria-label="Fix layout with AI">
+                        <Magic01Icon className="mr-2 h-4 w-4" />
+                        Fix Layout (AI)
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Coming soon</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             )}
 

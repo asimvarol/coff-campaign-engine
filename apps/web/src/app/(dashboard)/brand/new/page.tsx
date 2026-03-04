@@ -66,7 +66,7 @@ export default function NewBrandPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-2xl">
         {!isAnalyzing ? (
           <Card className="p-12">

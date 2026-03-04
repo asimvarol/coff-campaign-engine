@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
+import { toast } from 'sonner'
 import { FileText01Icon, Download04Icon, Calendar03Icon } from '@/lib/icons'
 import {
   mockReportTemplates,
@@ -23,12 +24,11 @@ export default function ReportsPage() {
     setIsGenerating(false)
     setSelectedTemplate(null)
     
-    // Would normally add to reports history here
-    alert('Report generated! Download would start here.')
+    toast.success('Report generated successfully!')
   }
 
   return (
-    <div className="p-8">
+    <div >
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Reports</h1>

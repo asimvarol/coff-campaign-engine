@@ -7,7 +7,7 @@ import { mockAgencyBrands } from '@/lib/mock-data/agency'
 
 export default function AgencyReportsPage() {
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Reports</h1>
         <p className="text-sm text-muted-foreground">Generate branded PDF reports for your clients</p>

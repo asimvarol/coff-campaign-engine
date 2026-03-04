@@ -1,11 +1,9 @@
 'use client'
 
-import { AnalyticsCampaignComparison } from '@/components/analytics/analytics-campaign-comparison'
-import { mockCampaignAnalytics } from '@/lib/mock-data/analytics'
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
-import { ChevronDown01Icon, ChevronDown01Icon as ChevronUp01Icon } from '@/lib/icons'
+import { ChevronDown01Icon } from '@/lib/icons'
 import { mockCampaignMetrics } from '@/lib/mock-data/analytics'
 import type { CampaignMetrics } from '@repo/types'
 
@@ -59,15 +57,13 @@ export default function CampaignAnalyticsPage() {
 
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return null
-    return sortDirection === 'asc' ? (
-      <ChevronUp01Icon size={14} className="inline rotate-180" />
-    ) : (
-      <ChevronDown01Icon size={14} className="inline" />
+    return (
+      <ChevronDown01Icon size={14} className={`inline ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
     )
   }
 
   return (
-    <div className="p-8">
+    <div >
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Campaign Analytics</h1>

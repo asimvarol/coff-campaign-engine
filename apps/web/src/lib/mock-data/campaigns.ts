@@ -401,7 +401,7 @@ export async function generateMockCreatives(
         cta: {
           text: 'Shop Now',
           style: 'primary',
-          url: 'https://example.com',
+          url: '',
           visible: true,
         },
         overlay: {
@@ -441,7 +441,7 @@ export async function generateMockCreatives(
         cta: {
           text: 'Learn More',
           style: 'primary',
-          url: 'https://example.com',
+          url: '',
           visible: true,
         },
         overlay: {
@@ -482,7 +482,7 @@ export async function generateMockCreatives(
         cta: {
           text: 'Shop Now',
           style: 'primary',
-          url: 'https://example.com',
+          url: '',
           visible: true,
         },
         overlay: {
@@ -523,7 +523,7 @@ export async function generateMockCreatives(
         cta: {
           text: 'Watch More',
           style: 'secondary',
-          url: 'https://example.com',
+          url: '',
           visible: true,
         },
         overlay: {

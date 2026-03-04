@@ -149,15 +149,16 @@ export const mockAnalyticsOverview: AnalyticsOverview = {
   totalSavesChange: 31,
 }
 
-// Reach Trend (Last 30 days)
+// Reach Trend (Last 30 days) — deterministic
 export const mockReachTrend: ReachTrendDataPoint[] = Array.from({ length: 30 }, (_, i) => {
-  const date = new Date()
-  date.setDate(date.getDate() - (29 - i))
+  const date = new Date('2026-02-01')
+  date.setDate(date.getDate() + i)
+  const base = 500 + Math.sin(i / 3) * 200
   return {
     date: date.toISOString().split('T')[0],
-    reach: Math.floor(300 + Math.random() * 500 + Math.sin(i / 3) * 200),
-    engagement: Math.floor(20 + Math.random() * 40 + Math.sin(i / 3) * 15),
-    clicks: Math.floor(5 + Math.random() * 15),
+    reach: Math.round(base + ((i * 137 + 43) % 300)),
+    engagement: Math.round((base + ((i * 89 + 67) % 150)) * 0.06),
+    clicks: Math.round(8 + ((i * 53 + 17) % 12)),
   }
 })
 

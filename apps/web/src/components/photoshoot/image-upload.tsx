@@ -54,12 +54,11 @@ export function ImageUpload({ value, onChange, onError }: ImageUploadProps) {
         return
       }
 
-      // Create preview URL
+      // Create a local blob URL for preview. The generate-image API is prompt-based
+      // and does not require an uploaded image URL, so blob URL is sufficient here.
       const previewUrl = URL.createObjectURL(file)
       onChange(previewUrl)
 
-      // TODO: Upload to cloud storage and get permanent URL
-      // For now, just use the preview URL
       setIsValidating(false)
     },
     [validateFile, onChange, onError]

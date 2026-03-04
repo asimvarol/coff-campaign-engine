@@ -105,7 +105,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
   if (isLoading || !campaign) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="space-y-6">
         <div className="flex items-start gap-4">
           <Skeleton className="h-16 w-16 rounded-lg" />
           <div className="space-y-2">
@@ -133,7 +133,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   }, {} as Record<string, Creative[]>)
 
   return (
-    <div className="p-8">
+    <div >
       {/* Header */}
       <div className="mb-8">
         <div className="mb-4 flex items-start justify-between">
@@ -200,19 +200,19 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
       {/* Stats */}
       <div className="mb-8 grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">24.5K</div>
-          <div className="text-sm text-muted-foreground">Total Reach</div>
+          <div className="text-2xl font-bold">{campaign.creativeCount}</div>
+          <div className="text-sm text-muted-foreground">Creatives</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">1,247</div>
-          <div className="text-sm text-muted-foreground">Engagement</div>
+          <div className="text-2xl font-bold">{campaign.platforms.length}</div>
+          <div className="text-sm text-muted-foreground">Platforms</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">3.2%</div>
+          <div className="text-sm text-muted-foreground">No data yet</div>
           <div className="text-sm text-muted-foreground">CTR</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">342</div>
+          <div className="text-sm text-muted-foreground">No data yet</div>
           <div className="text-sm text-muted-foreground">Clicks</div>
         </div>
       </div>

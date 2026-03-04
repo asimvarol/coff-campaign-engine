@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -42,11 +42,36 @@ export default function SchedulePostPage() {
   const [caption, setCaption] = useState('')
   const [platformCaptions, setPlatformCaptions] = useState<Record<string, string>>({})
 
-  const mockCreatives = [
-    { id: '1', thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=200&fit=crop', name: 'Creative 1' },
-    { id: '2', thumbnail: 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=200&h=200&fit=crop', name: 'Creative 2' },
-    { id: '3', thumbnail: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=200&h=200&fit=crop', name: 'Creative 3' },
-  ]
+  const [creatives, setCreatives] = useState<Array<{ id: string; thumbnail: string; name: string }>>([])
+
+  useEffect(() => {
+    const fetchCreatives = async () => {
+      try {
+        const res = await fetch('/api/campaigns')
+        if (res.ok) {
+          const data = await res.json()
+          const items = (data.data || []).flatMap((c: any) =>
+            (c.creatives || []).map((cr: any) => ({
+              id: cr.id,
+              thumbnail: cr.imageUrl || cr.thumbnail || '',
+              name: cr.headline || cr.name || 'Creative',
+            }))
+          )
+          if (items.length > 0) {
+            setCreatives(items)
+            return
+          }
+        }
+      } catch {}
+      // Fallback
+      setCreatives([
+        { id: '1', thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=200&fit=crop', name: 'Creative 1' },
+        { id: '2', thumbnail: 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=200&h=200&fit=crop', name: 'Creative 2' },
+        { id: '3', thumbnail: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=200&h=200&fit=crop', name: 'Creative 3' },
+      ])
+    }
+    fetchCreatives()
+  }, [])
 
   const connectedPlatforms = platforms.filter(p => 
     mockConnectedAccounts.some(acc => acc.platform === p.id && acc.status === 'connected')
@@ -73,9 +98,31 @@ export default function SchedulePostPage() {
   }
 
   const handleSchedule = async () => {
-    // Mock: Just redirect to queue
-    toast.success(`Scheduled ${selectedPlatforms.length} post(s)!`)
-    router.push('/publish/queue')
+    try {
+      const scheduledFor = postNow
+        ? new Date().toISOString()
+        : new Date(`${scheduledDate}T${scheduledTime}`).toISOString()
+
+      for (const platformId of selectedPlatforms) {
+        const creative = creatives.find(c => selectedCreatives.includes(c.id))
+        await fetch('/api/publish/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            creativeId: creative?.id || selectedCreatives[0],
+            creativeThumbnail: creative?.thumbnail || '',
+            platform: platformId,
+            scheduledFor,
+            caption: platformCaptions[platformId] || caption,
+            status: postNow ? 'publishing' : 'scheduled',
+          }),
+        })
+      }
+      toast.success(`Scheduled ${selectedPlatforms.length} post(s)!`)
+      router.push('/publish/queue')
+    } catch {
+      toast.error('Failed to schedule posts')
+    }
   }
 
   const handleBestTime = (platform: Platform) => {
@@ -87,7 +134,7 @@ export default function SchedulePostPage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
@@ -126,7 +173,7 @@ export default function SchedulePostPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
-              {mockCreatives.map((creative) => {
+              {creatives.map((creative) => {
                 const isSelected = selectedCreatives.includes(creative.id)
                 return (
                   <button

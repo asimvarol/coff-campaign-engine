@@ -14,18 +14,28 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent as AlertDialogContentUI,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Badge,
 } from '@repo/ui'
 import { mockConnectedAccounts, platforms, type Platform } from '@/lib/mock-data/publish'
+import { toast } from 'sonner'
 import { Link01Icon, Delete02Icon, CheckmarkCircle02Icon, AlertCircle01Icon } from '@/lib/icons'
 
 export default function PublishAccountsPage() {
   const [accounts, setAccounts] = useState(mockConnectedAccounts)
   const [connectDialogOpen, setConnectDialogOpen] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
+  const [disconnectAlertOpen, setDisconnectAlertOpen] = useState(false)
+  const [disconnectId, setDisconnectId] = useState('')
 
   const handleConnect = async (platform: Platform) => {
-    // Mock: Add a new connected account
     const newAccount = {
       id: `${Date.now()}`,
       platform,
@@ -40,23 +50,30 @@ export default function PublishAccountsPage() {
     setAccounts([...accounts, newAccount])
     setConnectDialogOpen(false)
     setSelectedPlatform(null)
+    toast.success(`Connected to ${platform}`)
   }
 
   const handleDisconnect = (id: string) => {
-    if (confirm('Are you sure you want to disconnect this account?')) {
-      setAccounts(accounts.filter((acc) => acc.id !== id))
-    }
+    setDisconnectId(id)
+    setDisconnectAlertOpen(true)
+  }
+
+  const handleConfirmDisconnect = () => {
+    const account = accounts.find((acc) => acc.id === disconnectId)
+    setAccounts(accounts.filter((acc) => acc.id !== disconnectId))
+    setDisconnectAlertOpen(false)
+    toast.success(`Disconnected ${account?.platform || 'account'}`)
   }
 
   const handleTestPost = (id: string) => {
     const account = accounts.find((acc) => acc.id === id)
-    alert(`Test post sent to ${account?.platform}!`)
+    toast.success(`Test post sent to ${account?.platform}!`)
   }
 
   const connectedPlatformIds = accounts.map((acc) => acc.platform)
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -211,6 +228,23 @@ export default function PublishAccountsPage() {
           </CardContent>
         </Card>
       )}
+
+      <AlertDialog open={disconnectAlertOpen} onOpenChange={setDisconnectAlertOpen}>
+        <AlertDialogContentUI>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to disconnect this account? You will need to reconnect to post again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDisconnect} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentUI>
+      </AlertDialog>
     </div>
   )
 }

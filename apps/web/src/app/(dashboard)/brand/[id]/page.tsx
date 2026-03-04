@@ -7,6 +7,7 @@ import { ArrowLeft01Icon, Download04Icon, Sparkles01Icon, Upload04Icon, RotateCc
 import Image from 'next/image'
 import Link from 'next/link'
 import { useBrand } from '@/lib/brand-context'
+import { toast } from 'sonner'
 
 interface Brand {
   id: string
@@ -38,6 +39,7 @@ export default function BrandDetailPage() {
   const leftRef = useRef<HTMLDivElement>(null)
   const [leftHeight, setLeftHeight] = useState<number>(0)
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
+  const [isReanalyzing, setIsReanalyzing] = useState(false)
 
   useEffect(() => { fetchBrand() }, [brandId])
 
@@ -60,11 +62,18 @@ export default function BrandDetailPage() {
   }
 
   const handleReanalyze = async () => {
-    if (!brand) return
+    if (!brand || isReanalyzing) return
+    setIsReanalyzing(true)
     try {
       await fetch(`/api/brands/${brandId}/analyze`, { method: 'POST' })
       await fetchBrand()
-    } catch (err) { console.error(err) }
+      toast.success('Brand re-analyzed successfully')
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to re-analyze brand')
+    } finally {
+      setIsReanalyzing(false)
+    }
   }
 
   const handleDeleteClick = () => {
@@ -92,7 +101,7 @@ export default function BrandDetailPage() {
     : [brand.colors.primary, brand.colors.secondary, brand.colors.accent, brand.colors.background]
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/brand" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -101,7 +110,7 @@ export default function BrandDetailPage() {
         </Link>
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Download04Icon className="mr-2 h-4 w-4" />Download Kit</Button>
-          <Button variant="outline" size="sm" onClick={handleReanalyze}><Sparkles01Icon className="mr-2 h-4 w-4" />Re-analyze</Button>
+          <Button variant="outline" size="sm" onClick={handleReanalyze} disabled={isReanalyzing}>{isReanalyzing ? <><span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />Analyzing...</> : <><Sparkles01Icon className="mr-2 h-4 w-4" />Re-analyze</>}</Button>
           <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleDeleteClick}><Trash2Icon className="mr-2 h-4 w-4" />Delete</Button>
         </div>
       </div>

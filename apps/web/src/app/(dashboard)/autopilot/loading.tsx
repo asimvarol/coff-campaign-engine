@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, Skeleton } from '@repo/ui'
 
 export default function AutopilotLoading() {
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between mb-8">
         <div className="space-y-2">
           <Skeleton className="h-8 w-32" />

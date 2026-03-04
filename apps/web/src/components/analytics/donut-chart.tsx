@@ -56,7 +56,7 @@ export function DonutChart({ data, size = 160, strokeWidth = 30 }: DonutChartPro
           )
         })}
         {/* Center circle for donut effect */}
-        <circle cx={centerX} cy={centerY} r={radius - strokeWidth / 2} fill="oklch(0.147 0.004 49.25)" />
+        <circle cx={centerX} cy={centerY} r={radius - strokeWidth / 2} fill="var(--card)" />
       </svg>
 
       {/* Legend */}

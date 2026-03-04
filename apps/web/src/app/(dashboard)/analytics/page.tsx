@@ -2,42 +2,30 @@
 
 import { useState } from 'react'
 import type { AnalyticsDateRange } from '@repo/types'
-import { AnalyticsOverview } from '@/components/analytics/analytics-overview'
-import { AnalyticsChart } from '@/components/analytics/analytics-chart'
-import { AnalyticsPlatformBreakdown } from '@/components/analytics/analytics-platform-breakdown'
-import { AnalyticsTopCreatives } from '@/components/analytics/analytics-top-creatives'
 import { AnalyticsCampaignComparison } from '@/components/analytics/analytics-campaign-comparison'
 import { AnalyticsAIInsights } from '@/components/analytics/analytics-ai-insights'
 import { AnalyticsDateRangePicker } from '@/components/analytics/analytics-date-range-picker'
 import {
-  mockAnalyticsKPIs,
-  mockTopCreatives,
-  mockTimeSeriesData,
   mockCampaignAnalytics,
   mockAIInsightsLegacy,
-} from '@/lib/mock-data/analytics'
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
-import { TrendUp01Icon, TrendDown01Icon, AlertCircle01Icon } from '@/lib/icons'
-import { LineChart } from '@/components/analytics/line-chart'
-import { DonutChart } from '@/components/analytics/donut-chart'
-import {
   mockAnalyticsOverview,
   mockReachTrend,
   mockPlatformBreakdown,
   mockCreativeMetrics,
 } from '@/lib/mock-data/analytics'
-
-type Period = '7d' | '30d' | '90d'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
+import { TrendUp01Icon, TrendDown01Icon, AlertCircle01Icon } from '@/lib/icons'
+import { LineChart } from '@/components/analytics/line-chart'
+import { DonutChart } from '@/components/analytics/donut-chart'
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState<AnalyticsDateRange>('30d')
-  const [period, setPeriod] = useState<Period>('30d')
 
   const overview = mockAnalyticsOverview
 
   // Get data for selected period
   const getTrendData = () => {
-    const days = period === '7d' ? 7 : period === '30d' ? 30 : 90
+    const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90
     return mockReachTrend.slice(-days)
   }
 
@@ -93,7 +81,7 @@ export default function AnalyticsPage() {
   ]
 
   return (
-    <div className="p-8">
+    <div >
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
@@ -103,15 +91,6 @@ export default function AnalyticsPage() {
         <div className="flex items-center gap-3">
           <AnalyticsDateRangePicker value={dateRange} onChange={setDateRange} />
           <Button variant="outline" size="sm">Export</Button>
-          <select
-            value={period}
-            onChange={(e) => setPeriod(e.target.value as Period)}
-            className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-          </select>
         </div>
       </div>
 
@@ -141,10 +120,6 @@ export default function AnalyticsPage() {
         ))}
       </div>
 
-      {/* Overview components from main */}
-      <AnalyticsOverview kpis={mockAnalyticsKPIs} />
-      <AnalyticsChart data={mockTimeSeriesData} />
-
       {/* Reach Over Time */}
       <Card className="mb-6">
         <CardHeader>
@@ -158,9 +133,6 @@ export default function AnalyticsPage() {
 
       {/* Platform Breakdown & Top Creative */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
-        <AnalyticsPlatformBreakdown data={mockPlatformBreakdown} />
-        <AnalyticsTopCreatives creatives={mockTopCreatives} />
-
         <Card>
           <CardHeader>
             <CardTitle>Platform Breakdown</CardTitle>

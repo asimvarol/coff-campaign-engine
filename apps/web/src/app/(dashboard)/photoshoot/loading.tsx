@@ -2,7 +2,7 @@ import { Card, CardContent, Skeleton } from '@repo/ui'
 
 export default function PhotoshootLoading() {
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Skeleton className="h-8 w-40" />

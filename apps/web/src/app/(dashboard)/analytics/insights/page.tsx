@@ -32,26 +32,31 @@ export default function InsightsPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedInsight, setSelectedInsight] = useState<AIInsight | null>(null)
 
+  const rotatingInsights: Omit<AIInsight, 'id' | 'createdAt' | 'isRead'>[] = [
+    { type: 'optimization', title: 'Carousel Format Trending', description: 'Carousel posts have 2.1x higher save rate compared to single image posts.', affectedEntity: null, suggestedAction: 'Create more carousel content for upcoming campaigns.', severity: 'medium' },
+    { type: 'trend', title: 'Video Content Rising', description: 'Short-form video content shows 3.2x higher engagement than static posts this week.', affectedEntity: null, suggestedAction: 'Allocate more budget to Reels and TikTok formats.', severity: 'low' },
+    { type: 'audience', title: 'New Audience Segment', description: '25-34 age group engagement increased by 45% after latest campaign launch.', affectedEntity: null, suggestedAction: 'Create targeted content for this high-growth segment.', severity: 'medium' },
+    { type: 'alert', title: 'Facebook Reach Declining', description: 'Facebook organic reach dropped 22% over the past 2 weeks.', affectedEntity: null, suggestedAction: 'Consider boosting top-performing posts or adjusting posting schedule.', severity: 'high' },
+  ]
+
   const handleGenerateInsights = async () => {
     setIsGenerating(true)
-    // Mock generation delay
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    
-    // Mock new insight
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+
+    const template = rotatingInsights[insights.length % rotatingInsights.length]
     const newInsight: AIInsight = {
+      ...template,
       id: `insight-${Date.now()}`,
-      type: 'optimization',
-      title: 'Carousel Format Trending',
-      description: 'Carousel posts have 2.1x higher save rate compared to single image posts.',
-      affectedEntity: null,
-      suggestedAction: 'Create more carousel content for upcoming campaigns.',
-      severity: 'medium',
       createdAt: new Date(),
       isRead: false,
     }
-    
+
     setInsights([newInsight, ...insights])
     setIsGenerating(false)
+  }
+
+  const handleDismiss = (insightId: string) => {
+    setInsights(insights.filter((i) => i.id !== insightId))
   }
 
   const markAsRead = (insightId: string) => {
@@ -61,7 +66,7 @@ export default function InsightsPage() {
   const unreadCount = insights.filter((i) => !i.isRead).length
 
   return (
-    <div className="p-8">
+    <div >
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
@@ -180,7 +185,10 @@ export default function InsightsPage() {
                           <button className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90">
                             Take Action
                           </button>
-                          <button className="rounded-md bg-background px-3 py-1 text-xs font-medium hover:bg-muted">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDismiss(insight.id) }}
+                            className="rounded-md bg-background px-3 py-1 text-xs font-medium hover:bg-muted"
+                          >
                             Dismiss
                           </button>
                         </div>

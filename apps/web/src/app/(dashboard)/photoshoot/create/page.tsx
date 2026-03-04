@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { PhotoshootTemplate } from '@repo/types'
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui'
 
+import { toast } from 'sonner'
 import { ArrowLeft01Icon, SparklesIcon } from '@/lib/icons'
 import { ImageUpload } from '@/components/photoshoot/image-upload'
 import { TemplateSelector } from '@/components/photoshoot/template-selector'
@@ -22,8 +23,16 @@ export default function CreatePhotoshootPage() {
   const [selectedTemplates, setSelectedTemplates] = useState<PhotoshootTemplate[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState('')
+  const [brands, setBrands] = useState<Array<{ id: string; name: string }>>([])
+  const [selectedBrandId, setSelectedBrandId] = useState('')
 
   const creditCost = 10
+
+  useEffect(() => {
+    fetch('/api/brands').then(r => r.json()).then(data => {
+      if (data.data) setBrands(data.data)
+    }).catch(() => {})
+  }, [])
 
   const handleGenerate = async () => {
     setError('')
@@ -41,20 +50,57 @@ export default function CreatePhotoshootPage() {
     setIsGenerating(true)
 
     try {
-      // TODO: Call API to generate photoshoot
-      // For now, simulate generation
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const templateNames = selectedTemplates.join(', ')
+      const prompt = `Professional product photography with ${templateNames} style background`
 
-      // Redirect to photoshoot list
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          num_images: selectedTemplates.length,
+          image_size: 'landscape_16_9',
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to generate images')
+      }
+
+      const genData = await response.json().catch(() => ({ images: [] }))
+      const images = (genData.images || []).map((img: { url: string }, i: number) => ({
+        id: `img-${Date.now()}-${i}`,
+        url: img.url,
+        template: selectedTemplates[i] || selectedTemplates[0],
+      }))
+
+      const brand = brands.find(b => b.id === selectedBrandId)
+      await fetch('/api/photoshoots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${brand?.name || 'Product'} Photoshoot`,
+          status: 'COMPLETED',
+          brandId: selectedBrandId || undefined,
+          brandName: brand?.name || undefined,
+          templates: selectedTemplates,
+          productImage,
+          images,
+        }),
+      })
+
+      toast.success('Photoshoot generated successfully!')
       router.push('/photoshoot')
     } catch (err) {
-      setError('Failed to generate photoshoot. Please try again.')
+      const message = err instanceof Error ? err.message : 'Failed to generate photoshoot. Please try again.'
+      setError(message)
       setIsGenerating(false)
     }
   }
 
   return (
-    <div className="p-8">
+    <div >
       <div className="mb-8">
         <Button variant="ghost" size="sm" asChild className="mb-4">
           <Link href="/photoshoot" aria-label="Back to photoshoots">
@@ -95,12 +141,25 @@ export default function CreatePhotoshootPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
-                <p className="text-sm text-muted-foreground">No brands available</p>
-                <Button variant="link" size="sm" asChild className="mt-2">
-                  <Link href="/brands">Create Brand DNA</Link>
-                </Button>
-              </div>
+              {brands.length > 0 ? (
+                <Select value={selectedBrandId} onValueChange={setSelectedBrandId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a brand..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {brands.map(brand => (
+                      <SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+                  <p className="text-sm text-muted-foreground">No brands available</p>
+                  <Button variant="link" size="sm" asChild className="mt-2">
+                    <Link href="/brand/new">Create Brand DNA</Link>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

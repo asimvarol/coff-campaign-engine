@@ -291,7 +291,6 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
   const baseUrl = url.match(/^https?:\/\/[^/]+/)?.[0] || `https://${domain}`
   
   // Step 1: Fetch website
-  await delay(300)
   onProgress?.({ step: 'scanning', progress: 20, message: 'Scanning website...' })
   
   // Normalize URL
@@ -315,7 +314,6 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
   }
   
   // Step 2: Extract colors
-  await delay(400)
   onProgress?.({ step: 'extracting-colors', progress: 40, message: 'Extracting colors...' })
   
   const extractedColors = html ? extractColors(html, domain) : []
@@ -324,13 +322,11 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
   const accent = extractedColors[2] || '#f59e0b'
   
   // Step 3: Typography
-  await delay(300)
   onProgress?.({ step: 'analyzing-typography', progress: 60, message: 'Analyzing typography...' })
   
   const fonts = html ? extractFonts(html) : { heading: 'Inter', body: 'Inter' }
   
   // Step 4: Voice & meta
-  await delay(400)
   onProgress?.({ step: 'learning-voice', progress: 80, message: 'Learning brand voice...' })
   
   const name = html ? extractBrandName(html, domain) : domain.split('.')[0]
@@ -340,7 +336,6 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
   const products = html ? extractProducts(html) : []
   
   // Step 5: Summary
-  await delay(300)
   onProgress?.({ step: 'generating-summary', progress: 95, message: 'Generating summary...' })
   
   const tone = TONES.slice(0, 3)
@@ -379,7 +374,6 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
     products
   }
   
-  await delay(200)
   onProgress?.({ step: 'generating-summary', progress: 100, message: 'Complete!' })
   
   return brandDNA

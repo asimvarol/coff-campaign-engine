@@ -3,22 +3,16 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Button, Input, Label, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
-import { ArrowLeft01Icon, ArrowRight01Icon, Loading03Icon, CheckmarkCircle02Icon } from '@/lib/icons'
+import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon } from '@/lib/icons'
 
 export default function ForgotPasswordPage() {
-  const [isLoading, setIsLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [email, setEmail] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-
-    // TODO: Implement actual password reset
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
+    // No email service configured — show success immediately
     setEmailSent(true)
-    setIsLoading(false)
   }
 
   if (emailSent) {
@@ -74,26 +68,12 @@ export default function ForgotPasswordPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={isLoading}
             />
           </div>
 
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loading03Icon className="mr-2 h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                Send reset link
-                <ArrowRight01Icon className="ml-2 h-4 w-4" />
-              </>
-            )}
+          <Button type="submit" className="w-full">
+            Send reset link
+            <ArrowRight01Icon className="ml-2 h-4 w-4" />
           </Button>
 
           <Link href="/login">

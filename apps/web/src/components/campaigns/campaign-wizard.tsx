@@ -10,6 +10,7 @@ import { useBrand } from '@/lib/brand-context'
 import type { CampaignConcept } from '@repo/types'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
+import { toast } from 'sonner'
 
 const OBJECTIVES = [
   { id: 'AWARENESS', label: 'Brand Awareness', icon: '👁️', description: 'Increase brand visibility' },
@@ -114,8 +115,6 @@ export function CampaignWizard() {
 
   const handleGenerateConcepts = async () => {
     setIsGenerating(true)
-    // Simulate AI generation
-    await new Promise(resolve => setTimeout(resolve, 2000))
     const concepts = generateMockConcepts(state.brandId, state.objective as CampaignObjective, state.platforms)
     updateState({ generatedConcepts: concepts })
     setIsGenerating(false)
@@ -203,7 +202,7 @@ export function CampaignWizard() {
           position: { x: 50, y: 170 },
           visible: true,
         },
-        cta: { text: 'Shop Now', style: 'primary', url: 'https://example.com', visible: true },
+        cta: { text: 'Shop Now', style: 'primary', url: '', visible: true },
         overlay: { color: '#000000', opacity: 0.3 },
         version: 1,
         status: 'DRAFT',
@@ -249,7 +248,8 @@ export function CampaignWizard() {
 
             return buildCreative(task, imageUrl)
           } catch (error) {
-            console.warn(`Fal.ai failed for ${task.platform}:`, error instanceof Error ? error.message : 'Unknown error')
+            console.warn(`Image generation failed for ${task.platform}:`, error instanceof Error ? error.message : 'Unknown error')
+            toast.error(`Failed to generate image for ${task.platform}`)
             return buildCreative(task, placeholderUrl(task))
           }
         })
@@ -647,7 +647,20 @@ export function CampaignWizard() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={async () => {
+                for (const creative of state.generatedCreatives) {
+                  try {
+                    const res = await fetch(creative.imageUrl)
+                    const blob = await res.blob()
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `${creative.platform}-${creative.format}.png`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  } catch { toast.error(`Failed to download ${creative.platform} creative`) }
+                }
+              }}>
                 <Download04Icon className="mr-2 h-4 w-4" />
                 Download All
               </Button>
