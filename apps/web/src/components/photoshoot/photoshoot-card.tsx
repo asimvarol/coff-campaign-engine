@@ -61,14 +61,27 @@ export function PhotoshootCard({ photoshoot }: PhotoshootCardProps) {
         <CardContent>
           <div className="grid grid-cols-4 gap-2">
             <div className="relative col-span-2 aspect-square overflow-hidden rounded-md border border-border bg-muted">
-              <Image
-                src={photoshoot.productImageUrl}
-                alt={`${photoshoot.name} product image`}
-                fill
-                unoptimized
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
+              {photoshoot.productImageUrl && !photoshoot.productImageUrl.startsWith('blob:') ? (
+                <Image
+                  src={photoshoot.productImageUrl}
+                  alt={`${photoshoot.name} product image`}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+              ) : photoshoot.variants.length > 0 ? (
+                <Image
+                  src={photoshoot.variants[0].imageUrl}
+                  alt={`${photoshoot.name} preview`}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-muted-foreground text-sm">No image</div>
+              )}
             </div>
             {photoshoot.variants.slice(0, 3).map((variant, index) => (
               <div

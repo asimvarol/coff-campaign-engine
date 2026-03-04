@@ -19,7 +19,28 @@ export default function PhotoshootPage() {
         if (res.ok) {
           const data = await res.json()
           if (data.data && data.data.length > 0) {
-            setPhotoshoots(data.data)
+            // Map API format to Photoshoot type expected by PhotoshootCard
+            const mapped = data.data.map((item: any) => ({
+              id: item.id,
+              name: item.name,
+              status: item.status,
+              productImageUrl: item.productImage || '',
+              productImageNoBackground: null,
+              brandDnaId: item.brandId || null,
+              brandDnaName: item.brandName || null,
+              creditCost: 10,
+              variants: (item.images || []).map((img: any) => ({
+                id: img.id,
+                template: img.template,
+                imageUrl: img.url,
+                prompt: '',
+                selected: false,
+              })),
+              selectedVariantIds: [],
+              createdAt: new Date(item.createdAt),
+              completedAt: item.status === 'COMPLETED' ? new Date(item.createdAt) : null,
+            }))
+            setPhotoshoots(mapped)
             setIsLoading(false)
             return
           }
