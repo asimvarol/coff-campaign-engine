@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   Badge,
+  Separator,
 } from '@repo/ui'
 import { mockScheduledPosts, getPlatform, type ScheduledPost } from '@/lib/mock-data/publish'
 import { toast } from 'sonner'
@@ -399,14 +400,15 @@ export default function PublishCalendarPage() {
                   {selectedPost.caption}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Button variant="outline" className="flex-1" asChild>
                   <Link href="/publish/schedule">
                     <Edit02Icon className="mr-2 h-4 w-4" />
                     Edit
                   </Link>
                 </Button>
-                <Button variant="destructive" onClick={() => setCancelAlertOpen(true)}>
+                <Separator orientation="vertical" className="h-8" />
+                <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setCancelAlertOpen(true)}>
                   <Delete02Icon className="mr-2 h-4 w-4" />
                   Cancel
                 </Button>

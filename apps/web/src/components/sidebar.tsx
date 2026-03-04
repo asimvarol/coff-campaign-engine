@@ -148,7 +148,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     {brand.id === selectedBrandId && <CheckIcon className="h-4 w-4 shrink-0" />}
                     <button
                       onClick={(e) => handleDeleteClick(brand.id, e)}
-                      className="ml-1 shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive"
+                      className="ml-1 shrink-0 rounded p-0.5 text-destructive hover:text-destructive hover:bg-destructive/10"
                       title="Delete brand"
                     >
                       <Trash2Icon className="h-3.5 w-3.5" />

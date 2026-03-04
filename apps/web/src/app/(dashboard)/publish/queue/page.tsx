@@ -22,6 +22,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  Separator,
 } from '@repo/ui'
 import { mockScheduledPosts, getPlatform, type PostStatus, type Platform } from '@/lib/mock-data/publish'
 import { toast } from 'sonner'
@@ -232,9 +233,11 @@ export default function PublishQueuePage() {
               <Button variant="outline" size="sm" asChild>
                 <Link href="/publish/schedule">Reschedule</Link>
               </Button>
+              <Separator orientation="vertical" className="h-6" />
               <Button
-                variant="destructive"
+                variant="outline"
                 size="sm"
+                className="border-destructive text-destructive hover:bg-destructive/10"
                 onClick={handleCancelSelected}
               >
                 Cancel Selected
@@ -335,7 +338,7 @@ export default function PublishQueuePage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-1">
+                <div className="flex items-center gap-1">
                   {post.status === 'failed' ? (
                     <Button
                       variant="outline"
@@ -349,9 +352,11 @@ export default function PublishQueuePage() {
                       <Button variant="outline" size="sm" asChild>
                         <Link href="/publish/schedule"><Edit02Icon className="h-4 w-4" /></Link>
                       </Button>
+                      <Separator orientation="vertical" className="h-6" />
                       <Button
-                        variant="destructive"
+                        variant="outline"
                         size="sm"
+                        className="border-destructive text-destructive hover:bg-destructive/10"
                         onClick={() => handleCancel(post.id)}
                       >
                         <Delete02Icon className="h-4 w-4" />

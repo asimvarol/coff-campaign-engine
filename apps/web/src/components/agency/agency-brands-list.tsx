@@ -10,7 +10,7 @@ export function AgencyBrandsList({ brands }: { brands: AgencyBrand[] }) {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {brands.map((brand) => (
         <Link key={brand.id} href={`/brand/${brand.id}`}>
-          <Card className="group cursor-pointer transition-all hover:border-primary/50">
+          <Card className="group cursor-pointer transition-all hover:border-primary hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <Image src={brand.logoUrl} alt={brand.name} width={48} height={48} className="h-12 w-12 shrink-0 rounded-lg bg-muted object-cover" unoptimized />
