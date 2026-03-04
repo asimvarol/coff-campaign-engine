@@ -90,19 +90,19 @@ export default function InsightsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Insights</CardDescription>
-            <CardTitle className="text-2xl">{insights.length}</CardTitle>
+            <CardTitle className="text-2xl font-mono">{insights.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Unread</CardDescription>
-            <CardTitle className="text-2xl text-primary">{unreadCount}</CardTitle>
+            <CardTitle className="text-2xl text-primary font-mono">{unreadCount}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Critical Alerts</CardDescription>
-            <CardTitle className="text-2xl text-destructive">
+            <CardTitle className="text-2xl text-destructive font-mono">
               {insights.filter((i) => i.severity === 'critical').length}
             </CardTitle>
           </CardHeader>
@@ -110,7 +110,7 @@ export default function InsightsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Actions Suggested</CardDescription>
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-2xl font-mono">
               {insights.filter((i) => i.suggestedAction).length}
             </CardTitle>
           </CardHeader>

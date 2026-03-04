@@ -111,19 +111,19 @@ export default function CreativeAnalyticsPage() {
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <p className="text-muted-foreground">Reach</p>
-                        <p className="font-medium">{creative.reach.toLocaleString()}</p>
+                        <p className="font-medium font-mono">{creative.reach.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Engagement Rate</p>
-                        <p className="font-medium">{creative.engagementRate}%</p>
+                        <p className="font-medium font-mono">{creative.engagementRate}%</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">CTR</p>
-                        <p className="font-medium">{creative.ctr}%</p>
+                        <p className="font-medium font-mono">{creative.ctr}%</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Score</p>
-                        <p className="text-lg font-bold text-primary">{creative.performanceScore}</p>
+                        <p className="text-lg font-bold text-primary font-mono">{creative.performanceScore}</p>
                       </div>
                     </div>
                   </div>
@@ -181,19 +181,19 @@ export default function CreativeAnalyticsPage() {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <p className="text-muted-foreground">Reach</p>
-                    <p className="font-medium">{creative.reach.toLocaleString()}</p>
+                    <p className="font-medium font-mono">{creative.reach.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Engagement</p>
-                    <p className="font-medium">{creative.engagementRate}%</p>
+                    <p className="font-medium font-mono">{creative.engagementRate}%</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">CTR</p>
-                    <p className="font-medium">{creative.ctr}%</p>
+                    <p className="font-medium font-mono">{creative.ctr}%</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Clicks</p>
-                    <p className="font-medium">{creative.clicks}</p>
+                    <p className="font-medium font-mono">{creative.clicks}</p>
                   </div>
                 </div>
 

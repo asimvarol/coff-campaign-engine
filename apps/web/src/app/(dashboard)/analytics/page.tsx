@@ -100,7 +100,7 @@ export default function AnalyticsPage() {
           <Card key={kpi.title}>
             <CardHeader className="pb-2">
               <CardDescription>{kpi.title}</CardDescription>
-              <CardTitle className="text-2xl">{kpi.value}</CardTitle>
+              <CardTitle className="text-2xl font-mono">{kpi.value}</CardTitle>
             </CardHeader>
             <CardContent>
               <div

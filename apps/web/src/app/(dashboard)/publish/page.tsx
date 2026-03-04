@@ -41,7 +41,7 @@ export default function PublishPage() {
             <Share08Icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-2xl font-bold font-mono">{stats.total}</div>
             <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
@@ -52,7 +52,7 @@ export default function PublishPage() {
             <Calendar03Icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.scheduled}</div>
+            <div className="text-2xl font-bold font-mono">{stats.scheduled}</div>
             <p className="text-xs text-muted-foreground">Upcoming posts</p>
           </CardContent>
         </Card>
@@ -63,7 +63,7 @@ export default function PublishPage() {
             <Share08Icon className="h-4 w-4 text-chart-3" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.published}</div>
+            <div className="text-2xl font-bold font-mono">{stats.published}</div>
             <p className="text-xs text-muted-foreground">Successfully posted</p>
           </CardContent>
         </Card>
@@ -74,7 +74,7 @@ export default function PublishPage() {
             <AlertCircle01Icon className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.failed}</div>
+            <div className="text-2xl font-bold font-mono">{stats.failed}</div>
             <p className="text-xs text-muted-foreground">Needs attention</p>
           </CardContent>
         </Card>

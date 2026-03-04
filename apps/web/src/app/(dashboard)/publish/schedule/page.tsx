@@ -450,7 +450,7 @@ export default function SchedulePostPage() {
                     {creditsPerPost} credit × {selectedPlatforms.length} platform(s)
                   </p>
                 </div>
-                <p className="text-2xl font-bold">{totalCredits} credits</p>
+                <p className="text-2xl font-bold"><span className="font-mono">{totalCredits}</span> credits</p>
               </div>
             </div>
           </CardContent>

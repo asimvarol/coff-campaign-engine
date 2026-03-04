@@ -76,25 +76,25 @@ export default function CampaignsPage() {
       <div className="mb-8 grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-2xl font-bold font-mono">{stats.total}</div>
             <div className="text-sm text-muted-foreground">Total Campaigns</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.active}</div>
+            <div className="text-2xl font-bold font-mono">{stats.active}</div>
             <div className="text-sm text-muted-foreground">Active</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.published}</div>
+            <div className="text-2xl font-bold font-mono">{stats.published}</div>
             <div className="text-sm text-muted-foreground">Published</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.totalCreatives}</div>
+            <div className="text-2xl font-bold font-mono">{stats.totalCreatives}</div>
             <div className="text-sm text-muted-foreground">Total Creatives</div>
           </CardContent>
         </Card>

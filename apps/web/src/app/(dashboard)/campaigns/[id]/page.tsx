@@ -222,11 +222,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
       {/* Stats */}
       <div className="mb-8 grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">{campaignCreatives.length}</div>
+          <div className="text-2xl font-bold font-mono">{campaignCreatives.length}</div>
           <div className="text-sm text-muted-foreground">Creatives</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">{campaign.platforms.length}</div>
+          <div className="text-2xl font-bold font-mono">{campaign.platforms.length}</div>
           <div className="text-sm text-muted-foreground">Platforms</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
