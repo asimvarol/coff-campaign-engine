@@ -32,6 +32,14 @@ export default function NewBrandPage() {
       normalizedUrl = 'https://' + normalizedUrl
     }
 
+    // Validate URL format
+    try {
+      new URL(normalizedUrl)
+    } catch {
+      setError('Please enter a valid URL (e.g. example.com)')
+      return
+    }
+
     setError('')
     setIsAnalyzing(true)
     setCurrentStep(0)
@@ -84,11 +92,13 @@ export default function NewBrandPage() {
               <div>
                 <Input
                   type="url"
+                  required
                   placeholder="example.com or www.example.com"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  onChange={(e) => { setUrl(e.target.value); if (error) setError('') }}
                   onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
                   className="h-14 text-lg"
+                  aria-invalid={!!error}
                   autoFocus
                 />
                 {error && (
