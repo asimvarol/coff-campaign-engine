@@ -55,30 +55,35 @@ export default function AnalyticsPage() {
       value: overview.totalReach.toLocaleString(),
       change: overview.totalReachChange,
       trend: overview.totalReachChange > 0 ? 'up' : 'down',
+      tooltip: 'Total number of users who saw your content',
     },
     {
       title: 'Engagement',
       value: overview.totalEngagement.toLocaleString(),
       change: overview.totalEngagementChange,
       trend: overview.totalEngagementChange > 0 ? 'up' : 'down',
+      tooltip: 'Likes, comments, shares, and saves',
     },
     {
       title: 'CTR',
       value: `${overview.avgCtr}%`,
       change: overview.avgCtrChange,
       trend: overview.avgCtrChange > 0 ? 'up' : 'down',
+      tooltip: 'Click-through rate — percentage of viewers who clicked',
     },
     {
       title: 'Clicks',
       value: overview.totalClicks.toLocaleString(),
       change: overview.totalClicksChange,
       trend: overview.totalClicksChange > 0 ? 'up' : 'down',
+      tooltip: 'Total link clicks across all platforms',
     },
     {
       title: 'Saves',
       value: overview.totalSaves.toLocaleString(),
       change: overview.totalSavesChange,
       trend: overview.totalSavesChange > 0 ? 'up' : 'down',
+      tooltip: 'Total saves/bookmarks across all platforms',
     },
   ]
 
@@ -101,7 +106,7 @@ export default function AnalyticsPage() {
         {kpiCards.map((kpi) => (
           <Card key={kpi.title}>
             <CardHeader className="pb-2">
-              <CardDescription>{kpi.title}</CardDescription>
+              <CardDescription title={kpi.tooltip}>{kpi.title}</CardDescription>
               <CardTitle className="text-2xl font-mono">{kpi.value}</CardTitle>
             </CardHeader>
             <CardContent>
@@ -115,7 +120,7 @@ export default function AnalyticsPage() {
                 ) : (
                   <TrendDown01Icon size={16} />
                 )}
-                <span>{Math.abs(kpi.change)}%</span>
+                <span>{Math.abs(kpi.change)}% vs prev. period</span>
               </div>
             </CardContent>
           </Card>
@@ -198,12 +203,12 @@ export default function AnalyticsPage() {
                   </p>
                   <p className="text-sm text-muted-foreground">{creative.aiInsight}</p>
                   <div className="mt-2 flex gap-2">
-                    <button className="rounded-md bg-background px-3 py-1 text-xs font-medium hover:bg-muted">
+                    <Button variant="outline" size="sm">
                       View Details
-                    </button>
-                    <button className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90">
+                    </Button>
+                    <Button size="sm">
                       Replace Creative
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

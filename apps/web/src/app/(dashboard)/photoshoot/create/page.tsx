@@ -179,7 +179,7 @@ export default function CreatePhotoshootPage() {
         </Card>
 
         {error && (
-          <div className="mt-6 rounded-lg border border-destructive bg-destructive/10 p-4">
+          <div className="mt-6 rounded-lg border border-destructive bg-destructive/10 p-4" role="alert">
             <p className="text-sm text-destructive">{error}</p>
           </div>
         )}

@@ -8,6 +8,7 @@ import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
 import Image from 'next/image'
 import { useBrand } from '@/lib/brand-context'
 import { formatDate } from '@/lib/format-date'
+import { GettingStarted } from '@/components/getting-started'
 
 interface Campaign {
   id: string
@@ -84,6 +85,8 @@ export default function CampaignsPage() {
           <Button size="lg"><Add01Icon className="mr-2 h-4 w-4" />New Campaign</Button>
         </Link>
       </div>
+
+      <GettingStarted />
 
       {/* Search & Filter */}
       <div className="mb-8 flex items-center gap-3">

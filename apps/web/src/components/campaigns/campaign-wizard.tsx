@@ -372,6 +372,8 @@ export function CampaignWizard() {
                 placeholder="Mother's Day Collection 2026"
                 value={state.campaignName}
                 onChange={(e) => updateState({ campaignName: e.target.value })}
+                required
+                aria-required="true"
               />
             </div>
 
@@ -398,12 +400,17 @@ export function CampaignWizard() {
                   <button
                     key={obj.id}
                     onClick={() => updateState({ objective: obj.id as CampaignObjective })}
-                    className={`rounded-lg border p-4 text-left transition-all ${
+                    className={`relative rounded-lg border p-4 text-left transition-all ${
                       state.objective === obj.id
-                        ? 'border-primary bg-primary/5'
+                        ? 'border-2 border-primary bg-primary/10 shadow-sm'
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
+                    {state.objective === obj.id && (
+                      <div className="absolute right-2 top-2">
+                        <CheckmarkCircle02Icon className="h-4 w-4 text-primary" />
+                      </div>
+                    )}
                     <div className="mb-2 text-2xl">{obj.icon}</div>
                     <div className="font-semibold">{obj.label}</div>
                     <div className="text-xs text-muted-foreground">{obj.description}</div>
@@ -458,7 +465,7 @@ export function CampaignWizard() {
               />
             </div>
 
-            <div className="flex items-center justify-between gap-3">
+            <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-between border-t border-border bg-card p-6 sm:static sm:mx-0 sm:mb-0 sm:border-0 sm:bg-transparent sm:p-0">
               <Button variant="outline" asChild>
                 <Link href="/campaigns">Cancel</Link>
               </Button>

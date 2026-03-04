@@ -101,7 +101,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
   if (error) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center p-8 text-center">
+      <div className="flex min-h-[400px] flex-col items-center justify-center p-8 text-center" role="alert">
         <p className="text-sm text-destructive">{error}</p>
         <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
           Try Again
@@ -173,7 +173,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
             </div>
             <div>
               <div className="mb-2 flex items-center gap-3">
-                <h1 className="text-3xl font-bold">{campaign.name}</h1>
+                <h1 className="text-3xl font-bold truncate max-w-md" title={campaign.name}>{campaign.name}</h1>
                 <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -233,12 +233,12 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
           <div className="text-sm text-muted-foreground">Platforms</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-sm text-muted-foreground">No data yet</div>
           <div className="text-sm text-muted-foreground">CTR</div>
+          <div className="text-lg font-medium text-muted-foreground/60 italic">&mdash;</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-sm text-muted-foreground">No data yet</div>
           <div className="text-sm text-muted-foreground">Clicks</div>
+          <div className="text-lg font-medium text-muted-foreground/60 italic">&mdash;</div>
         </div>
       </div>
 

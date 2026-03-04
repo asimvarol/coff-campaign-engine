@@ -117,7 +117,7 @@ export default function NewBrandPage() {
                   autoFocus
                 />
                 {error && (
-                  <p className="text-sm text-destructive mt-2">{error}</p>
+                  <p className="text-sm text-destructive mt-2" role="alert">{error}</p>
                 )}
               </div>
 

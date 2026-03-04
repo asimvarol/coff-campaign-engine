@@ -218,7 +218,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
       {/* Footer */}
       <div className="border-t border-border p-4">
-        <div className="rounded-lg bg-muted p-3 text-xs">
+        <div className="rounded-lg bg-muted p-3 text-xs" title="Credits are used for AI generation. Each campaign costs 5 credits, photoshoots cost 10.">
           <p className="font-medium text-foreground">Credits: 150</p>
           <p className="text-muted-foreground">Upgrade for unlimited</p>
         </div>

@@ -114,8 +114,8 @@ export default function BrandPage() {
                     </div>
 
                     {/* Colors Strip */}
-                    <div className="border-t border-border p-4">
-                      <div className="flex gap-2">
+                    <div className="border-t border-border p-4 overflow-hidden">
+                      <div className="flex gap-2 flex-wrap">
                         {brand.colors.palette.slice(0, 5).map((color, i) => (
                           <div key={i} className="h-8 w-8 rounded-full border border-border" style={{ backgroundColor: color }} title={color} />
                         ))}

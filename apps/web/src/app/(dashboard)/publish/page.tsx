@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { Calendar03Icon, Link01Icon, Share08Icon, AlertCircle01Icon } from '@/lib/icons'
-import { getPublishStats, getRecentActivity, getPlatform } from '@/lib/mock-data/publish'
+import { getPublishStats, getRecentActivity, getPlatform, mockConnectedAccounts } from '@/lib/mock-data/publish'
 import { formatDateTime } from '@/lib/format-date'
 
 export const metadata = { title: 'Publish Hub | Coff' }
@@ -83,6 +83,22 @@ export default function PublishPage() {
         </Card>
       </div>
 
+      {/* Connect Account Banner */}
+      {mockConnectedAccounts.filter(a => a.status === 'connected').length === 0 && (
+        <Card className="border-2 border-dashed border-primary/50 bg-primary/5">
+          <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
+            <Link01Icon className="h-8 w-8 text-primary" />
+            <div>
+              <h3 className="font-semibold">Connect your social accounts</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Link your Instagram, Facebook, TikTok and more to start publishing</p>
+            </div>
+            <Button asChild>
+              <Link href="/publish/accounts">Connect Accounts</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Recent Activity */}
       <Card>
         <CardHeader>
@@ -114,6 +130,7 @@ export default function PublishPage() {
                       src={post.creativeThumbnail}
                       alt="Creative"
                       className="h-full w-full object-cover"
+
                     />
                   </div>
 

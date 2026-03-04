@@ -14,7 +14,7 @@ const CHART_COLORS = [
   'oklch(0.52 0.20 4)', // Dark pink
 ]
 
-export function DonutChart({ data, size = 160, strokeWidth = 30 }: DonutChartProps) {
+export function DonutChart({ data, size = 160, strokeWidth = 40 }: DonutChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -57,6 +57,27 @@ export function DonutChart({ data, size = 160, strokeWidth = 30 }: DonutChartPro
         })}
         {/* Center circle for donut effect */}
         <circle cx={centerX} cy={centerY} r={radius - strokeWidth / 2} fill="var(--card)" />
+        {/* Center text */}
+        <text
+          x={centerX}
+          y={centerY - 6}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-foreground text-lg font-bold"
+          style={{ transform: 'rotate(90deg)', transformOrigin: `${centerX}px ${centerY}px` }}
+        >
+          {data.reduce((sum, item) => sum + item.value, 0).toLocaleString()}
+        </text>
+        <text
+          x={centerX}
+          y={centerY + 10}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-muted-foreground text-[10px]"
+          style={{ transform: 'rotate(90deg)', transformOrigin: `${centerX}px ${centerY}px` }}
+        >
+          Total
+        </text>
       </svg>
 
       {/* Legend */}
