@@ -106,7 +106,7 @@ export default function AnalyticsPage() {
         {kpiCards.map((kpi) => (
           <Card key={kpi.title}>
             <CardHeader className="pb-2">
-              <CardDescription title={kpi.tooltip}>{kpi.title}</CardDescription>
+              <CardDescription title={kpi.tooltip} aria-label={kpi.tooltip}>{kpi.title}</CardDescription>
               <CardTitle className="text-2xl font-mono">{kpi.value}</CardTitle>
             </CardHeader>
             <CardContent>
