@@ -37,7 +37,11 @@ export default function NewBrandPage() {
 
     // Validate URL format
     try {
-      new URL(normalizedUrl)
+      const parsedUrl = new URL(normalizedUrl)
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        setError('Please enter a valid HTTP/HTTPS URL')
+        return
+      }
     } catch {
       setError('Please enter a valid URL (e.g. example.com)')
       return
@@ -114,10 +118,11 @@ export default function NewBrandPage() {
                   onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
                   className="h-14 text-lg"
                   aria-invalid={!!error}
+                  aria-describedby={error ? 'url-error' : undefined}
                   autoFocus
                 />
                 {error && (
-                  <p className="text-sm text-destructive mt-2" role="alert">{error}</p>
+                  <p id="url-error" className="text-sm text-destructive mt-2" role="alert">{error}</p>
                 )}
               </div>
 
