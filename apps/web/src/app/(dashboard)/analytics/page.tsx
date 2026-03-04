@@ -81,9 +81,9 @@ export default function AnalyticsPage() {
   ]
 
   return (
-    <div >
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Analytics Overview</h1>
           <p className="text-muted-foreground">Track campaign performance across all platforms</p>
@@ -95,7 +95,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="mb-6 grid gap-6 md:grid-cols-5">
+      <div className="grid gap-6 md:grid-cols-5">
         {kpiCards.map((kpi) => (
           <Card key={kpi.title}>
             <CardHeader className="pb-2">
@@ -121,18 +121,18 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Reach Over Time */}
-      <Card className="mb-6">
+      <Card>
         <CardHeader>
           <CardTitle>Reach Over Time</CardTitle>
           <CardDescription>Daily reach for the selected period</CardDescription>
         </CardHeader>
-        <CardContent className="h-64">
-          <LineChart data={trendData} dataKey="reach" height={200} />
+        <CardContent className="h-72">
+          <LineChart data={trendData} dataKey="reach" height={280} />
         </CardContent>
       </Card>
 
       {/* Platform Breakdown & Top Creative */}
-      <div className="mb-6 grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Platform Breakdown</CardTitle>

@@ -12,7 +12,7 @@ export default function DashboardLayout({
       <div className="flex min-h-screen">
         <MobileSidebar />
         <main className="flex-1 overflow-y-auto bg-background">
-          <div className="mx-auto max-w-[1400px] p-8">
+          <div className="mx-auto max-w-[1200px] p-8">
             <PageTransition>{children}</PageTransition>
           </div>
         </main>
