@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { prisma } from '@repo/db'
 import type { ApiResponse } from '@repo/types'
+import { generateBestPostingTimes } from '../lib/openai'
 
 export const publishRouter = new Hono()
 
@@ -294,19 +295,35 @@ publishRouter.post('/queue/:id/retry', async (c) => {
   }
 })
 
-// GET /api/publish/best-time - AI best time suggestion (placeholder for Phase 3)
+// GET /api/publish/best-time - AI best time suggestion based on historical data
 publishRouter.get('/best-time', async (c) => {
   try {
-    const platform = c.req.query('platform')
+    const platform = c.req.query('platform') || 'instagram'
 
-    // Phase 3: Replace with real AI analysis based on historical engagement data
-    const suggestions = [
-      { platform: 'instagram', time: '10:00', score: 92, reason: 'Highest engagement for lifestyle brands' },
-      { platform: 'facebook', time: '12:00', score: 90, reason: 'Peak lunch break browsing' },
-      { platform: 'tiktok', time: '18:00', score: 95, reason: 'After-work highest engagement' },
-    ].filter((s) => !platform || s.platform === platform)
+    // Fetch historical engagement data grouped by hour
+    const performances = await prisma.creativePerformance.findMany({
+      where: {
+        creative: { platform },
+        recordedAt: { gte: new Date(Date.now() - 90 * 86400000) },
+      },
+      select: { recordedAt: true, likes: true, comments: true, shares: true, saves: true },
+    })
 
-    return c.json<ApiResponse>({ data: suggestions })
+    const hourlyData: { hour: number; engagement: number }[] = Array.from({ length: 24 }, (_, i) => ({
+      hour: i,
+      engagement: 0,
+    }))
+
+    for (const p of performances) {
+      const hour = new Date(p.recordedAt).getHours()
+      hourlyData[hour]!.engagement += p.likes + p.comments + p.shares + p.saves
+    }
+
+    const suggestions = await generateBestPostingTimes(platform, hourlyData)
+
+    return c.json<ApiResponse>({
+      data: suggestions.map((s) => ({ ...s, platform })),
+    })
   } catch (error) {
     console.error('Error fetching best times:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch best times' }, 500)

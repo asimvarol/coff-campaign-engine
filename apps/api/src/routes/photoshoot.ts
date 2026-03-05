@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/db'
 import type { ApiResponse } from '@repo/types'
+import { generatePhotoshootImages, removeBackground as removeBackgroundAI } from '../lib/fal'
 
 export const photoshootRouter = new Hono()
 
@@ -72,7 +73,6 @@ photoshootRouter.get('/:id', async (c) => {
 })
 
 // POST /api/photoshoot/remove-background - Remove background from product image
-// Note: fal.ai integration is Phase 3. Returns placeholder for now.
 photoshootRouter.post('/remove-background', async (c) => {
   try {
     const body = await c.req.json()
@@ -82,11 +82,12 @@ photoshootRouter.post('/remove-background', async (c) => {
       return c.json<ApiResponse>({ error: 'Image URL is required' }, 400)
     }
 
-    // Phase 3: Call fal.ai background removal API
+    const processedUrl = await removeBackgroundAI(imageUrl)
+
     return c.json<ApiResponse>({
       data: {
         originalUrl: imageUrl,
-        processedUrl: `${imageUrl}?bg=transparent`,
+        processedUrl,
       },
       message: 'Background removed successfully',
     })
@@ -121,7 +122,7 @@ photoshootRouter.post('/generate', async (c) => {
       return c.json<ApiResponse>({ error: 'Brand not found' }, 404)
     }
 
-    // Create photoshoot with placeholder variants (Phase 3: replace with AI generation)
+    // Create photoshoot record
     const photoshoot = await prisma.photoshoot.create({
       data: {
         brandId,
@@ -129,21 +130,37 @@ photoshootRouter.post('/generate', async (c) => {
         productImageUrl,
         status: 'GENERATING',
         creditCost: templates.length * 3,
-        variants: {
-          create: templates.map((template: string) => ({
-            template,
-            imageUrl: `https://placehold.co/1080x1080/1c1b1b/e6d3c1?text=${encodeURIComponent(template)}`,
-            prompt: `Product photoshoot with ${template} style for ${brand.name}`,
-          })),
-        },
       },
-      include: { variants: true },
     })
 
-    // Simulate completion (Phase 3: replace with async job queue)
-    await prisma.photoshoot.update({
+    // Generate images via fal.ai for each template
+    const variantPromises = templates.map(async (template: string) => {
+      const images = await generatePhotoshootImages(brand.name, template)
+      return images.map((imageUrl) => ({
+        photoshootId: photoshoot.id,
+        template,
+        imageUrl,
+        prompt: `Product photoshoot with ${template} style for ${brand.name}`,
+      }))
+    })
+
+    const variantResults = await Promise.allSettled(variantPromises)
+    const variantData = variantResults
+      .filter((r): r is PromiseFulfilledResult<any[]> => r.status === 'fulfilled')
+      .flatMap((r) => r.value)
+
+    // Create variants and mark complete
+    await prisma.$transaction([
+      ...variantData.map((data) => prisma.photoshootVariant.create({ data })),
+      prisma.photoshoot.update({
+        where: { id: photoshoot.id },
+        data: { status: 'COMPLETED', completedAt: new Date() },
+      }),
+    ])
+
+    const completed = await prisma.photoshoot.findUnique({
       where: { id: photoshoot.id },
-      data: { status: 'COMPLETED', completedAt: new Date() },
+      include: { variants: true },
     })
 
     return c.json<ApiResponse>({
@@ -151,7 +168,7 @@ photoshootRouter.post('/generate', async (c) => {
         photoshootId: photoshoot.id,
         status: 'COMPLETED',
         creditCost: photoshoot.creditCost,
-        variants: photoshoot.variants,
+        variants: completed?.variants || [],
       },
       message: 'Photoshoot generated successfully',
     }, 201)

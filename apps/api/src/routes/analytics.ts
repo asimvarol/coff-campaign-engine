@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { prisma } from '@repo/db'
 import type { ApiResponse } from '@repo/types'
+import { generateInsights } from '../lib/openai'
 
 export const analyticsRouter = new Hono()
 
@@ -509,24 +510,99 @@ analyticsRouter.get('/compare', zValidator('query', compareSchema), async (c) =>
   }
 })
 
-// GET /api/analytics/insights - AI insights (placeholder for Phase 3)
+// GET /api/analytics/insights - AI-generated insights from performance data
 analyticsRouter.get('/insights', async (c) => {
   try {
-    // Phase 3: Replace with real AI-generated insights from performance data
-    // For now return empty — UI shows empty state
-    return c.json<ApiResponse>({ data: [] })
+    const period = c.req.query('period') || '30d'
+
+    const daysBack = period === '7d' ? 7 : period === '90d' ? 90 : 30
+    const since = new Date()
+    since.setDate(since.getDate() - daysBack)
+
+    const performances = await prisma.creativePerformance.findMany({
+      where: { recordedAt: { gte: since } },
+      include: { creative: { select: { platform: true } } },
+    })
+
+    if (performances.length === 0) {
+      return c.json<ApiResponse>({ data: [] })
+    }
+
+    let totalReach = 0
+    let totalEngagement = 0
+    let totalCtr = 0
+    const platformReach: Record<string, number> = {}
+
+    for (const p of performances) {
+      totalReach += p.reach
+      totalEngagement += p.likes + p.comments + p.shares + p.saves
+      totalCtr += p.ctr || 0
+      const plat = p.creative.platform
+      platformReach[plat] = (platformReach[plat] || 0) + p.reach
+    }
+
+    const topPlatform = Object.entries(platformReach).sort((a, b) => b[1] - a[1])[0]?.[0] || 'instagram'
+    const avgCtr = Math.round((totalCtr / performances.length) * 10) / 10
+    const campaignCount = await prisma.campaign.count({ where: { status: { not: 'DRAFT' } } })
+
+    const insights = await generateInsights({
+      totalReach,
+      totalEngagement,
+      avgCtr,
+      topPlatform,
+      campaignCount,
+      period,
+    })
+
+    return c.json<ApiResponse>({ data: insights })
   } catch (error) {
     console.error('Error fetching insights:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch insights' }, 500)
   }
 })
 
-// POST /api/analytics/insights/generate - Generate AI insights (placeholder for Phase 3)
+// POST /api/analytics/insights/generate - Force regenerate AI insights
 analyticsRouter.post('/insights/generate', async (c) => {
-  return c.json<ApiResponse>({
-    data: null,
-    message: 'AI insights generation is not yet available (Phase 3)',
-  })
+  try {
+    const performances = await prisma.creativePerformance.findMany({
+      where: { recordedAt: { gte: new Date(Date.now() - 30 * 86400000) } },
+      include: { creative: { select: { platform: true } } },
+    })
+
+    let totalReach = 0
+    let totalEngagement = 0
+    let totalCtr = 0
+    const platformReach: Record<string, number> = {}
+
+    for (const p of performances) {
+      totalReach += p.reach
+      totalEngagement += p.likes + p.comments + p.shares + p.saves
+      totalCtr += p.ctr || 0
+      const plat = p.creative.platform
+      platformReach[plat] = (platformReach[plat] || 0) + p.reach
+    }
+
+    const topPlatform = Object.entries(platformReach).sort((a, b) => b[1] - a[1])[0]?.[0] || 'instagram'
+    const avgCtr = performances.length > 0 ? Math.round((totalCtr / performances.length) * 10) / 10 : 0
+    const campaignCount = await prisma.campaign.count({ where: { status: { not: 'DRAFT' } } })
+
+    const insights = await generateInsights({
+      totalReach,
+      totalEngagement,
+      avgCtr,
+      topPlatform,
+      campaignCount,
+      period: '30d',
+    })
+
+    return c.json<ApiResponse>({
+      data: insights,
+      message: 'Insights generated successfully',
+    })
+  } catch (error) {
+    console.error('Error generating insights:', error)
+    return c.json<ApiResponse>({ error: 'Failed to generate insights' }, 500)
+  }
 })
 
 // POST /api/analytics/reports/generate - Generate report (placeholder)

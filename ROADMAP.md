@@ -57,10 +57,13 @@
 - [ ] Database seeding
 
 ### Phase 3: AI Features
-- [ ] OpenAI integration
-- [ ] Fal.ai for image generation
-- [ ] Campaign generation from brand DNA
-- [ ] Creative suggestions
+- [x] OpenAI integration (gpt-4o-mini: concepts, insights, brand voice, best posting times)
+- [x] Fal.ai for image generation (nano-banana-2: creatives, photoshoot)
+- [x] Fal.ai background removal (birefnet)
+- [x] Campaign concept generation from brand DNA
+- [x] Creative image generation per platform
+- [x] AI-powered analytics insights
+- [x] AI best posting time suggestions
 - [ ] A/B test recommendations
 
 ### Phase 4: Social Integration
@@ -98,4 +101,4 @@
 - Test coverage: TBD
 - Lighthouse score: TBD
 
-Last updated: 2026-03-02
+Last updated: 2026-03-05

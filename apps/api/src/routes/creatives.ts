@@ -6,6 +6,7 @@ import {
   regenerateCreativeSchema,
   validateBody,
 } from '../lib/validators'
+import { regenerateCreativeImage } from '../lib/fal'
 
 export const creativesRouter = new Hono()
 
@@ -71,8 +72,7 @@ creativesRouter.put('/:id', async (c) => {
   }
 })
 
-// POST /api/creatives/:id/regenerate - Regenerate creative image
-// Note: AI integration is Phase 3. Creates a new version in DB.
+// POST /api/creatives/:id/regenerate - Regenerate creative image with AI
 creativesRouter.post('/:id/regenerate', async (c) => {
   try {
     const id = c.req.param('id')
@@ -89,7 +89,14 @@ creativesRouter.post('/:id/regenerate', async (c) => {
       return c.json<ApiResponse>({ error: 'Creative not found', code: 'NOT_FOUND' }, 404)
     }
 
-    // Create new version (Phase 3: replace with AI-generated image)
+    const imagePrompt = prompt || original.imagePrompt || `Regenerate creative for ${original.platform}`
+    const imageUrl = await regenerateCreativeImage(
+      imagePrompt,
+      original.platform,
+      original.width,
+      original.height
+    )
+
     const newCreative = await prisma.creative.create({
       data: {
         campaignId: original.campaignId,
@@ -98,8 +105,8 @@ creativesRouter.post('/:id/regenerate', async (c) => {
         format: original.format,
         width: original.width,
         height: original.height,
-        imageUrl: `https://placehold.co/${original.width}x${original.height}/1c1b1b/e6d3c1?text=v${original.version + 1}`,
-        imagePrompt: prompt || original.imagePrompt,
+        imageUrl,
+        imagePrompt,
         header: original.header as any,
         description: original.description as any,
         cta: original.cta as any,

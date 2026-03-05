@@ -7,6 +7,8 @@ import {
   generateCreativesSchema,
   validateBody,
 } from '../lib/validators'
+import { generateConcepts } from '../lib/openai'
+import { generateCampaignCreative } from '../lib/fal'
 
 export const campaignsRouter = new Hono()
 
@@ -171,7 +173,6 @@ campaignsRouter.delete('/:id', async (c) => {
 })
 
 // POST /api/campaigns/:id/generate-concepts - Generate AI campaign concepts
-// Note: AI integration is Phase 3. Returns placeholder concepts for now.
 campaignsRouter.post('/:id/generate-concepts', async (c) => {
   try {
     const id = c.req.param('id')
@@ -184,35 +185,19 @@ campaignsRouter.post('/:id/generate-concepts', async (c) => {
       return c.json<ApiResponse>({ error: 'Campaign not found', code: 'NOT_FOUND' }, 404)
     }
 
-    // Phase 3: Replace with real AI generation
-    const concepts = [
-      {
-        name: 'Heritage & Elegance',
-        description: 'Celebrate the timeless beauty of traditional craftsmanship with modern elegance.',
-        emotion: 'Nostalgic Pride',
-        hashtags: ['#TimelessElegance', '#Craftsmanship'],
-        colorMood: 'Warm earth tones with gold accents',
-        textPosition: 'bottom',
-      },
-      {
-        name: 'Empowered Femininity',
-        description: 'Honor the strength and grace through bold, statement pieces.',
-        emotion: 'Empowerment',
-        hashtags: ['#EmpoweredWomen', '#ConfidentStyle'],
-        colorMood: 'Deep blacks with rose gold highlights',
-        textPosition: 'top',
-      },
-      {
-        name: 'Sentimental Journey',
-        description: 'Every piece tells a story of love, memory, and cherished moments.',
-        emotion: 'Warmth & Nostalgia',
-        hashtags: ['#StoriesThatShine', '#CherishedMoments'],
-        colorMood: 'Soft pastels with warm lighting',
-        textPosition: 'center',
-      },
-    ]
+    const brand = campaign.brand
+    const brandVoice = (brand as any).voice?.tone || []
+    const brandValues = (brand as any).values || []
 
-    // Update campaign status
+    const concepts = await generateConcepts({
+      brandName: brand.name,
+      brandVoice,
+      brandValues,
+      objective: campaign.objective,
+      platforms: campaign.platforms,
+      description: campaign.description || undefined,
+    })
+
     await prisma.campaign.update({
       where: { id },
       data: { status: 'GENERATING', creditsCost: { increment: 5 } },
@@ -229,12 +214,14 @@ campaignsRouter.post('/:id/generate-concepts', async (c) => {
 })
 
 // POST /api/campaigns/:id/generate-creatives - Generate creatives from selected concept
-// Note: AI integration is Phase 3. Creates placeholder creatives in DB.
 campaignsRouter.post('/:id/generate-creatives', async (c) => {
   try {
     const id = c.req.param('id')
 
-    const campaign = await prisma.campaign.findUnique({ where: { id } })
+    const campaign = await prisma.campaign.findUnique({
+      where: { id },
+      include: { brand: true },
+    })
     if (!campaign) {
       return c.json<ApiResponse>({ error: 'Campaign not found', code: 'NOT_FOUND' }, 404)
     }
@@ -244,31 +231,51 @@ campaignsRouter.post('/:id/generate-creatives', async (c) => {
       return c.json<ApiResponse>({ error: validation.error, code: validation.code }, 400)
     }
 
-    const { platforms } = validation.data
+    const { platforms, concept } = validation.data
+    const brand = campaign.brand
+    const brandColors = (brand as any).colors || { primary: '#000', accent: '#999' }
+    const conceptName = concept?.name || campaign.name
+    const conceptDesc = concept?.description || campaign.description || ''
+    const colorMood = concept?.colorMood || ''
 
-    // Create placeholder creatives in DB (Phase 3: replace with AI-generated images)
-    const creativeData = platforms.flatMap((platform: string) => [
-      {
-        campaignId: id,
-        brandId: campaign.brandId,
-        platform,
-        format: 'story',
-        width: 1080,
-        height: 1920,
-        imageUrl: `https://placehold.co/1080x1920/1c1b1b/e6d3c1?text=${platform}+Story`,
-        imagePrompt: `${platform} story creative for ${campaign.name}`,
-      },
-      {
-        campaignId: id,
-        brandId: campaign.brandId,
-        platform,
-        format: 'feed',
-        width: 1080,
-        height: 1080,
-        imageUrl: `https://placehold.co/1080x1080/1c1b1b/e6d3c1?text=${platform}+Feed`,
-        imagePrompt: `${platform} feed creative for ${campaign.name}`,
-      },
-    ])
+    const sizeMap: Record<string, { w: number; h: number }> = {
+      instagram: { w: 1080, h: 1080 },
+      facebook: { w: 1200, h: 628 },
+      tiktok: { w: 1080, h: 1920 },
+      linkedin: { w: 1200, h: 900 },
+      x: { w: 1200, h: 628 },
+      pinterest: { w: 1000, h: 1500 },
+    }
+
+    // Generate images in parallel per platform
+    const results = await Promise.allSettled(
+      platforms.flatMap((platform: string) => {
+        const size = sizeMap[platform] || { w: 1080, h: 1080 }
+        return ['feed', 'story'].map(async (format) => {
+          const imageUrl = await generateCampaignCreative(
+            conceptName,
+            conceptDesc,
+            colorMood,
+            platform,
+            { primary: brandColors.primary, accent: brandColors.accent }
+          )
+          return {
+            campaignId: id,
+            brandId: campaign.brandId,
+            platform,
+            format,
+            width: format === 'story' ? 1080 : size.w,
+            height: format === 'story' ? 1920 : size.h,
+            imageUrl,
+            imagePrompt: `${platform} ${format} creative for "${conceptName}": ${conceptDesc}`,
+          }
+        })
+      })
+    )
+
+    const creativeData = results
+      .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled')
+      .map((r) => r.value)
 
     const creatives = await prisma.$transaction(
       creativeData.map((data) => prisma.creative.create({ data }))
