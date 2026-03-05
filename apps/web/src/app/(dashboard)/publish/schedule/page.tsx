@@ -16,7 +16,6 @@ import {
   Checkbox,
   Badge,
 } from '@repo/ui'
-import { platforms, mockBestTimes, mockConnectedAccounts, type Platform } from '@/lib/mock-data/publish'
 import { toast } from 'sonner'
 import {
   ArrowLeft01Icon,
@@ -27,6 +26,36 @@ import {
   CheckmarkCircle02Icon,
 } from '@/lib/icons'
 
+type Platform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin' | 'x' | 'pinterest' | 'youtube'
+
+interface PlatformDefinition {
+  id: Platform
+  name: string
+  color: string
+  icon: string
+}
+
+interface ConnectedAccount {
+  id: string
+  platform: Platform
+  username: string
+  handle: string
+  avatar: string
+  status: 'connected' | 'expired'
+  lastUsed: string
+  connectedAt: string
+}
+
+const platforms: PlatformDefinition[] = [
+  { id: 'instagram', name: 'Instagram', color: 'oklch(0.66 0.21 354)', icon: '📸' },
+  { id: 'facebook', name: 'Facebook', color: 'oklch(0.55 0.18 240)', icon: '👥' },
+  { id: 'tiktok', name: 'TikTok', color: 'oklch(0.2 0 0)', icon: '🎵' },
+  { id: 'linkedin', name: 'LinkedIn', color: 'oklch(0.48 0.14 240)', icon: '💼' },
+  { id: 'x', name: 'X', color: 'oklch(0.4 0 0)', icon: '𝕏' },
+  { id: 'pinterest', name: 'Pinterest', color: 'oklch(0.52 0.20 360)', icon: '📌' },
+  { id: 'youtube', name: 'YouTube', color: 'oklch(0.54 0.22 30)', icon: '▶️' },
+]
+
 type Step = 1 | 2 | 3 | 4 | 5
 
 export default function SchedulePostPage() {
@@ -34,7 +63,7 @@ export default function SchedulePostPage() {
 
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState<Step>(1)
-  
+
   // Form state
   const [selectedCreatives, setSelectedCreatives] = useState<string[]>([])
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>([])
@@ -45,6 +74,7 @@ export default function SchedulePostPage() {
   const [platformCaptions, setPlatformCaptions] = useState<Record<string, string>>({})
 
   const [creatives, setCreatives] = useState<Array<{ id: string; thumbnail: string; name: string }>>([])
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
 
   useEffect(() => {
     const fetchCreatives = async () => {
@@ -75,8 +105,8 @@ export default function SchedulePostPage() {
     fetchCreatives()
   }, [])
 
-  const connectedPlatforms = platforms.filter(p => 
-    mockConnectedAccounts.some(acc => acc.platform === p.id && acc.status === 'connected')
+  const connectedPlatforms = platforms.filter(p =>
+    connectedAccounts.some(acc => acc.platform === p.id && acc.status === 'connected')
   )
 
   const creditsPerPost = 1
@@ -124,14 +154,6 @@ export default function SchedulePostPage() {
       router.push('/publish/queue')
     } catch {
       toast.error('Failed to schedule posts')
-    }
-  }
-
-  const handleBestTime = (platform: Platform) => {
-    const bestTime = mockBestTimes.find(t => t.platform === platform)
-    if (bestTime) {
-      setScheduledTime(bestTime.time)
-      toast.info(`Best time for ${platform}: ${bestTime.time} (${bestTime.reason})`)
     }
   }
 
@@ -228,48 +250,63 @@ export default function SchedulePostPage() {
           <CardHeader>
             <CardTitle>Select Platform(s)</CardTitle>
             <CardDescription>
-              Choose which platforms to post to
+              {connectedPlatforms.length === 0
+                ? 'No connected accounts. Connect an account first to select platforms.'
+                : 'Choose which platforms to post to'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {connectedPlatforms.map((platform) => {
-                const isSelected = selectedPlatforms.includes(platform.id)
-                return (
-                  <button
-                    key={platform.id}
-                    onClick={() =>
-                      setSelectedPlatforms((prev) =>
-                        prev.includes(platform.id)
-                          ? prev.filter((p) => p !== platform.id)
-                          : [...prev, platform.id]
-                      )
-                    }
-                    className={`flex items-center gap-3 rounded-lg border-2 p-4 transition-all ${
-                      isSelected
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary'
-                    }`}
-                  >
-                    <div
-                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-xl"
-                      style={{ backgroundColor: platform.color }}
+            {connectedPlatforms.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Calendar03Icon className="h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-semibold">No connected accounts</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Connect a social media account to start scheduling posts
+                </p>
+                <Button className="mt-4" asChild>
+                  <Link href="/publish/accounts">Connect Account</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-3">
+                {connectedPlatforms.map((platform) => {
+                  const isSelected = selectedPlatforms.includes(platform.id)
+                  return (
+                    <button
+                      key={platform.id}
+                      onClick={() =>
+                        setSelectedPlatforms((prev) =>
+                          prev.includes(platform.id)
+                            ? prev.filter((p) => p !== platform.id)
+                            : [...prev, platform.id]
+                        )
+                      }
+                      className={`flex items-center gap-3 rounded-lg border-2 p-4 transition-all ${
+                        isSelected
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary'
+                      }`}
                     >
-                      {platform.icon}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <div className="font-medium">{platform.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        1 credit per post
+                      <div
+                        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-xl"
+                        style={{ backgroundColor: platform.color }}
+                      >
+                        {platform.icon}
                       </div>
-                    </div>
-                    {isSelected && (
-                      <CheckmarkCircle02Icon className="h-5 w-5 text-primary" />
-                    )}
-                  </button>
-                )
-              })}
-            </div>
+                      <div className="flex-1 text-left">
+                        <div className="font-medium">{platform.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          1 credit per post
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <CheckmarkCircle02Icon className="h-5 w-5 text-primary" />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -296,55 +333,27 @@ export default function SchedulePostPage() {
             </div>
 
             {!postNow && (
-              <>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Date</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={scheduledDate}
-                      onChange={(e) => setScheduledDate(e.target.value)}
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="time">Time</Label>
-                    <Input
-                      id="time"
-                      type="time"
-                      value={scheduledTime}
-                      onChange={(e) => setScheduledTime(e.target.value)}
-                    />
-                  </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={scheduledDate}
+                    onChange={(e) => setScheduledDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
                 </div>
-
-                <div className="rounded-lg border border-border bg-muted/30 p-4">
-                  <h4 className="mb-3 font-medium">Best Time Suggestions</h4>
-                  <div className="space-y-2">
-                    {selectedPlatforms.slice(0, 3).map((platformId) => {
-                      const platform = platforms.find(p => p.id === platformId)
-                      const bestTime = mockBestTimes.find(t => t.platform === platformId)
-                      if (!bestTime) return null
-                      return (
-                        <button
-                          key={platformId}
-                          onClick={() => handleBestTime(platformId)}
-                          className="flex w-full items-center justify-between rounded-lg border border-border bg-card p-3 text-left transition-colors hover:bg-muted"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Magic01Icon className="h-4 w-4 text-primary" />
-                            <span className="text-sm">
-                              {platform?.icon} <strong>{bestTime.time}</strong>
-                            </span>
-                          </div>
-                          <Badge variant="secondary">{bestTime.score}% match</Badge>
-                        </button>
-                      )
-                    })}
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time">Time</Label>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                  />
                 </div>
-              </>
+              </div>
             )}
           </CardContent>
         </Card>

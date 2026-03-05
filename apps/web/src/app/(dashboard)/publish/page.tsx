@@ -1,14 +1,31 @@
 import Link from 'next/link'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { Calendar03Icon, Link01Icon, Share08Icon, AlertCircle01Icon } from '@/lib/icons'
-import { getPublishStats, getRecentActivity, getPlatform, mockConnectedAccounts } from '@/lib/mock-data/publish'
-import { formatDateTime } from '@/lib/format-date'
 
 export const metadata = { title: 'Publish Hub | Coff' }
 
+const PLATFORMS: Record<string, { name: string; icon: string }> = {
+  instagram: { name: 'Instagram', icon: '📸' },
+  facebook: { name: 'Facebook', icon: '👥' },
+  tiktok: { name: 'TikTok', icon: '🎵' },
+  linkedin: { name: 'LinkedIn', icon: '💼' },
+  x: { name: 'X', icon: '𝕏' },
+  pinterest: { name: 'Pinterest', icon: '📌' },
+  youtube: { name: 'YouTube', icon: '▶️' },
+}
+
 export default function PublishPage() {
-  const stats = getPublishStats()
-  const recentActivity = getRecentActivity()
+  const stats = { total: 0, scheduled: 0, published: 0, failed: 0 }
+  const recentActivity: Array<{
+    id: string
+    platform: string
+    scheduledFor: string
+    creativeThumbnail: string
+    caption: string
+    status: string
+    error?: string
+    postUrl?: string
+  }> = []
 
   return (
     <div className="space-y-6">
@@ -83,21 +100,19 @@ export default function PublishPage() {
         </Card>
       </div>
 
-      {/* Connect Account Banner */}
-      {mockConnectedAccounts.filter(a => a.status === 'connected').length === 0 && (
-        <Card className="border-2 border-dashed border-primary/50 bg-primary/5">
-          <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-            <Link01Icon className="h-8 w-8 text-primary" />
-            <div>
-              <h3 className="font-semibold">Connect your social accounts</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Link your Instagram, Facebook, TikTok and more to start publishing</p>
-            </div>
-            <Button asChild>
-              <Link href="/publish/accounts">Connect Accounts</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {/* Connect Account Banner — always shown since no accounts */}
+      <Card className="border-2 border-dashed border-primary/50 bg-primary/5">
+        <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
+          <Link01Icon className="h-8 w-8 text-primary" />
+          <div>
+            <h3 className="font-semibold">Connect your social accounts</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Link your Instagram, Facebook, TikTok and more to start publishing</p>
+          </div>
+          <Button asChild>
+            <Link href="/publish/accounts">Connect Accounts</Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Recent Activity */}
       <Card>
@@ -113,76 +128,90 @@ export default function PublishPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {recentActivity.map((post) => {
-              const platform = getPlatform(post.platform)
-              const date = new Date(post.scheduledFor)
-              const isUpcoming = date > new Date()
+          {recentActivity.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Calendar03Icon className="h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-4 text-lg font-semibold">No recent activity</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Schedule your first post to get started
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {recentActivity.map((post) => {
+                const platform = PLATFORMS[post.platform]
+                const date = new Date(post.scheduledFor)
+                const isUpcoming = date > new Date()
 
-              return (
-                <div
-                  key={post.id}
-                  className="flex items-start gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"
-                >
-                  {/* Creative Thumbnail */}
-                  <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
-                    <img
-                      src={post.creativeThumbnail}
-                      alt="Creative"
-                      className="h-full w-full object-cover"
-
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {platform?.icon} {platform?.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {isUpcoming ? 'Scheduled for' : 'Published'}{' '}
-                        {formatDateTime(post.scheduledFor)}
-                      </span>
+                return (
+                  <div
+                    key={post.id}
+                    className="flex items-start gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"
+                  >
+                    {/* Creative Thumbnail */}
+                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+                      <img
+                        src={post.creativeThumbnail}
+                        alt="Creative"
+                        className="h-full w-full object-cover"
+                      />
                     </div>
-                    <p className="line-clamp-2 text-sm text-muted-foreground">
-                      {post.caption}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          post.status === 'published'
-                            ? 'bg-chart-3/10 text-chart-3'
-                            : post.status === 'failed'
-                              ? 'bg-destructive/10 text-destructive'
-                              : 'bg-primary/10 text-primary'
-                        }`}
-                      >
-                        {post.status === 'published' ? '✓ Published' : 
-                         post.status === 'failed' ? '✗ Failed' : 
-                         '◷ Scheduled'}
-                      </span>
-                      {post.status === 'failed' && (
-                        <span className="text-xs text-destructive">
-                          {post.error || 'Connection to platform expired. Reconnect account.'}
+
+                    {/* Content */}
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">
+                          {platform?.icon} {platform?.name}
                         </span>
-                      )}
-                      {post.postUrl && (
-                        <a
-                          href={post.postUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-primary hover:underline"
+                        <span className="text-xs text-muted-foreground">
+                          {isUpcoming ? 'Scheduled for' : 'Published'}{' '}
+                          {date.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                      <p className="line-clamp-2 text-sm text-muted-foreground">
+                        {post.caption}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                            post.status === 'published'
+                              ? 'bg-chart-3/10 text-chart-3'
+                              : post.status === 'failed'
+                                ? 'bg-destructive/10 text-destructive'
+                                : 'bg-primary/10 text-primary'
+                          }`}
                         >
-                          View Post →
-                        </a>
-                      )}
+                          {post.status === 'published' ? '✓ Published' :
+                           post.status === 'failed' ? '✗ Failed' :
+                           '◷ Scheduled'}
+                        </span>
+                        {post.status === 'failed' && (
+                          <span className="text-xs text-destructive">
+                            {post.error || 'Connection to platform expired. Reconnect account.'}
+                          </span>
+                        )}
+                        {post.postUrl && (
+                          <a
+                            href={post.postUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            View Post →
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 

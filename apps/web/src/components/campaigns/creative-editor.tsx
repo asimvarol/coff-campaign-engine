@@ -10,15 +10,53 @@ import {
   Magic01Icon,
   ClockIcon 
 } from '@/lib/icons'
-import { MockCreative } from '@/lib/mock-data/campaigns'
-import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
+import { PLATFORM_LABELS } from '@/lib/platform-config'
+
+export interface CreativeData {
+  id: string
+  campaignId: string
+  platform: string
+  format: string
+  width: number
+  height: number
+  imageUrl: string
+  header: {
+    text: string
+    font: string
+    size: number
+    color: string
+    position: { x: number; y: number }
+    visible: boolean
+  }
+  description: {
+    text: string
+    font: string
+    size: number
+    color: string
+    position: { x: number; y: number }
+    visible: boolean
+  }
+  cta: {
+    text: string
+    style: string
+    url: string
+    visible: boolean
+  }
+  overlay: {
+    color: string
+    opacity: number
+  }
+  version: number
+  status: string
+  createdAt: Date
+}
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@repo/ui'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import Link from 'next/link'
 
 interface CreativeEditorProps {
-  creative: MockCreative
+  creative: CreativeData
   campaignId: string
 }
 

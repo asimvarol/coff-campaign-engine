@@ -1,4 +1,4 @@
-import type { Platform, PostStatus } from '@/lib/mock-data/publish'
+import type { Platform, PostStatus } from '@/lib/platform-config'
 
 export interface PublishPostRecord {
   id: string

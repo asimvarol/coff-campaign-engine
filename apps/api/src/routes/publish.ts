@@ -3,48 +3,6 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import type { ApiResponse } from '@repo/types'
 
-// Import mock data (will use DB once schema is ready)
-const mockConnectedAccounts = [
-  {
-    id: '1',
-    platform: 'instagram',
-    username: 'brandname.official',
-    handle: '@brandname.official',
-    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=BO',
-    status: 'connected',
-    lastUsed: new Date().toISOString(),
-    connectedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: '2',
-    platform: 'facebook',
-    username: 'Brand Name Page',
-    handle: '@brandnamepage',
-    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=BP',
-    status: 'connected',
-    lastUsed: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    connectedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-]
-
-const mockScheduledPosts = [
-  {
-    id: '1',
-    creativeId: 'cr-1',
-    creativeThumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=200&fit=crop',
-    platform: 'instagram',
-    scheduledFor: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    caption: '✨ New collection drop! Link in bio.',
-    status: 'scheduled',
-  },
-]
-
-const mockBestTimes = [
-  { platform: 'instagram', time: '10:00', score: 92, reason: 'Highest engagement for lifestyle brands' },
-  { platform: 'facebook', time: '12:00', score: 90, reason: 'Peak lunch break browsing' },
-  { platform: 'tiktok', time: '18:00', score: 95, reason: 'After-work highest engagement' },
-]
-
 export const publishRouter = new Hono()
 
 // Validation schemas
@@ -76,7 +34,8 @@ publishRouter.get('/accounts', async (c) => {
     //   orderBy: { lastUsed: 'desc' },
     // })
     
-    return c.json<ApiResponse>({ data: mockConnectedAccounts })
+    // TODO: Replace with actual DB query
+    return c.json<ApiResponse>({ data: [] })
   } catch (error) {
     console.error('Error fetching accounts:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch accounts' }, 500)
@@ -169,7 +128,8 @@ publishRouter.get('/calendar', async (c) => {
     //   orderBy: { scheduledFor: 'asc' },
     // })
 
-    return c.json<ApiResponse>({ data: mockScheduledPosts })
+    // TODO: Replace with actual DB query
+    return c.json<ApiResponse>({ data: [] })
   } catch (error) {
     console.error('Error fetching calendar:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch calendar' }, 500)
@@ -243,10 +203,11 @@ publishRouter.get('/queue', async (c) => {
     //   }),
     // ])
 
-    const filteredPosts = mockScheduledPosts
+    // TODO: Replace with actual DB query
+    const filteredPosts: unknown[] = []
     const total = filteredPosts.length
 
-    return c.json<ApiResponse>({ 
+    return c.json<ApiResponse>({
       data: filteredPosts.slice(skip, skip + limit),
       pagination: {
         page,
@@ -336,11 +297,8 @@ publishRouter.get('/best-time', async (c) => {
     // - Audience timezone
     // - Day of week patterns
 
-    const suggestions = platform 
-      ? mockBestTimes.filter(t => t.platform === platform)
-      : mockBestTimes
-
-    return c.json<ApiResponse>({ data: suggestions })
+    // TODO: Real AI analysis
+    return c.json<ApiResponse>({ data: [] })
   } catch (error) {
     console.error('Error fetching best times:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch best times' }, 500)

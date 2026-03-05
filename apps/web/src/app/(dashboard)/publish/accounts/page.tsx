@@ -24,27 +24,56 @@ import {
   AlertDialogTitle,
   Badge,
 } from '@repo/ui'
-import { mockConnectedAccounts, platforms, type Platform } from '@/lib/mock-data/publish'
 import { toast } from 'sonner'
 import { Link01Icon, Delete02Icon, CheckmarkCircle02Icon, AlertCircle01Icon } from '@/lib/icons'
+
+type Platform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin' | 'x' | 'pinterest' | 'youtube'
+
+interface PlatformDefinition {
+  id: Platform
+  name: string
+  color: string
+  icon: string
+}
+
+interface ConnectedAccount {
+  id: string
+  platform: Platform
+  username: string
+  handle: string
+  avatar: string
+  status: 'connected' | 'expired'
+  lastUsed: string
+  connectedAt: string
+}
+
+const platforms: PlatformDefinition[] = [
+  { id: 'instagram', name: 'Instagram', color: 'oklch(0.66 0.21 354)', icon: '📸' },
+  { id: 'facebook', name: 'Facebook', color: 'oklch(0.55 0.18 240)', icon: '👥' },
+  { id: 'tiktok', name: 'TikTok', color: 'oklch(0.2 0 0)', icon: '🎵' },
+  { id: 'linkedin', name: 'LinkedIn', color: 'oklch(0.48 0.14 240)', icon: '💼' },
+  { id: 'x', name: 'X', color: 'oklch(0.4 0 0)', icon: '𝕏' },
+  { id: 'pinterest', name: 'Pinterest', color: 'oklch(0.52 0.20 360)', icon: '📌' },
+  { id: 'youtube', name: 'YouTube', color: 'oklch(0.54 0.22 30)', icon: '▶️' },
+]
 
 export default function PublishAccountsPage() {
   useEffect(() => { document.title = 'Connected Accounts | Coff' }, [])
 
-  const [accounts, setAccounts] = useState(mockConnectedAccounts)
+  const [accounts, setAccounts] = useState<ConnectedAccount[]>([])
   const [connectDialogOpen, setConnectDialogOpen] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
   const [disconnectAlertOpen, setDisconnectAlertOpen] = useState(false)
   const [disconnectId, setDisconnectId] = useState('')
 
   const handleConnect = async (platform: Platform) => {
-    const newAccount = {
+    const newAccount: ConnectedAccount = {
       id: `${Date.now()}`,
       platform,
       username: `${platform}_user`,
       handle: `@${platform}_user`,
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${platform}`,
-      status: 'connected' as const,
+      status: 'connected',
       lastUsed: new Date().toISOString(),
       connectedAt: new Date().toISOString(),
     }

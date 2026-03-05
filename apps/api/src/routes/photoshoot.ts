@@ -24,16 +24,16 @@ photoshootRouter.get('/', async (c) => {
 
     await mockDelay(MOCK_DELAYS.SHORT)
 
-    // Import mock data dynamically to avoid build-time issues
-    const { getPhotoshoots } = await import('../../../web/src/lib/mock-data/photoshoots')
-
-    const result = getPhotoshoots({
-      page: validPage,
-      limit: validLimit,
-      status: status as any,
+    // TODO: Fetch from database
+    return c.json<PaginatedResponse<Photoshoot>>({
+      data: [],
+      pagination: {
+        page: validPage,
+        limit: validLimit,
+        total: 0,
+        totalPages: 0,
+      },
     })
-
-    return c.json<PaginatedResponse<Photoshoot>>(result)
   } catch (error) {
     console.error('Error fetching photoshoots:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch photoshoots' }, 500)
@@ -49,14 +49,8 @@ photoshootRouter.get('/:id', async (c) => {
 
     await mockDelay(MOCK_DELAYS.SHORT)
 
-    const { getPhotoshootById } = await import('../../../web/src/lib/mock-data/photoshoots')
-    const photoshoot = getPhotoshootById(id)
-
-    if (!photoshoot) {
-      return c.json<ApiResponse>({ error: 'Photoshoot not found' }, 404)
-    }
-
-    return c.json<ApiResponse<Photoshoot>>({ data: photoshoot })
+    // TODO: Fetch from database
+    return c.json<ApiResponse>({ error: 'Photoshoot not found' }, 404)
   } catch (error) {
     console.error('Error fetching photoshoot:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch photoshoot' }, 500)

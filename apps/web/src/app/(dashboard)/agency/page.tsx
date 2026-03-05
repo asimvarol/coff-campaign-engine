@@ -5,7 +5,12 @@ import { Button } from '@repo/ui'
 import { AgencyOverview } from '@/components/agency/agency-overview'
 import { AgencyBrandsList } from '@/components/agency/agency-brands-list'
 import { AgencyActivityLog } from '@/components/agency/agency-activity-log'
-import { mockAgency, mockAgencyBrands, mockTeamActivities } from '@/lib/mock-data/agency'
+import type { AgencyBrand, TeamActivity } from '@repo/types'
+
+// TODO: Fetch from API
+const mockAgencyBrands: AgencyBrand[] = []
+const mockTeamActivities: TeamActivity[] = []
+const mockAgency = { members: [] as unknown[], totalCreditsUsed: 0, totalCreditsRemaining: 0, monthlySpend: 0 }
 
 export default function AgencyPage() {
   useEffect(() => { document.title = 'Agency | Coff' }, [])

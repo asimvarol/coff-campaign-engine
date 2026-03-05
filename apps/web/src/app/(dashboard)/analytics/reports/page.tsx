@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { toast } from 'sonner'
 import { FileText01Icon, Download04Icon, Calendar03Icon } from '@/lib/icons'
-import {
-  mockReportTemplates,
-  mockGeneratedReports,
-  mockScheduledReports,
-} from '@/lib/mock-data/analytics'
+import type { ReportTemplate, GeneratedReport, ScheduledReport } from '@repo/types'
+
+// TODO: Fetch from API
+const mockReportTemplates: ReportTemplate[] = []
+const mockGeneratedReports: GeneratedReport[] = []
+const mockScheduledReports: ScheduledReport[] = []
 
 export default function ReportsPage() {
   useEffect(() => { document.title = 'Reports | Coff' }, [])

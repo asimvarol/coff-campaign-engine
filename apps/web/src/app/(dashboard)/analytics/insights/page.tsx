@@ -10,8 +10,10 @@ import {
   Magic01Icon,
   Loading03Icon,
 } from '@/lib/icons'
-import { mockAIInsights } from '@/lib/mock-data/analytics'
 import type { AIInsight } from '@repo/types'
+
+// TODO: Fetch from API
+const mockAIInsights: AIInsight[] = []
 
 const insightIcons = {
   alert: AlertCircle01Icon,
