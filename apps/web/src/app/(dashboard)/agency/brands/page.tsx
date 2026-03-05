@@ -1,10 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Button } from '@repo/ui'
 import { AgencyBrandsList } from '@/components/agency/agency-brands-list'
 import { mockAgencyBrands } from '@/lib/mock-data/agency'
 
 export default function AgencyBrandsPage() {
+  useEffect(() => { document.title = 'Agency Brands | Coff' }, [])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

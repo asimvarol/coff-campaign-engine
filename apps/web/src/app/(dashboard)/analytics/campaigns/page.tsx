@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { ChevronDown01Icon } from '@/lib/icons'
@@ -11,6 +11,8 @@ type SortField = 'campaignName' | 'reach' | 'engagement' | 'ctr' | 'clicks' | 's
 type SortDirection = 'asc' | 'desc'
 
 export default function CampaignAnalyticsPage() {
+  useEffect(() => { document.title = 'Campaign Analytics | Coff' }, [])
+
   const [sortField, setSortField] = useState<SortField>('score')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([])
@@ -91,23 +93,23 @@ export default function CampaignAnalyticsPage() {
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <p className="text-muted-foreground">Reach</p>
-                        <p className="font-medium">{campaign.reach.toLocaleString()}</p>
+                        <p className="font-medium font-mono">{campaign.reach.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Engagement</p>
-                        <p className="font-medium">{campaign.engagement.toLocaleString()}</p>
+                        <p className="font-medium font-mono">{campaign.engagement.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">CTR</p>
-                        <p className="font-medium">{campaign.ctr}%</p>
+                        <p className="font-medium font-mono">{campaign.ctr}%</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Clicks</p>
-                        <p className="font-medium">{campaign.clicks.toLocaleString()}</p>
+                        <p className="font-medium font-mono">{campaign.clicks.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Score</p>
-                        <p className="text-lg font-bold text-primary">{campaign.score}</p>
+                        <p className="text-lg font-bold text-primary font-mono">{campaign.score}</p>
                       </div>
                     </div>
                   </div>

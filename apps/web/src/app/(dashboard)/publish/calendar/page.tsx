@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   Badge,
+  Separator,
 } from '@repo/ui'
 import { mockScheduledPosts, getPlatform, type ScheduledPost } from '@/lib/mock-data/publish'
 import { toast } from 'sonner'
@@ -33,6 +34,8 @@ import {
 type ViewMode = 'month' | 'week'
 
 export default function PublishCalendarPage() {
+  useEffect(() => { document.title = 'Content Calendar | Coff' }, [])
+
   const [viewMode, setViewMode] = useState<ViewMode>('month')
   const [currentDate, setCurrentDate] = useState(() => new Date())
   const [posts, setPosts] = useState<ScheduledPost[]>(mockScheduledPosts)
@@ -243,6 +246,7 @@ export default function PublishCalendarPage() {
                         <button
                           key={post.id}
                           onClick={() => setSelectedPost(post)}
+                          title={post.caption}
                           className="flex w-full items-center gap-1 rounded border border-border bg-card p-1 text-xs transition-colors hover:bg-muted"
                         >
                           <div className="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-muted">
@@ -259,6 +263,7 @@ export default function PublishCalendarPage() {
                               minute: '2-digit',
                             })}
                           </span>
+                          <span className="hidden sm:inline truncate">{post.caption.slice(0, 20)}</span>
                         </button>
                       )
                     })}
@@ -395,14 +400,15 @@ export default function PublishCalendarPage() {
                   {selectedPost.caption}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Button variant="outline" className="flex-1" asChild>
                   <Link href="/publish/schedule">
                     <Edit02Icon className="mr-2 h-4 w-4" />
                     Edit
                   </Link>
                 </Button>
-                <Button variant="destructive" onClick={() => setCancelAlertOpen(true)}>
+                <Separator orientation="vertical" className="h-8" />
+                <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setCancelAlertOpen(true)}>
                   <Delete02Icon className="mr-2 h-4 w-4" />
                   Cancel
                 </Button>

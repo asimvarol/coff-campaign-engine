@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger, Skeleton } from '@repo/ui'
+import { useRouter } from 'next/navigation'
+import { Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger, Skeleton, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Separator } from '@repo/ui'
 import { Edit02Icon, Copy01Icon, Delete02Icon, Download04Icon, Add01Icon } from '@/lib/icons'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
+import { formatDate } from '@/lib/format-date'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -58,11 +60,16 @@ const objectiveLabels: Record<string, string> = {
 }
 
 export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  useEffect(() => { document.title = 'Campaign Detail | Coff' }, [])
+
   const { id } = use(params)
+  const router = useRouter()
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isNotFound, setIsNotFound] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [archiveAlertOpen, setArchiveAlertOpen] = useState(false)
+  const [isArchiving, setIsArchiving] = useState(false)
 
   useEffect(() => {
     const fetchCampaign = async () => {
@@ -94,7 +101,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
   if (error) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center p-8 text-center">
+      <div className="flex min-h-[400px] flex-col items-center justify-center p-8 text-center" role="alert">
         <p className="text-sm text-destructive">{error}</p>
         <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
           Try Again
@@ -126,6 +133,23 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   const campaignCreatives: Creative[] = campaign.creatives || []
   const statusInfo = statusConfig[campaign.status] || statusConfig.DRAFT
 
+  const handleArchive = async () => {
+    setIsArchiving(true)
+    try {
+      const response = await fetch(`/api/campaigns/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'ARCHIVED' }),
+      })
+      if (!response.ok) throw new Error('Failed to archive')
+      router.push('/campaigns')
+    } catch {
+      setError('Failed to archive campaign. Please try again.')
+      setIsArchiving(false)
+      setArchiveAlertOpen(false)
+    }
+  }
+
   // Group creatives by platform
   const creativesByPlatform = campaign.platforms.reduce((acc, platform) => {
     acc[platform] = campaignCreatives.filter(c => c.platform === platform)
@@ -149,7 +173,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
             </div>
             <div>
               <div className="mb-2 flex items-center gap-3">
-                <h1 className="text-3xl font-bold">{campaign.name}</h1>
+                <h1 className="text-3xl font-bold truncate max-w-md" title={campaign.name}>{campaign.name}</h1>
                 <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -157,9 +181,9 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 <span>•</span>
                 <span>{objectiveLabels[campaign.objective] || campaign.objective}</span>
                 <span>•</span>
-                <span>{campaign.creativeCount} creatives</span>
+                <span>{campaignCreatives.length} creatives</span>
                 <span>•</span>
-                <span>Updated {new Date(campaign.updatedAt).toLocaleDateString()}</span>
+                <span>Updated {formatDate(campaign.updatedAt)}</span>
               </div>
             </div>
           </div>
@@ -173,11 +197,12 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
               <Copy01Icon className="mr-2 h-4 w-4" />
               Duplicate
             </Button>
-            <Button variant="outline" size="sm" aria-label="Download all creatives">
+            <Button variant="outline" size="sm" aria-label="Download all creatives" disabled={campaignCreatives.length === 0} title={campaignCreatives.length === 0 ? 'No creatives to download' : ''}>
               <Download04Icon className="mr-2 h-4 w-4" />
               Download All
             </Button>
-            <Button variant="outline" size="sm" aria-label="Archive campaign">
+            <Separator orientation="vertical" className="h-8" />
+            <Button variant="outline" size="sm" aria-label="Archive campaign" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setArchiveAlertOpen(true)}>
               <Delete02Icon className="mr-2 h-4 w-4" />
               Archive
             </Button>
@@ -200,20 +225,20 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
       {/* Stats */}
       <div className="mb-8 grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">{campaign.creativeCount}</div>
+          <div className="text-2xl font-bold font-mono">{campaignCreatives.length}</div>
           <div className="text-sm text-muted-foreground">Creatives</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">{campaign.platforms.length}</div>
+          <div className="text-2xl font-bold font-mono">{campaign.platforms.length}</div>
           <div className="text-sm text-muted-foreground">Platforms</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-sm text-muted-foreground">No data yet</div>
           <div className="text-sm text-muted-foreground">CTR</div>
+          <div className="text-lg font-medium text-muted-foreground/60 italic">&mdash;</div>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-sm text-muted-foreground">No data yet</div>
           <div className="text-sm text-muted-foreground">Clicks</div>
+          <div className="text-lg font-medium text-muted-foreground/60 italic">&mdash;</div>
         </div>
       </div>
 
@@ -324,6 +349,24 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
           </div>
         )}
       </div>
+
+      {/* Archive Confirmation Dialog */}
+      <AlertDialog open={archiveAlertOpen} onOpenChange={setArchiveAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive Campaign</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to archive this campaign? Archived campaigns can be restored later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isArchiving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleArchive} disabled={isArchiving} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {isArchiving ? 'Archiving...' : 'Archive'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

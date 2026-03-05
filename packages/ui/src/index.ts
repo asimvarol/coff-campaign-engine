@@ -21,6 +21,7 @@ export * from './components/dropdown-menu'
 export * from './components/alert-dialog'
 export * from './components/sidebar'
 export * from './components/tooltip'
+export * from './components/command'
 
 // Utils
 export * from './lib/utils'

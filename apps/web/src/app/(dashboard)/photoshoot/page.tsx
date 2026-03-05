@@ -9,6 +9,8 @@ import { PhotoshootEmptyState } from '@/components/photoshoot/empty-state'
 import { getPhotoshoots } from '@/lib/mock-data/photoshoots'
 
 export default function PhotoshootPage() {
+  useEffect(() => { document.title = 'Photoshoot | Coff' }, [])
+
   const [photoshoots, setPhotoshoots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 

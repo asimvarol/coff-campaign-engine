@@ -1,11 +1,14 @@
 'use client'
 
+import { useEffect } from 'react'
 import { AgencyBillingOverview } from '@/components/agency/agency-billing-overview'
 import { AgencyOverview } from '@/components/agency/agency-overview'
 import { AgencyUpgradeCard } from '@/components/agency/agency-upgrade-card'
 import { mockAgencyBrands, mockAgency } from '@/lib/mock-data/agency'
 
 export default function AgencyBillingPage() {
+  useEffect(() => { document.title = 'Billing | Coff' }, [])
+
   const kpis = [
     { label: 'Total Credits Used', value: mockAgency.totalCreditsUsed.toLocaleString() },
     { label: 'Credits Remaining', value: mockAgency.totalCreditsRemaining.toLocaleString() },

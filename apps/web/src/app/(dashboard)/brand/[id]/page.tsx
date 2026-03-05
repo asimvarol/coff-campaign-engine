@@ -30,6 +30,8 @@ interface Brand {
 }
 
 export default function BrandDetailPage() {
+  useEffect(() => { document.title = 'Brand Detail | Coff' }, [])
+
   const params = useParams()
   const brandId = params.id as string
   const router = useRouter()

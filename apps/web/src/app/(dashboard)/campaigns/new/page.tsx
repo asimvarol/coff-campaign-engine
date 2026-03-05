@@ -1,5 +1,7 @@
 import { CampaignWizard } from '@/components/campaigns/campaign-wizard'
 
+export const metadata = { title: 'New Campaign | Coff' }
+
 export default function NewCampaignPage() {
   return (
     <div >

@@ -18,6 +18,8 @@ import { TemplateSelector } from '@/components/photoshoot/template-selector'
  * Allows users to upload product image and select templates
  */
 export default function CreatePhotoshootPage() {
+  useEffect(() => { document.title = 'Create Photoshoot | Coff' }, [])
+
   const router = useRouter()
   const [productImage, setProductImage] = useState('')
   const [selectedTemplates, setSelectedTemplates] = useState<PhotoshootTemplate[]>([])
@@ -177,7 +179,7 @@ export default function CreatePhotoshootPage() {
         </Card>
 
         {error && (
-          <div className="mt-6 rounded-lg border border-destructive bg-destructive/10 p-4">
+          <div className="mt-6 rounded-lg border border-destructive bg-destructive/10 p-4" role="alert">
             <p className="text-sm text-destructive">{error}</p>
           </div>
         )}

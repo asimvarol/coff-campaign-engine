@@ -18,6 +18,8 @@ interface Brand {
 }
 
 export default function BrandPage() {
+  useEffect(() => { document.title = 'Brand DNA | Coff' }, [])
+
   const [brands, setBrands] = useState<Brand[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -42,7 +44,7 @@ export default function BrandPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
             <Card key={i} className="p-6">
               <Skeleton className="h-40 w-full rounded-lg mb-4" />
@@ -65,7 +67,7 @@ export default function BrandPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {brands.map((brand) => (
             <Link key={brand.id} href={`/brand/${brand.id}`}>
               <Card className="overflow-hidden transition-all hover:border-primary hover:shadow-lg cursor-pointer group">
@@ -112,8 +114,8 @@ export default function BrandPage() {
                     </div>
 
                     {/* Colors Strip */}
-                    <div className="border-t border-border p-4">
-                      <div className="flex gap-2">
+                    <div className="border-t border-border p-4 overflow-hidden">
+                      <div className="flex gap-2 flex-wrap">
                         {brand.colors.palette.slice(0, 5).map((color, i) => (
                           <div key={i} className="h-8 w-8 rounded-full border border-border" style={{ backgroundColor: color }} title={color} />
                         ))}

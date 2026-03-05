@@ -30,6 +30,8 @@ import {
 type Step = 1 | 2 | 3 | 4 | 5
 
 export default function SchedulePostPage() {
+  useEffect(() => { document.title = 'Schedule Post | Coff' }, [])
+
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState<Step>(1)
   
@@ -450,7 +452,7 @@ export default function SchedulePostPage() {
                     {creditsPerPost} credit × {selectedPlatforms.length} platform(s)
                   </p>
                 </div>
-                <p className="text-2xl font-bold">{totalCredits} credits</p>
+                <p className="text-2xl font-bold"><span className="font-mono">{totalCredits}</span> credits</p>
               </div>
             </div>
           </CardContent>

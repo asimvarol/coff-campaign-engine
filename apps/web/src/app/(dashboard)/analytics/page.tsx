@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { AnalyticsDateRange } from '@repo/types'
 import { AnalyticsCampaignComparison } from '@/components/analytics/analytics-campaign-comparison'
 import { AnalyticsAIInsights } from '@/components/analytics/analytics-ai-insights'
@@ -19,6 +19,8 @@ import { LineChart } from '@/components/analytics/line-chart'
 import { DonutChart } from '@/components/analytics/donut-chart'
 
 export default function AnalyticsPage() {
+  useEffect(() => { document.title = 'Analytics | Coff' }, [])
+
   const [dateRange, setDateRange] = useState<AnalyticsDateRange>('30d')
 
   const overview = mockAnalyticsOverview
@@ -53,37 +55,42 @@ export default function AnalyticsPage() {
       value: overview.totalReach.toLocaleString(),
       change: overview.totalReachChange,
       trend: overview.totalReachChange > 0 ? 'up' : 'down',
+      tooltip: 'Total number of users who saw your content',
     },
     {
       title: 'Engagement',
       value: overview.totalEngagement.toLocaleString(),
       change: overview.totalEngagementChange,
       trend: overview.totalEngagementChange > 0 ? 'up' : 'down',
+      tooltip: 'Likes, comments, shares, and saves',
     },
     {
       title: 'CTR',
       value: `${overview.avgCtr}%`,
       change: overview.avgCtrChange,
       trend: overview.avgCtrChange > 0 ? 'up' : 'down',
+      tooltip: 'Click-through rate — percentage of viewers who clicked',
     },
     {
       title: 'Clicks',
       value: overview.totalClicks.toLocaleString(),
       change: overview.totalClicksChange,
       trend: overview.totalClicksChange > 0 ? 'up' : 'down',
+      tooltip: 'Total link clicks across all platforms',
     },
     {
       title: 'Saves',
       value: overview.totalSaves.toLocaleString(),
       change: overview.totalSavesChange,
       trend: overview.totalSavesChange > 0 ? 'up' : 'down',
+      tooltip: 'Total saves/bookmarks across all platforms',
     },
   ]
 
   return (
-    <div >
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Analytics Overview</h1>
           <p className="text-muted-foreground">Track campaign performance across all platforms</p>
@@ -95,12 +102,12 @@ export default function AnalyticsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="mb-6 grid gap-6 md:grid-cols-5">
+      <div className="grid gap-6 md:grid-cols-5">
         {kpiCards.map((kpi) => (
           <Card key={kpi.title}>
             <CardHeader className="pb-2">
-              <CardDescription>{kpi.title}</CardDescription>
-              <CardTitle className="text-2xl">{kpi.value}</CardTitle>
+              <CardDescription title={kpi.tooltip} aria-label={kpi.tooltip}>{kpi.title}</CardDescription>
+              <CardTitle className="text-2xl font-mono">{kpi.value}</CardTitle>
             </CardHeader>
             <CardContent>
               <div
@@ -113,7 +120,7 @@ export default function AnalyticsPage() {
                 ) : (
                   <TrendDown01Icon size={16} />
                 )}
-                <span>{Math.abs(kpi.change)}%</span>
+                <span>{Math.abs(kpi.change)}% vs prev. period</span>
               </div>
             </CardContent>
           </Card>
@@ -121,18 +128,18 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Reach Over Time */}
-      <Card className="mb-6">
+      <Card>
         <CardHeader>
           <CardTitle>Reach Over Time</CardTitle>
           <CardDescription>Daily reach for the selected period</CardDescription>
         </CardHeader>
-        <CardContent className="h-64">
-          <LineChart data={trendData} dataKey="reach" height={200} />
+        <CardContent className="h-72">
+          <LineChart data={trendData} dataKey="reach" height={280} />
         </CardContent>
       </Card>
 
       {/* Platform Breakdown & Top Creative */}
-      <div className="mb-6 grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Platform Breakdown</CardTitle>
@@ -196,12 +203,12 @@ export default function AnalyticsPage() {
                   </p>
                   <p className="text-sm text-muted-foreground">{creative.aiInsight}</p>
                   <div className="mt-2 flex gap-2">
-                    <button className="rounded-md bg-background px-3 py-1 text-xs font-medium hover:bg-muted">
+                    <Button variant="outline" size="sm">
                       View Details
-                    </button>
-                    <button className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90">
+                    </Button>
+                    <Button size="sm">
                       Replace Creative
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

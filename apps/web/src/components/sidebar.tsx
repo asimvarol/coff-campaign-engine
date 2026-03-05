@@ -90,7 +90,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   }
 
   return (
-    <div className="flex w-64 flex-col border-r border-border bg-card h-screen sticky top-0">
+    <aside className="flex w-64 flex-col border-r border-border bg-card h-screen sticky top-0">
       {/* Header */}
       <div className="flex h-16 items-center gap-3 border-b border-border px-6">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -148,7 +148,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     {brand.id === selectedBrandId && <CheckIcon className="h-4 w-4 shrink-0" />}
                     <button
                       onClick={(e) => handleDeleteClick(brand.id, e)}
-                      className="ml-1 shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive"
+                      className="ml-1 shrink-0 rounded p-0.5 text-destructive hover:text-destructive hover:bg-destructive/10"
                       title="Delete brand"
                     >
                       <Trash2Icon className="h-3.5 w-3.5" />
@@ -190,7 +190,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               </Link>
               
               {hasSubItems && isActive && (
-                <div className="ml-7 mt-1 space-y-1">
+                <div className="ml-7 mt-1 space-y-1 border-l border-border pl-2">
                   {item.subItems.map((subItem) => {
                     const isSubActive = pathname === subItem.href
                     return (
@@ -218,7 +218,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
       {/* Footer */}
       <div className="border-t border-border p-4">
-        <div className="rounded-lg bg-muted p-3 text-xs">
+        <div className="rounded-lg bg-muted p-3 text-xs" title="Credits are used for AI generation. Each campaign costs 5 credits, photoshoots cost 10.">
           <p className="font-medium text-foreground">Credits: 150</p>
           <p className="text-muted-foreground">Upgrade for unlimited</p>
         </div>
@@ -241,6 +241,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </aside>
   )
 }

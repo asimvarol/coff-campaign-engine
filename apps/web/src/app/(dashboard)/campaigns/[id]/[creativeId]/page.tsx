@@ -7,6 +7,8 @@ import { mockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
 import { notFound } from 'next/navigation'
 
 export default function CreativeEditorPage() {
+  useEffect(() => { document.title = 'Creative Editor | Coff' }, [])
+
   const params = useParams()
   const id = params.id as string
   const creativeId = params.creativeId as string

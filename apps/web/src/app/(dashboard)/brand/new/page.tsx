@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Input, Card, ProgressStepper, type Step } from '@repo/ui'
 import { ArrowRight01Icon, Loader2Icon, Sparkles01Icon } from '@/lib/icons'
@@ -14,7 +14,15 @@ const ANALYSIS_STEPS: Step[] = [
 ]
 
 export default function NewBrandPage() {
+  useEffect(() => { document.title = 'New Brand | Coff' }, [])
+
   const router = useRouter()
+  const abortRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    return () => { abortRef.current?.abort() }
+  }, [])
+
   const [url, setUrl] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [currentStep, setCurrentStep] = useState(-1)
@@ -32,13 +40,29 @@ export default function NewBrandPage() {
       normalizedUrl = 'https://' + normalizedUrl
     }
 
+    // Validate URL format
+    try {
+      const parsedUrl = new URL(normalizedUrl)
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        setError('Please enter a valid HTTP/HTTPS URL')
+        return
+      }
+    } catch {
+      setError('Please enter a valid URL (e.g. example.com)')
+      return
+    }
+
     setError('')
     setIsAnalyzing(true)
     setCurrentStep(0)
 
+    const controller = new AbortController()
+    abortRef.current = controller
+
     try {
       // Simulate step progress
       for (let i = 0; i < ANALYSIS_STEPS.length; i++) {
+        if (controller.signal.aborted) return
         setCurrentStep(i)
         await new Promise(resolve => setTimeout(resolve, 1000))
       }
@@ -48,6 +72,7 @@ export default function NewBrandPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: normalizedUrl }),
+        signal: controller.signal,
       })
 
       const data = await response.json()
@@ -59,10 +84,17 @@ export default function NewBrandPage() {
       // Navigate to brand detail page
       router.push(`/brand/${data.data.id}`)
     } catch (err: any) {
+      if (err.name === 'AbortError') return
       setError(err.message || 'Failed to analyze brand')
       setIsAnalyzing(false)
       setCurrentStep(-1)
     }
+  }
+
+  const handleCancel = () => {
+    abortRef.current?.abort()
+    setIsAnalyzing(false)
+    setCurrentStep(-1)
   }
 
   return (
@@ -84,15 +116,18 @@ export default function NewBrandPage() {
               <div>
                 <Input
                   type="url"
+                  required
                   placeholder="example.com or www.example.com"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  onChange={(e) => { setUrl(e.target.value); if (error) setError('') }}
                   onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
                   className="h-14 text-lg"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? 'url-error' : undefined}
                   autoFocus
                 />
                 {error && (
-                  <p className="text-sm text-destructive mt-2">{error}</p>
+                  <p id="url-error" className="text-sm text-destructive mt-2" role="alert">{error}</p>
                 )}
               </div>
 
@@ -124,10 +159,11 @@ export default function NewBrandPage() {
 
             <ProgressStepper steps={ANALYSIS_STEPS} currentStep={currentStep} />
 
-            <div className="mt-8 text-center">
+            <div className="mt-8 text-center space-y-3">
               <p className="text-sm text-muted-foreground">
                 Please wait, this will take a few moments...
               </p>
+              <Button variant="outline" onClick={handleCancel}>Cancel Analysis</Button>
             </div>
           </Card>
         )}

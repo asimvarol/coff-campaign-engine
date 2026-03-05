@@ -18,7 +18,7 @@ export function AgencyUpgradeCard() {
           </p>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold">$99<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+          <div className="text-2xl font-bold"><span className="font-mono">$99</span><span className="text-sm font-normal text-muted-foreground">/mo</span></div>
           <Button className="mt-2">Start Free Trial</Button>
         </div>
       </CardContent>

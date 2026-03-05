@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
+import { useState, useEffect } from 'react'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { toast } from 'sonner'
 import { FileText01Icon, Download04Icon, Calendar03Icon } from '@/lib/icons'
 import {
@@ -11,6 +11,8 @@ import {
 } from '@/lib/mock-data/analytics'
 
 export default function ReportsPage() {
+  useEffect(() => { document.title = 'Reports | Coff' }, [])
+
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
 
@@ -74,18 +76,18 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <button
+                  <Button
+                    className="flex-1"
                     onClick={() => handleGenerateReport(template.id)}
                     disabled={isGenerating && selectedTemplate === template.id}
-                    className="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                   >
                     {isGenerating && selectedTemplate === template.id
                       ? 'Generating...'
                       : 'Generate Report'}
-                  </button>
-                  <button className="rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted">
+                  </Button>
+                  <Button variant="outline">
                     Preview
-                  </button>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -157,12 +159,12 @@ export default function ReportsPage() {
                         <p className="font-medium">{scheduled.recipients.length}</p>
                       </div>
                       <div className="flex gap-2">
-                        <button className="rounded-md bg-background px-3 py-1 text-xs font-medium hover:bg-muted">
+                        <Button variant="outline" size="sm">
                           Edit
-                        </button>
-                        <button className="rounded-md bg-destructive/10 px-3 py-1 text-xs font-medium text-destructive hover:bg-destructive/20">
+                        </Button>
+                        <Button variant="destructive" size="sm">
                           Pause
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -206,10 +208,10 @@ export default function ReportsPage() {
                       <p className="text-sm text-muted-foreground">
                         {new Date(report.generatedAt).toLocaleDateString()}
                       </p>
-                      <button className="flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
+                      <Button size="sm">
                         <Download04Icon size={14} />
                         Download
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}

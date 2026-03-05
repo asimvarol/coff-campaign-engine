@@ -18,7 +18,7 @@ export function AnalyticsOverview({ kpis }: { kpis: AnalyticsKPI[] }) {
             <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold tabular-nums">{kpi.value}</div>
+            <div className="text-2xl font-bold font-mono">{kpi.value}</div>
             <div className="mt-1 text-sm">
               <TrendArrow trend={kpi.trend} change={kpi.change} />
             </div>

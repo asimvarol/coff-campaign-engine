@@ -1,6 +1,8 @@
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge } from '@repo/ui'
 import { PlusIcon, ZapIcon, AlertCircleIcon, TrendingUpIcon } from '@/lib/icons'
 
+export const metadata = { title: 'Autopilot | Coff' }
+
 export default function AutopilotPage() {
   return (
     <div >
@@ -18,7 +20,7 @@ export default function AutopilotPage() {
       <div className="mb-6 grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardDescription>Active Rules</CardDescription>
+            <CardDescription title="Rules currently monitoring your campaigns">Active Rules</CardDescription>
             <CardTitle className="text-2xl">4/6</CardTitle>
           </CardHeader>
         </Card>
@@ -30,8 +32,9 @@ export default function AutopilotPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardDescription>Savings</CardDescription>
+            <CardDescription title="Estimated savings from automated optimizations this month">Savings</CardDescription>
             <CardTitle className="text-2xl">$342</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">Saved from auto-optimizations this month</p>
           </CardHeader>
         </Card>
       </div>
@@ -108,7 +111,7 @@ export default function AutopilotPage() {
             <CardContent className="flex items-center justify-between p-4">
               <div>
                 <p className="font-medium">Critical Low Performance</p>
-                <p className="text-sm text-muted-foreground">CTR &lt; 0.5% (24h) → Pause + Notify</p>
+                <p className="text-sm text-muted-foreground"><code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">CTR &lt; 0.5% (24h)</code> <span className="mx-1">→</span> Pause + Notify</p>
               </div>
               <Badge>Active</Badge>
             </CardContent>
@@ -117,9 +120,45 @@ export default function AutopilotPage() {
             <CardContent className="flex items-center justify-between p-4">
               <div>
                 <p className="font-medium">Low Performance</p>
-                <p className="text-sm text-muted-foreground">CTR &lt; 1% (48h) → Replace + Notify</p>
+                <p className="text-sm text-muted-foreground"><code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">CTR &lt; 1% (48h)</code> <span className="mx-1">→</span> Replace + Notify</p>
               </div>
               <Badge>Active</Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="font-medium">High Performer Boost</p>
+                <p className="text-sm text-muted-foreground"><code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">CTR &gt; 5% (24h)</code> <span className="mx-1">→</span> Increase budget 2x</p>
+              </div>
+              <Badge>Active</Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="font-medium">Engagement Surge</p>
+                <p className="text-sm text-muted-foreground"><code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Engagement &gt; 10%</code> <span className="mx-1">→</span> Cross-post to other platforms</p>
+              </div>
+              <Badge>Active</Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="font-medium">Budget Cap Alert</p>
+                <p className="text-sm text-muted-foreground"><code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Daily spend &gt; $50</code> <span className="mx-1">→</span> Pause + Notify</p>
+              </div>
+              <Badge variant="outline">Paused</Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="font-medium">Weekend Schedule</p>
+                <p className="text-sm text-muted-foreground"><code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Sat-Sun</code> <span className="mx-1">→</span> Reduce posting frequency by 50%</p>
+              </div>
+              <Badge variant="outline">Paused</Badge>
             </CardContent>
           </Card>
         </div>

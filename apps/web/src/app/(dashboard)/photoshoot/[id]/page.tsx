@@ -25,6 +25,8 @@ interface PhotoshootDetail {
 }
 
 export default function PhotoshootDetailPage() {
+  useEffect(() => { document.title = 'Photoshoot Detail | Coff' }, [])
+
   const params = useParams()
   const id = params.id as string
   const [photoshoot, setPhotoshoot] = useState<PhotoshootDetail | null>(null)
@@ -151,14 +153,14 @@ export default function PhotoshootDetailPage() {
             <ImageAddIcon className="h-4 w-4" />
             Total Images
           </div>
-          <div className="text-2xl font-bold">{photoshoot.images.length}</div>
+          <div className="text-2xl font-bold font-mono">{photoshoot.images.length}</div>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
             <CheckmarkCircle02Icon className="h-4 w-4" />
             Selected
           </div>
-          <div className="text-2xl font-bold">{selectedImages.size}</div>
+          <div className="text-2xl font-bold font-mono">{selectedImages.size}</div>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">

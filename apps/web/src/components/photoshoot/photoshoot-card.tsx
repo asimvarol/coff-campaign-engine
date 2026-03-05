@@ -43,7 +43,7 @@ export function PhotoshootCard({ photoshoot }: PhotoshootCardProps) {
 
   return (
     <Link href={`/photoshoot/${photoshoot.id}`}>
-      <Card className="group cursor-pointer transition-all hover:border-primary/50">
+      <Card className="group cursor-pointer transition-all hover:border-primary hover:shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
@@ -110,7 +110,7 @@ export function PhotoshootCard({ photoshoot }: PhotoshootCardProps) {
             <span>
               {photoshoot.variants.length > 0
                 ? `${photoshoot.variants.length} variants`
-                : 'Generating...'}
+                : photoshoot.status === 'GENERATING' ? 'Generating... ~30s remaining' : 'Processing...'}
             </span>
             <span>{photoshoot.creditCost} credits</span>
           </div>

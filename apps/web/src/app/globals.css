@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/NeueMontreal-Regular.otf') format('opentype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal Medium';
+  src: url('/fonts/NeueMontreal-Medium.otf') format('opentype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal Mono';
+  src: url('/fonts/PPNeueMontrealMono-Medium.otf') format('opentype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer components {
+  button,
+  [role="button"],
+  .btn {
+    font-family: 'PP Neue Montreal Medium', 'PP Neue Montreal', sans-serif;
+  }
+}
+
 @layer base {
   /* Olive green dark theme — converted from OKLCH (commit 90d0ee0) */
   :root {
@@ -29,6 +61,7 @@
     --chart-3: 90 40% 50%;
     --chart-4: 160 25% 40%;
     --chart-5: 80 35% 60%;
+    --placeholder: 90 5% 50%;
     --radius: 0.5rem;
   }
 
@@ -39,7 +72,12 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: 'Google Sans Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  ::placeholder {
+    color: hsl(var(--placeholder));
+    opacity: 1;
   }
 }
 
