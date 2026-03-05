@@ -66,6 +66,17 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  ws:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    command: bun run src/ws-server.ts
+    ports:
+      - '3003:3003'
+    environment:
+      WS_PORT: '3003'
+    restart: unless-stopped
+
   migrate:
     build:
       context: .

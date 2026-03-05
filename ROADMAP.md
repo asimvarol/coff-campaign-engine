@@ -80,10 +80,10 @@
 - [x] File upload (S3 with CDN, multipart + URL upload)
 - [x] A/B test recommendations (AI-powered, campaign + creative level)
 - [x] Creative editor refactor (552 -> 145 lines + 5 panel components)
+- [x] Real-time collaboration (WebSocket server + presence + live cursors)
 
 ## Remaining
 
-- [ ] Real-time collaboration (WebSocket)
 - [ ] Load testing
 - [ ] Security audit (penetration testing)
 - [ ] Accessibility audit
