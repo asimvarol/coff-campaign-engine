@@ -1,8 +1,10 @@
 /**
- * Mock Brand DNA Analyzer
- * Takes a URL and returns realistic brand DNA data
- * Simulates 3-5 second delay with progress updates
+ * Brand DNA Analyzer
+ * Takes a URL and returns brand DNA data
+ * Uses OpenAI for voice analysis when configured, deterministic fallback otherwise
  */
+
+import { analyzeBrandVoice } from './openai'
 
 export interface BrandDNA {
   name: string
@@ -284,20 +286,32 @@ export async function analyzeBrand(
   const bodyFont = FONTS.body[hash % FONTS.body.length]
   const accentFont = hash % 3 === 0 ? FONTS.accent[hash % FONTS.accent.length] : undefined
   
-  // Step 4: Learning brand voice
+  // Step 4: Learning brand voice (AI-powered when configured)
   await delay(1100)
   onProgress?.({
     step: 'learning-voice',
     progress: 80,
     message: 'Learning brand voice...',
   })
-  
-  const tone = pickRandom(TONES, 3, hash)
-  const personality = pickRandom(PERSONALITIES, 3, hash + 1)
-  const values = pickRandom(VALUES, 3, hash + 2)
-  const aesthetic = pickRandom(AESTHETICS, 2, hash + 3)
+
   const industry = INDUSTRIES[hash % INDUSTRIES.length]
-  
+
+  // Generate brand name from domain
+  const name = domain
+    .split('.')[0]
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+
+  // Use AI for voice analysis, falls back to deterministic generation
+  const voiceAnalysis = await analyzeBrandVoice({
+    url,
+    name,
+    colors: { primary, secondary, accent },
+    typography: { heading: headingFont, body: bodyFont },
+    industry,
+  })
+
   // Step 5: Generating summary
   await delay(800)
   onProgress?.({
@@ -305,14 +319,7 @@ export async function analyzeBrand(
     progress: 95,
     message: 'Generating summary...',
   })
-  
-  // Generate brand name from domain
-  const name = domain
-    .split('.')[0]
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-  
+
   const brandDNA: BrandDNA = {
     name,
     url,
@@ -334,24 +341,16 @@ export async function analyzeBrand(
       accent: accentFont,
     },
     voice: {
-      tone,
-      personality,
-      keywords: [
-        `${tone[0].toLowerCase()}`,
-        `${personality[0].toLowerCase()}`,
-        `${values[0].toLowerCase()}`,
-      ],
-      sampleTexts: [
-        `Discover the essence of ${tone[0].toLowerCase()} ${industry}.`,
-        `Where ${personality[0].toLowerCase()} meets ${values[0].toLowerCase()}.`,
-        `Experience ${name}: ${aesthetic[0]} design at its finest.`,
-      ],
+      tone: voiceAnalysis.tone,
+      personality: voiceAnalysis.personality,
+      keywords: voiceAnalysis.keywords,
+      sampleTexts: voiceAnalysis.sampleTexts,
     },
-    values,
-    aesthetic,
+    values: voiceAnalysis.values,
+    aesthetic: voiceAnalysis.aesthetic,
     industry,
-    targetAudience: `${industry === 'luxury' ? 'Affluent' : 'Modern'} consumers aged 25-45 seeking ${values[0].toLowerCase()} and ${values[1].toLowerCase()}`,
-    summary: `${name} embodies ${aesthetic[0]} in the ${industry} space. With a focus on ${values.join(', ').toLowerCase()}, the brand speaks to ${personality.join(', ').toLowerCase()} individuals. The visual identity reflects ${tone.join(', ').toLowerCase()} qualities through carefully curated design elements.`,
+    targetAudience: voiceAnalysis.targetAudience,
+    summary: voiceAnalysis.summary,
     images: {
       scraped: [
         `https://picsum.photos/seed/${hash}/800/600`,

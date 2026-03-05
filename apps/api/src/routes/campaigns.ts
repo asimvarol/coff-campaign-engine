@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { prisma } from '@repo/db'
 import type { ApiResponse } from '@repo/types'
 import {
   createCampaignSchema,
@@ -6,107 +7,41 @@ import {
   generateCreativesSchema,
   validateBody,
 } from '../lib/validators'
+import { generateConcepts } from '../lib/openai'
+import { generateCampaignCreative } from '../lib/fal'
 
 export const campaignsRouter = new Hono()
 
-// TODO: Add auth middleware
-// import { authMiddleware } from '../middleware/auth'
-// campaignsRouter.use('*', authMiddleware)
-
-// Mock data (temporary - will be replaced with Prisma once DB is ready)
-const mockCampaigns = [
-  {
-    id: 'campaign-1',
-    brandId: 'brand-1',
-    name: "Mother's Day - Honor Her Story",
-    description: 'Celebrating maternal love with our heritage collection',
-    objective: 'SEASONAL',
-    status: 'PUBLISHED',
-    platforms: ['instagram', 'facebook', 'pinterest'],
-    concept: {
-      name: 'Heritage & Elegance',
-      description: 'Celebrate timeless beauty',
-      emotion: 'Nostalgic Pride',
-    },
-    creditsCost: 45,
-    createdAt: new Date('2026-02-20'),
-    updatedAt: new Date('2026-02-25'),
-  },
-  {
-    id: 'campaign-2',
-    brandId: 'brand-1',
-    name: 'Spring Collection Launch',
-    description: 'New spring jewelry line',
-    objective: 'PRODUCT_LAUNCH',
-    status: 'REVIEW',
-    platforms: ['instagram', 'facebook', 'tiktok', 'pinterest'],
-    concept: {
-      name: 'Spring Awakening',
-      description: 'Fresh, vibrant, renewed',
-      emotion: 'Joy & Renewal',
-    },
-    creditsCost: 60,
-    createdAt: new Date('2026-02-22'),
-    updatedAt: new Date('2026-02-26'),
-  },
-]
-
-const mockConcepts = [
-  {
-    name: 'Heritage & Elegance',
-    description: 'Celebrate the timeless beauty of traditional craftsmanship with modern elegance.',
-    emotion: 'Nostalgic Pride',
-    hashtags: ['#TimelessElegance', '#HeritageJewellery', '#CraftsmanshipMatters'],
-    colorMood: 'Warm earth tones with gold accents',
-    textPosition: 'bottom',
-  },
-  {
-    name: 'Empowered Femininity',
-    description: 'Honor the strength and grace of women through bold, statement pieces.',
-    emotion: 'Empowerment',
-    hashtags: ['#EmpoweredWomen', '#ConfidentStyle', '#StatementJewellery'],
-    colorMood: 'Deep blacks with rose gold highlights',
-    textPosition: 'top',
-  },
-  {
-    name: 'Sentimental Journey',
-    description: 'Every piece tells a story—of love, memory, and cherished moments.',
-    emotion: 'Warmth & Nostalgia',
-    hashtags: ['#StoriesThatShine', '#SentimentalValue', '#CherishedMoments'],
-    colorMood: 'Soft pastels with warm lighting',
-    textPosition: 'center',
-  },
-]
-
 // GET /api/campaigns - List all campaigns
-// TODO: Add auth middleware to verify user access
 campaignsRouter.get('/', async (c) => {
   try {
-    // TODO: Get user from auth context
-    // const user = c.get('user')
-    // TODO: Filter campaigns by user's clinic/organization
-    
     const brandId = c.req.query('brandId')
+    const status = c.req.query('status')
     const page = parseInt(c.req.query('page') || '1')
     const limit = Math.min(parseInt(c.req.query('limit') || '20'), 100)
-    
-    let campaigns = mockCampaigns
-    
-    if (brandId) {
-      campaigns = mockCampaigns.filter(c => c.brandId === brandId)
+    const skip = (page - 1) * limit
+
+    const where = {
+      ...(brandId && { brandId }),
+      ...(status && { status: status as any }),
     }
 
-    // Pagination
-    const total = campaigns.length
-    const startIndex = (page - 1) * limit
-    const endIndex = startIndex + limit
-    const paginatedCampaigns = campaigns.slice(startIndex, endIndex)
+    const [campaigns, total] = await Promise.all([
+      prisma.campaign.findMany({
+        where,
+        include: {
+          brand: { select: { id: true, name: true, logo: true } },
+          _count: { select: { creatives: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.campaign.count({ where }),
+    ])
 
     return c.json<ApiResponse>({
-      data: paginatedCampaigns.map(campaign => ({
-        ...campaign,
-        _count: { creatives: Math.floor(Math.random() * 15) + 5 },
-      })),
+      data: campaigns,
       pagination: {
         page,
         limit,
@@ -116,338 +51,248 @@ campaignsRouter.get('/', async (c) => {
     })
   } catch (error) {
     console.error('Error fetching campaigns:', error)
-    return c.json<ApiResponse>(
-      { 
-        error: 'Failed to fetch campaigns',
-        code: 'FETCH_ERROR',
-      },
-      500
-    )
+    return c.json<ApiResponse>({ error: 'Failed to fetch campaigns' }, 500)
   }
 })
 
 // GET /api/campaigns/:id - Get single campaign with creatives
-// TODO: Add auth middleware to verify user owns this campaign
 campaignsRouter.get('/:id', async (c) => {
   try {
-    // TODO: Verify user has access to this campaign
     const id = c.req.param('id')
-    const campaign = mockCampaigns.find(c => c.id === id)
+    const campaign = await prisma.campaign.findUnique({
+      where: { id },
+      include: {
+        brand: { select: { id: true, name: true, logo: true } },
+        creatives: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    })
 
     if (!campaign) {
-      return c.json<ApiResponse>(
-        { 
-          error: 'Campaign not found',
-          code: 'NOT_FOUND',
-        },
-        404
-      )
+      return c.json<ApiResponse>({ error: 'Campaign not found', code: 'NOT_FOUND' }, 404)
     }
 
-    // Mock creatives
-    const creatives = Array.from({ length: 12 }, (_, i) => ({
-      id: `creative-${id}-${i}`,
-      campaignId: id,
-      platform: ['instagram', 'facebook', 'tiktok'][i % 3],
-      format: ['story', 'feed', 'reels'][i % 3],
-      imageUrl: `https://placehold.co/1080x1920?text=Creative+${i + 1}`,
-      status: 'PUBLISHED',
-      version: 1,
-      createdAt: new Date(),
-    }))
-
-    return c.json<ApiResponse>({
-      data: {
-        ...campaign,
-        brand: {
-          id: 'brand-1',
-          name: 'Golden Horn Jewellery',
-          logo: { primary: 'https://placehold.co/200x200?text=GH' },
-        },
-        creatives,
-      }
-    })
+    return c.json<ApiResponse>({ data: campaign })
   } catch (error) {
     console.error('Error fetching campaign:', error)
-    return c.json<ApiResponse>(
-      { 
-        error: 'Failed to fetch campaign',
-        code: 'FETCH_ERROR',
-      },
-      500
-    )
+    return c.json<ApiResponse>({ error: 'Failed to fetch campaign' }, 500)
   }
 })
 
 // POST /api/campaigns - Create new campaign
-// TODO: Add auth middleware - only authenticated users can create
 campaignsRouter.post('/', async (c) => {
   try {
-    // TODO: Get authenticated user
-    // const user = c.get('user')
-    
-    // Validate input
     const validation = await validateBody(c.req.raw, createCampaignSchema)
     if (!validation.success) {
-      return c.json<ApiResponse>(
-        {
-          error: validation.error,
-          code: validation.code,
-        },
-        400
-      )
+      return c.json<ApiResponse>({ error: validation.error, code: validation.code }, 400)
     }
 
     const body = validation.data
 
-    // TODO: Verify user has access to this brand
-    // TODO: Check user has enough credits
-    
-    // Simulate creation
-    const newCampaign = {
-      id: `campaign-${Date.now()}`,
-      brandId: body.brandId,
-      name: body.name,
-      description: body.description || '',
-      objective: body.objective,
-      status: 'DRAFT',
-      platforms: body.platforms,
-      concept: {
-        name: '',
-        description: '',
-        emotion: '',
-      },
-      creditsCost: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    // Verify brand exists
+    const brand = await prisma.brand.findUnique({ where: { id: body.brandId } })
+    if (!brand) {
+      return c.json<ApiResponse>({ error: 'Brand not found', code: 'NOT_FOUND' }, 404)
     }
 
-    mockCampaigns.push(newCampaign)
-
-    return c.json<ApiResponse>(
-      {
-        data: newCampaign,
-        message: 'Campaign created successfully'
+    const campaign = await prisma.campaign.create({
+      data: {
+        brandId: body.brandId,
+        name: body.name,
+        description: body.description || '',
+        objective: body.objective as any,
+        platforms: body.platforms,
+        concept: {},
       },
-      201
-    )
+      include: {
+        brand: { select: { id: true, name: true, logo: true } },
+      },
+    })
+
+    return c.json<ApiResponse>({ data: campaign, message: 'Campaign created successfully' }, 201)
   } catch (error) {
     console.error('Error creating campaign:', error)
-    return c.json<ApiResponse>(
-      {
-        error: 'Failed to create campaign',
-        code: 'CREATE_ERROR',
-      },
-      500
-    )
+    return c.json<ApiResponse>({ error: 'Failed to create campaign' }, 500)
   }
 })
 
 // PUT /api/campaigns/:id - Update campaign
-// TODO: Add auth middleware to verify user owns this campaign
 campaignsRouter.put('/:id', async (c) => {
   try {
-    // TODO: Verify user has access to this campaign
     const id = c.req.param('id')
-    
-    // Validate input
+
     const validation = await validateBody(c.req.raw, updateCampaignSchema)
     if (!validation.success) {
-      return c.json<ApiResponse>(
-        {
-          error: validation.error,
-          code: validation.code,
-        },
-        400
-      )
+      return c.json<ApiResponse>({ error: validation.error, code: validation.code }, 400)
     }
 
     const body = validation.data
 
-    const campaignIndex = mockCampaigns.findIndex(c => c.id === id)
-    if (campaignIndex === -1) {
-      return c.json<ApiResponse>(
-        {
-          error: 'Campaign not found',
-          code: 'NOT_FOUND',
-        },
-        404
-      )
+    const existing = await prisma.campaign.findUnique({ where: { id } })
+    if (!existing) {
+      return c.json<ApiResponse>({ error: 'Campaign not found', code: 'NOT_FOUND' }, 404)
     }
 
-    mockCampaigns[campaignIndex] = {
-      ...mockCampaigns[campaignIndex],
-      ...body,
-      updatedAt: new Date(),
-    }
-
-    return c.json<ApiResponse>({
-      data: mockCampaigns[campaignIndex],
-      message: 'Campaign updated successfully'
+    const campaign = await prisma.campaign.update({
+      where: { id },
+      data: {
+        ...(body.name && { name: body.name }),
+        ...(body.description !== undefined && { description: body.description }),
+        ...(body.objective && { objective: body.objective as any }),
+        ...(body.platforms && { platforms: body.platforms }),
+        ...(body.status && { status: body.status as any }),
+        ...(body.concept && { concept: body.concept }),
+      },
     })
+
+    return c.json<ApiResponse>({ data: campaign, message: 'Campaign updated successfully' })
   } catch (error) {
     console.error('Error updating campaign:', error)
-    return c.json<ApiResponse>(
-      {
-        error: 'Failed to update campaign',
-        code: 'UPDATE_ERROR',
-      },
-      500
-    )
+    return c.json<ApiResponse>({ error: 'Failed to update campaign' }, 500)
   }
 })
 
-// DELETE /api/campaigns/:id - Delete campaign (soft delete)
-// TODO: Add auth middleware + admin role check
+// DELETE /api/campaigns/:id
 campaignsRouter.delete('/:id', async (c) => {
   try {
-    // TODO: Verify user has access and admin rights
-    // TODO: Implement soft delete instead of hard delete
     const id = c.req.param('id')
-    const campaignIndex = mockCampaigns.findIndex(c => c.id === id)
 
-    if (campaignIndex === -1) {
-      return c.json<ApiResponse>(
-        {
-          error: 'Campaign not found',
-          code: 'NOT_FOUND',
-        },
-        404
-      )
+    const existing = await prisma.campaign.findUnique({ where: { id } })
+    if (!existing) {
+      return c.json<ApiResponse>({ error: 'Campaign not found', code: 'NOT_FOUND' }, 404)
     }
 
-    // TODO: Replace with soft delete: { deletedAt: new Date() }
-    mockCampaigns.splice(campaignIndex, 1)
+    await prisma.campaign.delete({ where: { id } })
 
-    return c.json<ApiResponse>({
-      data: { success: true },
-      message: 'Campaign deleted successfully'
-    })
+    return c.json<ApiResponse>({ message: 'Campaign deleted successfully' })
   } catch (error) {
     console.error('Error deleting campaign:', error)
-    return c.json<ApiResponse>(
-      {
-        error: 'Failed to delete campaign',
-        code: 'DELETE_ERROR',
-      },
-      500
-    )
+    return c.json<ApiResponse>({ error: 'Failed to delete campaign' }, 500)
   }
 })
 
 // POST /api/campaigns/:id/generate-concepts - Generate AI campaign concepts
-// TODO: Add auth middleware + credits check
 campaignsRouter.post('/:id/generate-concepts', async (c) => {
   try {
-    // TODO: Verify user has access to this campaign
-    // TODO: Check user has enough credits (5 credits required)
     const id = c.req.param('id')
-    
-    const campaign = mockCampaigns.find(c => c.id === id)
-    if (!campaign) {
-      return c.json<ApiResponse>(
-        {
-          error: 'Campaign not found',
-          code: 'NOT_FOUND',
-        },
-        404
-      )
-    }
-    
-    // Simulate AI generation delay
-    await new Promise(resolve => setTimeout(resolve, 1500))
 
-    // TODO: Deduct 5 credits from user
-    // TODO: Call AI service to generate concepts
+    const campaign = await prisma.campaign.findUnique({
+      where: { id },
+      include: { brand: true },
+    })
+    if (!campaign) {
+      return c.json<ApiResponse>({ error: 'Campaign not found', code: 'NOT_FOUND' }, 404)
+    }
+
+    const brand = campaign.brand
+    const brandVoice = (brand as any).voice?.tone || []
+    const brandValues = (brand as any).values || []
+
+    const concepts = await generateConcepts({
+      brandName: brand.name,
+      brandVoice,
+      brandValues,
+      objective: campaign.objective,
+      platforms: campaign.platforms,
+      description: campaign.description || undefined,
+    })
+
+    await prisma.campaign.update({
+      where: { id },
+      data: { status: 'GENERATING', creditsCost: { increment: 5 } },
+    })
 
     return c.json<ApiResponse>({
-      data: {
-        concepts: mockConcepts,
-        creditsCost: 5,
-      },
-      message: 'Concepts generated successfully'
+      data: { concepts, creditsCost: 5 },
+      message: 'Concepts generated successfully',
     })
   } catch (error) {
     console.error('Error generating concepts:', error)
-    return c.json<ApiResponse>(
-      {
-        error: 'Failed to generate concepts',
-        code: 'GENERATION_ERROR',
-      },
-      500
-    )
+    return c.json<ApiResponse>({ error: 'Failed to generate concepts' }, 500)
   }
 })
 
 // POST /api/campaigns/:id/generate-creatives - Generate creatives from selected concept
-// TODO: Add auth middleware + credits check
 campaignsRouter.post('/:id/generate-creatives', async (c) => {
   try {
-    // TODO: Verify user has access to this campaign
-    // TODO: Check user has enough credits (3 credits per creative)
     const id = c.req.param('id')
-    
-    const campaign = mockCampaigns.find(c => c.id === id)
+
+    const campaign = await prisma.campaign.findUnique({
+      where: { id },
+      include: { brand: true },
+    })
     if (!campaign) {
-      return c.json<ApiResponse>(
-        {
-          error: 'Campaign not found',
-          code: 'NOT_FOUND',
-        },
-        404
-      )
+      return c.json<ApiResponse>({ error: 'Campaign not found', code: 'NOT_FOUND' }, 404)
     }
-    
-    // Validate input
+
     const validation = await validateBody(c.req.raw, generateCreativesSchema)
     if (!validation.success) {
-      return c.json<ApiResponse>(
-        {
-          error: validation.error,
-          code: validation.code,
-        },
-        400
-      )
+      return c.json<ApiResponse>({ error: validation.error, code: validation.code }, 400)
     }
 
-    const { conceptIndex, platforms } = validation.data
+    const { platforms, concept } = validation.data
+    const brand = campaign.brand
+    const brandColors = (brand as any).colors || { primary: '#000', accent: '#999' }
+    const conceptName = concept?.name || campaign.name
+    const conceptDesc = concept?.description || campaign.description || ''
+    const colorMood = concept?.colorMood || ''
 
-    // Simulate generation delay
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const sizeMap: Record<string, { w: number; h: number }> = {
+      instagram: { w: 1080, h: 1080 },
+      facebook: { w: 1200, h: 628 },
+      tiktok: { w: 1080, h: 1920 },
+      linkedin: { w: 1200, h: 900 },
+      x: { w: 1200, h: 628 },
+      pinterest: { w: 1000, h: 1500 },
+    }
 
-    const creatives = platforms.flatMap((platform: string, idx: number) => 
-      Array.from({ length: 2 }, (_, i) => ({
-        id: `creative-${Date.now()}-${idx}-${i}`,
-        campaignId: id,
-        platform,
-        format: ['story', 'feed', 'reels'][i % 3],
-        width: 1080,
-        height: platform === 'facebook' ? 630 : 1920,
-        imageUrl: `https://placehold.co/1080x1920?text=${platform}+${i}`,
-        status: 'DRAFT',
-        version: 1,
-        createdAt: new Date(),
-      }))
+    // Generate images in parallel per platform
+    const results = await Promise.allSettled(
+      platforms.flatMap((platform: string) => {
+        const size = sizeMap[platform] || { w: 1080, h: 1080 }
+        return ['feed', 'story'].map(async (format) => {
+          const imageUrl = await generateCampaignCreative(
+            conceptName,
+            conceptDesc,
+            colorMood,
+            platform,
+            { primary: brandColors.primary, accent: brandColors.accent }
+          )
+          return {
+            campaignId: id,
+            brandId: campaign.brandId,
+            platform,
+            format,
+            width: format === 'story' ? 1080 : size.w,
+            height: format === 'story' ? 1920 : size.h,
+            imageUrl,
+            imagePrompt: `${platform} ${format} creative for "${conceptName}": ${conceptDesc}`,
+          }
+        })
+      })
     )
 
-    // TODO: Deduct (creatives.length * 3) credits from user
-    // TODO: Call AI service to generate creatives
+    const creativeData = results
+      .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled')
+      .map((r) => r.value)
+
+    const creatives = await prisma.$transaction(
+      creativeData.map((data) => prisma.creative.create({ data }))
+    )
+
+    const creditsCost = creatives.length * 3
+    await prisma.campaign.update({
+      where: { id },
+      data: { status: 'REVIEW', creditsCost: { increment: creditsCost } },
+    })
 
     return c.json<ApiResponse>({
-      data: {
-        creatives,
-        creditsCost: creatives.length * 3,
-      },
-      message: `Generated ${creatives.length} creatives successfully`
+      data: { creatives, creditsCost },
+      message: `Generated ${creatives.length} creatives successfully`,
     })
   } catch (error) {
     console.error('Error generating creatives:', error)
-    return c.json<ApiResponse>(
-      {
-        error: 'Failed to generate creatives',
-        code: 'GENERATION_ERROR',
-      },
-      500
-    )
+    return c.json<ApiResponse>({ error: 'Failed to generate creatives' }, 500)
   }
 })

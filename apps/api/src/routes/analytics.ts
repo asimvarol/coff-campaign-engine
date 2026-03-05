@@ -1,6 +1,9 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
+import { prisma } from '@repo/db'
+import type { ApiResponse } from '@repo/types'
+import { generateInsights } from '../lib/openai'
 
 export const analyticsRouter = new Hono()
 
@@ -26,195 +29,304 @@ const compareSchema = z.object({
   ids: z.array(z.string()).min(2).max(2),
 })
 
-// GET /api/analytics/overview
-// Returns KPI stats + trends for date range
-analyticsRouter.get('/overview', zValidator('query', dateRangeSchema), async (c) => {
-  const { period = '30d' } = c.req.valid('query')
-
-  // Mock data - in production, fetch from database
-  const data = {
-    totalReach: 12400,
-    totalReachChange: 23,
-    totalEngagement: 856,
-    totalEngagementChange: 12,
-    avgCtr: 3.2,
-    avgCtrChange: -0.4,
-    totalClicks: 245,
-    totalClicksChange: 8,
-    totalSaves: 187,
-    totalSavesChange: 31,
-    period,
+function getDateRange(period: string = '30d', start?: string, end?: string) {
+  if (start && end) {
+    return { gte: new Date(start), lte: new Date(end) }
   }
-
-  return c.json({ data })
-})
-
-// GET /api/analytics/reach-trend
-// Returns time series data
-analyticsRouter.get('/reach-trend', zValidator('query', dateRangeSchema), async (c) => {
-  const { period = '30d' } = c.req.valid('query')
-
   const days = period === '7d' ? 7 : period === '30d' ? 30 : 90
+  const now = new Date()
+  return {
+    gte: new Date(now.getTime() - days * 24 * 60 * 60 * 1000),
+    lte: now,
+  }
+}
 
-  // Mock time series data
-  const data = Array.from({ length: days }, (_, i) => {
-    const date = new Date()
-    date.setDate(date.getDate() - (days - 1 - i))
-    return {
-      date: date.toISOString().split('T')[0],
-      reach: Math.floor(300 + Math.random() * 500),
-      engagement: Math.floor(20 + Math.random() * 40),
-      clicks: Math.floor(5 + Math.random() * 15),
+// GET /api/analytics/overview - KPI stats + trends
+analyticsRouter.get('/overview', zValidator('query', dateRangeSchema), async (c) => {
+  const { period = '30d', start, end } = c.req.valid('query')
+  const dateRange = getDateRange(period, start, end)
+
+  try {
+    const metrics = await prisma.creativePerformance.aggregate({
+      where: { recordedAt: dateRange },
+      _sum: {
+        reach: true,
+        impressions: true,
+        likes: true,
+        comments: true,
+        shares: true,
+        saves: true,
+        clicks: true,
+      },
+      _avg: {
+        engagementRate: true,
+        ctr: true,
+      },
+    })
+
+    const totalEngagement =
+      (metrics._sum.likes || 0) +
+      (metrics._sum.comments || 0) +
+      (metrics._sum.shares || 0) +
+      (metrics._sum.saves || 0)
+
+    // Calculate change vs previous period
+    const dayCount = period === '7d' ? 7 : period === '30d' ? 30 : 90
+    const prevRange = {
+      gte: new Date(dateRange.gte.getTime() - dayCount * 24 * 60 * 60 * 1000),
+      lte: dateRange.gte,
     }
-  })
+    const prevMetrics = await prisma.creativePerformance.aggregate({
+      where: { recordedAt: prevRange },
+      _sum: { reach: true, likes: true, comments: true, shares: true, saves: true, clicks: true },
+      _avg: { ctr: true },
+    })
 
-  return c.json({ data })
+    const prevEngagement =
+      (prevMetrics._sum.likes || 0) +
+      (prevMetrics._sum.comments || 0) +
+      (prevMetrics._sum.shares || 0) +
+      (prevMetrics._sum.saves || 0)
+
+    const pctChange = (curr: number, prev: number) =>
+      prev === 0 ? 0 : Math.round(((curr - prev) / prev) * 100)
+
+    return c.json<ApiResponse>({
+      data: {
+        totalReach: metrics._sum.reach || 0,
+        totalReachChange: pctChange(metrics._sum.reach || 0, prevMetrics._sum.reach || 0),
+        totalEngagement,
+        totalEngagementChange: pctChange(totalEngagement, prevEngagement),
+        avgCtr: Math.round((metrics._avg.ctr || 0) * 10) / 10,
+        avgCtrChange: pctChange(metrics._avg.ctr || 0, prevMetrics._avg.ctr || 0),
+        totalClicks: metrics._sum.clicks || 0,
+        totalClicksChange: pctChange(metrics._sum.clicks || 0, prevMetrics._sum.clicks || 0),
+        totalSaves: metrics._sum.saves || 0,
+        totalSavesChange: pctChange(metrics._sum.saves || 0, prevMetrics._sum.saves || 0),
+        period,
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching overview:', error)
+    return c.json<ApiResponse>({ error: 'Failed to fetch analytics overview' }, 500)
+  }
 })
 
-// GET /api/analytics/platform-breakdown
-// Returns per-platform metrics
+// GET /api/analytics/reach-trend - Time series data
+analyticsRouter.get('/reach-trend', zValidator('query', dateRangeSchema), async (c) => {
+  const { period = '30d', start, end } = c.req.valid('query')
+  const dateRange = getDateRange(period, start, end)
+
+  try {
+    const records = await prisma.creativePerformance.findMany({
+      where: { recordedAt: dateRange },
+      select: { recordedAt: true, reach: true, likes: true, comments: true, shares: true, saves: true, clicks: true },
+      orderBy: { recordedAt: 'asc' },
+    })
+
+    // Group by day
+    const byDay = new Map<string, { reach: number; engagement: number; clicks: number }>()
+    for (const r of records) {
+      const day = r.recordedAt.toISOString().split('T')[0]
+      const existing = byDay.get(day) || { reach: 0, engagement: 0, clicks: 0 }
+      existing.reach += r.reach
+      existing.engagement += r.likes + r.comments + r.shares + r.saves
+      existing.clicks += r.clicks
+      byDay.set(day, existing)
+    }
+
+    const data = Array.from(byDay.entries()).map(([date, vals]) => ({ date, ...vals }))
+
+    return c.json<ApiResponse>({ data })
+  } catch (error) {
+    console.error('Error fetching reach trend:', error)
+    return c.json<ApiResponse>({ error: 'Failed to fetch reach trend' }, 500)
+  }
+})
+
+// GET /api/analytics/platform-breakdown - Per-platform metrics
 analyticsRouter.get('/platform-breakdown', zValidator('query', dateRangeSchema), async (c) => {
-  const data = [
-    {
-      platform: 'Instagram',
-      reach: 8432,
-      engagement: 582,
-      clicks: 167,
-      percentage: 68,
-    },
-    {
-      platform: 'Facebook',
-      reach: 2604,
-      engagement: 178,
-      clicks: 51,
-      percentage: 21,
-    },
-    {
-      platform: 'TikTok',
-      reach: 1364,
-      engagement: 96,
-      clicks: 27,
-      percentage: 11,
-    },
-  ]
+  const { period = '30d', start, end } = c.req.valid('query')
+  const dateRange = getDateRange(period, start, end)
 
-  return c.json({ data })
+  try {
+    const creatives = await prisma.creative.findMany({
+      where: {
+        performance: { some: { recordedAt: dateRange } },
+      },
+      select: {
+        platform: true,
+        performance: {
+          where: { recordedAt: dateRange },
+          select: { reach: true, likes: true, comments: true, shares: true, saves: true, clicks: true },
+        },
+      },
+    })
+
+    // Aggregate by platform
+    const platformMap = new Map<string, { reach: number; engagement: number; clicks: number }>()
+    for (const cr of creatives) {
+      const existing = platformMap.get(cr.platform) || { reach: 0, engagement: 0, clicks: 0 }
+      for (const p of cr.performance) {
+        existing.reach += p.reach
+        existing.engagement += p.likes + p.comments + p.shares + p.saves
+        existing.clicks += p.clicks
+      }
+      platformMap.set(cr.platform, existing)
+    }
+
+    const totalReach = Array.from(platformMap.values()).reduce((sum, v) => sum + v.reach, 0)
+
+    const data = Array.from(platformMap.entries()).map(([platform, vals]) => ({
+      platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+      ...vals,
+      percentage: totalReach > 0 ? Math.round((vals.reach / totalReach) * 100) : 0,
+    }))
+
+    return c.json<ApiResponse>({ data })
+  } catch (error) {
+    console.error('Error fetching platform breakdown:', error)
+    return c.json<ApiResponse>({ error: 'Failed to fetch platform breakdown' }, 500)
+  }
 })
 
-// GET /api/analytics/campaigns
-// Returns campaign-level metrics with sorting + pagination
+// GET /api/analytics/campaigns - Campaign-level metrics
 analyticsRouter.get(
   '/campaigns',
   zValidator('query', z.object({ ...paginationSchema.shape, ...sortSchema.shape })),
   async (c) => {
     const { page, limit, sortBy = 'score', sortOrder = 'desc' } = c.req.valid('query')
 
-    // Mock campaign data
-    const allCampaigns = [
-      {
-        campaignId: 'campaign-1',
-        campaignName: "Mother's Day - Honor Her Story",
-        brandName: 'Golden Horn Jewellery',
-        reach: 4200,
-        engagement: 312,
-        ctr: 5.1,
-        clicks: 214,
-        score: 92,
-      },
-      {
-        campaignId: 'campaign-2',
-        campaignName: 'Spring Collection Launch',
-        brandName: 'Golden Horn Jewellery',
-        reach: 3800,
-        engagement: 267,
-        ctr: 4.3,
-        clicks: 163,
-        score: 85,
-      },
-      {
-        campaignId: 'campaign-3',
-        campaignName: 'Heritage Collection Awareness',
-        brandName: 'Golden Horn Jewellery',
-        reach: 2900,
-        engagement: 189,
-        ctr: 3.8,
-        clicks: 110,
-        score: 78,
-      },
-    ]
+    try {
+      const campaigns = await prisma.campaign.findMany({
+        include: {
+          brand: { select: { name: true } },
+          creatives: {
+            include: {
+              performance: {
+                orderBy: { recordedAt: 'desc' },
+                take: 1,
+              },
+            },
+          },
+        },
+      })
 
-    // Sort
-    const sorted = allCampaigns.sort((a, b) => {
-      const aValue = a[sortBy as keyof typeof a]
-      const bValue = b[sortBy as keyof typeof b]
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
-      }
-      
-      const aNum = Number(aValue)
-      const bNum = Number(bValue)
-      return sortOrder === 'asc' ? aNum - bNum : bNum - aNum
-    })
+      // Compute metrics per campaign
+      const campaignMetrics = campaigns.map((camp) => {
+        let reach = 0, engagement = 0, clicks = 0, totalCtr = 0, totalScore = 0, count = 0
+        for (const cr of camp.creatives) {
+          if (cr.performance.length > 0) {
+            const p = cr.performance[0]
+            reach += p.reach
+            engagement += p.likes + p.comments + p.shares + p.saves
+            clicks += p.clicks
+            totalCtr += p.ctr || 0
+            totalScore += cr.performanceScore || 0
+            count++
+          }
+        }
+        return {
+          campaignId: camp.id,
+          campaignName: camp.name,
+          brandName: camp.brand.name,
+          reach,
+          engagement,
+          ctr: count > 0 ? Math.round((totalCtr / count) * 10) / 10 : 0,
+          clicks,
+          score: count > 0 ? Math.round(totalScore / count) : 0,
+        }
+      })
 
-    // Paginate
-    const total = sorted.length
-    const start = (page - 1) * limit
-    const end = start + limit
-    const campaigns = sorted.slice(start, end)
+      // Sort
+      campaignMetrics.sort((a, b) => {
+        const key = sortBy as keyof typeof a
+        const aVal = a[key] ?? 0
+        const bVal = b[key] ?? 0
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        return sortOrder === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal)
+      })
 
-    return c.json({
-      data: campaigns,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    })
+      const total = campaignMetrics.length
+      const start = (page - 1) * limit
+      const paged = campaignMetrics.slice(start, start + limit)
+
+      return c.json<ApiResponse>({
+        data: paged,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      })
+    } catch (error) {
+      console.error('Error fetching campaign analytics:', error)
+      return c.json<ApiResponse>({ error: 'Failed to fetch campaign analytics' }, 500)
+    }
   }
 )
 
-// GET /api/analytics/campaigns/:id
-// Returns single campaign detailed metrics
+// GET /api/analytics/campaigns/:id - Single campaign detailed metrics
 analyticsRouter.get('/campaigns/:id', async (c) => {
   const id = c.req.param('id')
 
-  // Mock campaign detail
-  const data = {
-    campaignId: id,
-    campaignName: "Mother's Day - Honor Her Story",
-    brandName: 'Golden Horn Jewellery',
-    reach: 4200,
-    engagement: 312,
-    ctr: 5.1,
-    clicks: 214,
-    score: 92,
-    creatives: [
-      {
-        creativeId: 'creative-1',
-        creativeName: 'Honor Her Story - IG Story',
-        platform: 'Instagram',
-        reach: 2100,
-        ctr: 5.5,
-        score: 94,
+  try {
+    const campaign = await prisma.campaign.findUnique({
+      where: { id },
+      include: {
+        brand: { select: { name: true } },
+        creatives: {
+          include: {
+            performance: { orderBy: { recordedAt: 'desc' }, take: 1 },
+          },
+        },
       },
-      {
-        creativeId: 'creative-2',
-        creativeName: 'Honor Her Story - FB Feed',
-        platform: 'Facebook',
-        reach: 2100,
-        ctr: 4.7,
-        score: 90,
-      },
-    ],
-  }
+    })
 
-  return c.json({ data })
+    if (!campaign) {
+      return c.json<ApiResponse>({ error: 'Campaign not found' }, 404)
+    }
+
+    let reach = 0, engagement = 0, clicks = 0, totalCtr = 0, totalScore = 0, count = 0
+    const creativeMetrics = campaign.creatives.map((cr) => {
+      const p = cr.performance[0]
+      const crReach = p?.reach || 0
+      const crCtr = p?.ctr || 0
+      const crScore = cr.performanceScore || 0
+      reach += crReach
+      engagement += (p?.likes || 0) + (p?.comments || 0) + (p?.shares || 0) + (p?.saves || 0)
+      clicks += p?.clicks || 0
+      totalCtr += crCtr
+      totalScore += crScore
+      if (p) count++
+      return {
+        creativeId: cr.id,
+        platform: cr.platform,
+        format: cr.format,
+        reach: crReach,
+        ctr: crCtr,
+        score: crScore,
+      }
+    })
+
+    return c.json<ApiResponse>({
+      data: {
+        campaignId: campaign.id,
+        campaignName: campaign.name,
+        brandName: campaign.brand.name,
+        reach,
+        engagement,
+        ctr: count > 0 ? Math.round((totalCtr / count) * 10) / 10 : 0,
+        clicks,
+        score: count > 0 ? Math.round(totalScore / count) : 0,
+        creatives: creativeMetrics,
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching campaign detail:', error)
+    return c.json<ApiResponse>({ error: 'Failed to fetch campaign detail' }, 500)
+  }
 })
 
-// GET /api/analytics/creatives
-// Returns creative-level metrics with sorting + pagination
+// GET /api/analytics/creatives - Creative-level metrics
 analyticsRouter.get(
   '/creatives',
   zValidator(
@@ -222,175 +334,278 @@ analyticsRouter.get(
     z.object({
       ...paginationSchema.shape,
       ...sortSchema.shape,
-      performanceLabel: z
-        .enum(['excellent', 'good', 'average', 'poor', 'critical'])
-        .optional(),
+      performanceLabel: z.enum(['excellent', 'good', 'average', 'poor', 'critical']).optional(),
     })
   ),
   async (c) => {
-    const {
-      page,
-      limit,
-      sortBy = 'score',
-      sortOrder = 'desc',
-      performanceLabel,
-    } = c.req.valid('query')
+    const { page, limit, sortBy = 'score', sortOrder = 'desc', performanceLabel } = c.req.valid('query')
 
-    // Mock creative data (simplified)
-    let allCreatives = [
-      {
-        creativeId: 'creative-1',
-        creativeName: 'Honor Her Story - IG Story',
-        campaignName: "Mother's Day",
-        platform: 'Instagram',
-        reach: 4200,
-        ctr: 5.1,
-        score: 92,
-        performanceLabel: 'excellent',
-      },
-      {
-        creativeId: 'creative-2',
-        creativeName: 'Spring Necklace - Feed',
-        campaignName: 'Spring Collection',
-        platform: 'Instagram',
-        reach: 3100,
-        ctr: 4.3,
-        score: 85,
-        performanceLabel: 'excellent',
-      },
-    ]
+    try {
+      const creatives = await prisma.creative.findMany({
+        include: {
+          campaign: { select: { name: true } },
+          performance: { orderBy: { recordedAt: 'desc' }, take: 1 },
+        },
+      })
 
-    // Filter by performance label
-    if (performanceLabel) {
-      allCreatives = allCreatives.filter((c) => c.performanceLabel === performanceLabel)
+      let metrics = creatives.map((cr) => {
+        const p = cr.performance[0]
+        const score = cr.performanceScore || 0
+        const label = score >= 90 ? 'excellent' : score >= 75 ? 'good' : score >= 50 ? 'average' : score >= 25 ? 'poor' : 'critical'
+        return {
+          creativeId: cr.id,
+          platform: cr.platform,
+          format: cr.format,
+          campaignName: cr.campaign.name,
+          reach: p?.reach || 0,
+          ctr: p?.ctr || 0,
+          score,
+          performanceLabel: label,
+        }
+      })
+
+      if (performanceLabel) {
+        metrics = metrics.filter((m) => m.performanceLabel === performanceLabel)
+      }
+
+      metrics.sort((a, b) => {
+        const key = sortBy as keyof typeof a
+        const aVal = a[key] ?? 0
+        const bVal = b[key] ?? 0
+        return sortOrder === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal)
+      })
+
+      const total = metrics.length
+      const start = (page - 1) * limit
+      const paged = metrics.slice(start, start + limit)
+
+      return c.json<ApiResponse>({
+        data: paged,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      })
+    } catch (error) {
+      console.error('Error fetching creative analytics:', error)
+      return c.json<ApiResponse>({ error: 'Failed to fetch creative analytics' }, 500)
     }
-
-    // Sort and paginate (same logic as campaigns)
-    const total = allCreatives.length
-    const start = (page - 1) * limit
-    const end = start + limit
-    const creatives = allCreatives.slice(start, end)
-
-    return c.json({
-      data: creatives,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    })
   }
 )
 
-// GET /api/analytics/creatives/:id
-// Returns single creative full metrics
+// GET /api/analytics/creatives/:id - Single creative full metrics
 analyticsRouter.get('/creatives/:id', async (c) => {
   const id = c.req.param('id')
 
-  // Mock creative detail
-  const data = {
-    creativeId: id,
-    creativeName: 'Honor Her Story - IG Story',
-    campaignName: "Mother's Day",
-    platform: 'Instagram',
-    postUrl: 'https://instagram.com/p/abc123',
-    publishedAt: new Date('2026-02-25'),
-    thumbnailUrl: 'https://placehold.co/400x400/1c1b1b/e6d3c1?text=Story+1',
-    reach: 4200,
-    impressions: 5800,
-    frequency: 1.38,
-    likes: 287,
-    comments: 23,
-    shares: 12,
-    saves: 45,
-    engagementRate: 8.7,
-    clicks: 214,
-    ctr: 5.1,
-    linkClicks: 189,
-    videoViews: 3200,
-    avgWatchTime: 8.5,
-    completionRate: 72,
-    performanceScore: 92,
-    performanceLabel: 'excellent',
-    aiInsight: 'High engagement driven by emotional storytelling',
-    aiSuggestion: 'Repurpose this creative for Facebook Stories',
-  }
+  try {
+    const creative = await prisma.creative.findUnique({
+      where: { id },
+      include: {
+        campaign: { select: { name: true } },
+        performance: { orderBy: { recordedAt: 'desc' }, take: 1 },
+      },
+    })
 
-  return c.json({ data })
+    if (!creative) {
+      return c.json<ApiResponse>({ error: 'Creative not found' }, 404)
+    }
+
+    const p = creative.performance[0]
+    const score = creative.performanceScore || 0
+    const label = score >= 90 ? 'excellent' : score >= 75 ? 'good' : score >= 50 ? 'average' : score >= 25 ? 'poor' : 'critical'
+
+    return c.json<ApiResponse>({
+      data: {
+        creativeId: creative.id,
+        campaignName: creative.campaign.name,
+        platform: creative.platform,
+        format: creative.format,
+        imageUrl: creative.imageUrl,
+        publishedAt: creative.publishedAt,
+        postUrl: creative.postUrl,
+        reach: p?.reach || 0,
+        impressions: p?.impressions || 0,
+        likes: p?.likes || 0,
+        comments: p?.comments || 0,
+        shares: p?.shares || 0,
+        saves: p?.saves || 0,
+        engagementRate: p?.engagementRate || 0,
+        clicks: p?.clicks || 0,
+        ctr: p?.ctr || 0,
+        videoViews: p?.videoViews,
+        avgWatchTime: p?.avgWatchTime,
+        spend: p?.spend,
+        cpc: p?.cpc,
+        cpm: p?.cpm,
+        roas: p?.roas,
+        performanceScore: score,
+        performanceLabel: label,
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching creative detail:', error)
+    return c.json<ApiResponse>({ error: 'Failed to fetch creative detail' }, 500)
+  }
 })
 
-// GET /api/analytics/compare
-// Compare 2 campaigns or creatives
+// GET /api/analytics/compare - Compare 2 campaigns or creatives
 analyticsRouter.get('/compare', zValidator('query', compareSchema), async (c) => {
   const { type, ids } = c.req.valid('query')
 
-  // Mock comparison data
-  const data = {
-    type,
-    entities: ids.map((id) => ({
-      id,
-      name: type === 'campaign' ? `Campaign ${id}` : `Creative ${id}`,
-      reach: Math.floor(2000 + Math.random() * 3000),
-      engagement: Math.floor(150 + Math.random() * 200),
-      ctr: parseFloat((2 + Math.random() * 4).toFixed(1)),
-      score: Math.floor(60 + Math.random() * 30),
-    })),
-  }
+  try {
+    if (type === 'campaign') {
+      const campaigns = await prisma.campaign.findMany({
+        where: { id: { in: ids } },
+        include: {
+          creatives: {
+            include: { performance: { orderBy: { recordedAt: 'desc' }, take: 1 } },
+          },
+        },
+      })
 
-  return c.json({ data })
+      const entities = campaigns.map((camp) => {
+        let reach = 0, engagement = 0, totalCtr = 0, totalScore = 0, count = 0
+        for (const cr of camp.creatives) {
+          if (cr.performance.length > 0) {
+            const p = cr.performance[0]
+            reach += p.reach
+            engagement += p.likes + p.comments + p.shares + p.saves
+            totalCtr += p.ctr || 0
+            totalScore += cr.performanceScore || 0
+            count++
+          }
+        }
+        return {
+          id: camp.id,
+          name: camp.name,
+          reach,
+          engagement,
+          ctr: count > 0 ? Math.round((totalCtr / count) * 10) / 10 : 0,
+          score: count > 0 ? Math.round(totalScore / count) : 0,
+        }
+      })
+
+      return c.json<ApiResponse>({ data: { type, entities } })
+    }
+
+    // Creative comparison
+    const creatives = await prisma.creative.findMany({
+      where: { id: { in: ids } },
+      include: { performance: { orderBy: { recordedAt: 'desc' }, take: 1 } },
+    })
+
+    const entities = creatives.map((cr) => {
+      const p = cr.performance[0]
+      return {
+        id: cr.id,
+        name: `${cr.platform} ${cr.format}`,
+        reach: p?.reach || 0,
+        engagement: (p?.likes || 0) + (p?.comments || 0) + (p?.shares || 0) + (p?.saves || 0),
+        ctr: p?.ctr || 0,
+        score: cr.performanceScore || 0,
+      }
+    })
+
+    return c.json<ApiResponse>({ data: { type, entities } })
+  } catch (error) {
+    console.error('Error comparing:', error)
+    return c.json<ApiResponse>({ error: 'Failed to compare' }, 500)
+  }
 })
 
-// GET /api/analytics/insights
-// Returns AI insights list
+// GET /api/analytics/insights - AI-generated insights from performance data
 analyticsRouter.get('/insights', async (c) => {
-  const data = [
-    {
-      id: 'insight-1',
-      type: 'alert',
-      title: 'Critical Underperformance Detected',
-      description: 'Ancient Craft IG Story has CTR of only 0.3%',
-      severity: 'critical',
-      createdAt: new Date(),
-      isRead: false,
-    },
-    {
-      id: 'insight-2',
-      type: 'optimization',
-      title: 'High Save Rate Opportunity',
-      description: 'Spring Collection has 32% higher save rate',
-      severity: 'medium',
-      createdAt: new Date(),
-      isRead: false,
-    },
-  ]
+  try {
+    const period = c.req.query('period') || '30d'
 
-  return c.json({ data })
-})
+    const daysBack = period === '7d' ? 7 : period === '90d' ? 90 : 30
+    const since = new Date()
+    since.setDate(since.getDate() - daysBack)
 
-// POST /api/analytics/insights/generate
-// Generate new AI insights (mock)
-analyticsRouter.post('/insights/generate', async (c) => {
-  // Mock credit deduction
-  const creditCost = 2
+    const performances = await prisma.creativePerformance.findMany({
+      where: { recordedAt: { gte: since } },
+      include: { creative: { select: { platform: true } } },
+    })
 
-  // Mock new insight
-  const data = {
-    id: `insight-${Date.now()}`,
-    type: 'trend',
-    title: 'Carousel Format Trending',
-    description: 'Carousel posts have 2.1x higher save rate',
-    severity: 'medium',
-    createdAt: new Date(),
-    isRead: false,
-    creditCost,
+    if (performances.length === 0) {
+      return c.json<ApiResponse>({ data: [] })
+    }
+
+    let totalReach = 0
+    let totalEngagement = 0
+    let totalCtr = 0
+    const platformReach: Record<string, number> = {}
+
+    for (const p of performances) {
+      totalReach += p.reach
+      totalEngagement += p.likes + p.comments + p.shares + p.saves
+      totalCtr += p.ctr || 0
+      const plat = p.creative.platform
+      platformReach[plat] = (platformReach[plat] || 0) + p.reach
+    }
+
+    const topPlatform = Object.entries(platformReach).sort((a, b) => b[1] - a[1])[0]?.[0] || 'instagram'
+    const avgCtr = Math.round((totalCtr / performances.length) * 10) / 10
+    const campaignCount = await prisma.campaign.count({ where: { status: { not: 'DRAFT' } } })
+
+    const insights = await generateInsights({
+      totalReach,
+      totalEngagement,
+      avgCtr,
+      topPlatform,
+      campaignCount,
+      period,
+    })
+
+    return c.json<ApiResponse>({ data: insights })
+  } catch (error) {
+    console.error('Error fetching insights:', error)
+    return c.json<ApiResponse>({ error: 'Failed to fetch insights' }, 500)
   }
-
-  return c.json({ data })
 })
 
-// POST /api/analytics/reports/generate
-// Generate report (mock)
+// POST /api/analytics/insights/generate - Force regenerate AI insights
+analyticsRouter.post('/insights/generate', async (c) => {
+  try {
+    const performances = await prisma.creativePerformance.findMany({
+      where: { recordedAt: { gte: new Date(Date.now() - 30 * 86400000) } },
+      include: { creative: { select: { platform: true } } },
+    })
+
+    let totalReach = 0
+    let totalEngagement = 0
+    let totalCtr = 0
+    const platformReach: Record<string, number> = {}
+
+    for (const p of performances) {
+      totalReach += p.reach
+      totalEngagement += p.likes + p.comments + p.shares + p.saves
+      totalCtr += p.ctr || 0
+      const plat = p.creative.platform
+      platformReach[plat] = (platformReach[plat] || 0) + p.reach
+    }
+
+    const topPlatform = Object.entries(platformReach).sort((a, b) => b[1] - a[1])[0]?.[0] || 'instagram'
+    const avgCtr = performances.length > 0 ? Math.round((totalCtr / performances.length) * 10) / 10 : 0
+    const campaignCount = await prisma.campaign.count({ where: { status: { not: 'DRAFT' } } })
+
+    const insights = await generateInsights({
+      totalReach,
+      totalEngagement,
+      avgCtr,
+      topPlatform,
+      campaignCount,
+      period: '30d',
+    })
+
+    return c.json<ApiResponse>({
+      data: insights,
+      message: 'Insights generated successfully',
+    })
+  } catch (error) {
+    console.error('Error generating insights:', error)
+    return c.json<ApiResponse>({ error: 'Failed to generate insights' }, 500)
+  }
+})
+
+// POST /api/analytics/reports/generate - Generate report (placeholder)
 analyticsRouter.post(
   '/reports/generate',
   zValidator(
@@ -398,60 +613,32 @@ analyticsRouter.post(
     z.object({
       templateId: z.string(),
       format: z.enum(['pdf', 'csv']),
-      dateRange: z.object({
-        start: z.string(),
-        end: z.string(),
-      }),
+      dateRange: z.object({ start: z.string(), end: z.string() }),
     })
   ),
   async (c) => {
     const { templateId, format, dateRange } = c.req.valid('json')
 
-    // Mock report generation
-    const data = {
-      id: `report-${Date.now()}`,
-      templateId,
-      format,
-      dateRange,
-      generatedAt: new Date(),
-      downloadUrl: `/reports/mock-report.${format}`,
-    }
-
-    return c.json({ data })
+    return c.json<ApiResponse>({
+      data: {
+        id: `report-${Date.now()}`,
+        templateId,
+        format,
+        dateRange,
+        generatedAt: new Date(),
+        downloadUrl: null,
+      },
+      message: 'Report generation queued',
+    })
   }
 )
 
-// GET /api/analytics/reports
-// Returns report history
+// GET /api/analytics/reports - Report history (placeholder)
 analyticsRouter.get('/reports', zValidator('query', paginationSchema), async (c) => {
   const { page, limit } = c.req.valid('query')
 
-  const allReports = [
-    {
-      id: 'report-1',
-      templateName: 'Weekly Summary',
-      dateRange: {
-        start: new Date('2026-02-17'),
-        end: new Date('2026-02-24'),
-      },
-      generatedAt: new Date('2026-02-24T09:00:00'),
-      format: 'pdf',
-      downloadUrl: '/reports/weekly-2026-02-24.pdf',
-    },
-  ]
-
-  const total = allReports.length
-  const start = (page - 1) * limit
-  const end = start + limit
-  const reports = allReports.slice(start, end)
-
-  return c.json({
-    data: reports,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
+  return c.json<ApiResponse>({
+    data: [],
+    pagination: { page, limit, total: 0, totalPages: 0 },
   })
 })

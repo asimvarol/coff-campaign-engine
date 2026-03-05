@@ -26,8 +26,13 @@ export const updateCampaignSchema = z.object({
 })
 
 export const generateCreativesSchema = z.object({
-  conceptIndex: z.number().min(0).max(10),
+  conceptIndex: z.number().min(0).max(10).optional(),
   platforms: z.array(z.string()).min(1, 'At least one platform is required'),
+  concept: z.object({
+    name: z.string(),
+    description: z.string(),
+    colorMood: z.string().optional(),
+  }).optional(),
 })
 
 // Creative validation schemas
