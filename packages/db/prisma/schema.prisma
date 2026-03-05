@@ -49,6 +49,7 @@ model Brand {
   creatives       Creative[]
   socialAccounts  SocialAccount[]
   autopilotRules  AutopilotRule[]
+  photoshoots     Photoshoot[]
 
   // Agency
   agencyId        String?
@@ -289,6 +290,46 @@ model AutopilotLog {
 
   @@index([ruleId, createdAt])
   @@index([creativeId])
+}
+
+// ==================== PHOTOSHOOT ====================
+model Photoshoot {
+  id                       String           @id @default(cuid())
+  brandId                  String
+  brand                    Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  name                     String
+  productImageUrl          String
+  productImageNoBackground String?
+  status                   PhotoshootStatus @default(DRAFT)
+  creditCost               Int              @default(10)
+  selectedVariantIds       String[]
+  createdAt                DateTime         @default(now())
+  completedAt              DateTime?
+
+  variants PhotoshootVariant[]
+
+  @@index([brandId])
+  @@index([status])
+}
+
+model PhotoshootVariant {
+  id           String    @id @default(cuid())
+  photoshootId String
+  photoshoot   Photoshoot @relation(fields: [photoshootId], references: [id], onDelete: Cascade)
+  template     String    // "Minimalist Studio", "Lifestyle Scene", etc.
+  imageUrl     String
+  prompt       String    @db.Text
+  selected     Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  @@index([photoshootId])
+}
+
+enum PhotoshootStatus {
+  DRAFT
+  GENERATING
+  COMPLETED
+  FAILED
 }
 
 // ==================== AGENCY ====================

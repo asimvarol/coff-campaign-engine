@@ -1,86 +1,88 @@
 import { Hono } from 'hono'
-
-import type { ApiResponse, PaginatedResponse, Photoshoot, PhotoshootGenerateRequest } from '@repo/types'
-
-import { MOCK_DELAYS, mockDelay } from '../lib/constants'
-import { validateImageUrl, validatePagination } from '../lib/validation'
+import { prisma } from '@repo/db'
+import type { ApiResponse } from '@repo/types'
 
 export const photoshootRouter = new Hono()
 
-/**
- * GET /api/photoshoot - List all photoshoots with pagination
- */
+// GET /api/photoshoot - List all photoshoots with pagination
 photoshootRouter.get('/', async (c) => {
   try {
-    const page = c.req.query('page')
-    const limit = c.req.query('limit')
+    const page = parseInt(c.req.query('page') || '1')
+    const limit = Math.min(parseInt(c.req.query('limit') || '10'), 100)
     const status = c.req.query('status')
+    const brandId = c.req.query('brandId')
+    const skip = (page - 1) * limit
 
-    const { page: validPage, limit: validLimit, error } = validatePagination(page, limit)
-
-    if (error) {
-      return c.json<ApiResponse>({ error }, 400)
+    const where = {
+      ...(status && { status: status as any }),
+      ...(brandId && { brandId }),
     }
 
-    await mockDelay(MOCK_DELAYS.SHORT)
+    const [photoshoots, total] = await Promise.all([
+      prisma.photoshoot.findMany({
+        where,
+        include: {
+          variants: true,
+          brand: { select: { id: true, name: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.photoshoot.count({ where }),
+    ])
 
-    // Import mock data dynamically to avoid build-time issues
-    const { getPhotoshoots } = await import('../../../web/src/lib/mock-data/photoshoots')
-
-    const result = getPhotoshoots({
-      page: validPage,
-      limit: validLimit,
-      status: status as any,
+    return c.json<ApiResponse>({
+      data: photoshoots,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     })
-
-    return c.json<PaginatedResponse<Photoshoot>>(result)
   } catch (error) {
     console.error('Error fetching photoshoots:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch photoshoots' }, 500)
   }
 })
 
-/**
- * GET /api/photoshoot/:id - Get single photoshoot by ID
- */
+// GET /api/photoshoot/:id - Get single photoshoot by ID
 photoshootRouter.get('/:id', async (c) => {
   try {
     const id = c.req.param('id')
 
-    await mockDelay(MOCK_DELAYS.SHORT)
-
-    const { getPhotoshootById } = await import('../../../web/src/lib/mock-data/photoshoots')
-    const photoshoot = getPhotoshootById(id)
+    const photoshoot = await prisma.photoshoot.findUnique({
+      where: { id },
+      include: {
+        variants: true,
+        brand: { select: { id: true, name: true } },
+      },
+    })
 
     if (!photoshoot) {
       return c.json<ApiResponse>({ error: 'Photoshoot not found' }, 404)
     }
 
-    return c.json<ApiResponse<Photoshoot>>({ data: photoshoot })
+    return c.json<ApiResponse>({ data: photoshoot })
   } catch (error) {
     console.error('Error fetching photoshoot:', error)
     return c.json<ApiResponse>({ error: 'Failed to fetch photoshoot' }, 500)
   }
 })
 
-/**
- * POST /api/photoshoot/remove-background - Remove background from product image
- */
+// POST /api/photoshoot/remove-background - Remove background from product image
+// Note: fal.ai integration is Phase 3. Returns placeholder for now.
 photoshootRouter.post('/remove-background', async (c) => {
   try {
     const body = await c.req.json()
     const { imageUrl } = body
 
-    // Validate image URL
-    const validation = validateImageUrl(imageUrl)
-    if (!validation.valid) {
-      return c.json<ApiResponse>({ error: validation.error }, 400)
+    if (!imageUrl || typeof imageUrl !== 'string') {
+      return c.json<ApiResponse>({ error: 'Image URL is required' }, 400)
     }
 
-    await mockDelay(MOCK_DELAYS.LONG)
-
-    // TODO: Call fal.ai background removal API
-    // For now, return mock response
+    // Phase 3: Call fal.ai background removal API
     return c.json<ApiResponse>({
       data: {
         originalUrl: imageUrl,
@@ -94,52 +96,72 @@ photoshootRouter.post('/remove-background', async (c) => {
   }
 })
 
-/**
- * POST /api/photoshoot/generate - Generate product photoshoot
- */
+// POST /api/photoshoot/generate - Generate product photoshoot
 photoshootRouter.post('/generate', async (c) => {
   try {
-    const body: PhotoshootGenerateRequest = await c.req.json()
-    const { productImageUrl, brandDnaId, templates } = body
+    const body = await c.req.json()
+    const { productImageUrl, brandId, templates } = body
 
-    // Validate product image URL
-    const validation = validateImageUrl(productImageUrl)
-    if (!validation.valid) {
-      return c.json<ApiResponse>({ error: validation.error }, 400)
+    if (!productImageUrl) {
+      return c.json<ApiResponse>({ error: 'Product image URL is required' }, 400)
     }
-
-    // Validate templates
-    if (!templates || templates.length === 0) {
+    if (!brandId) {
+      return c.json<ApiResponse>({ error: 'Brand ID is required' }, 400)
+    }
+    if (!templates || !Array.isArray(templates) || templates.length === 0) {
       return c.json<ApiResponse>({ error: 'At least one template must be selected' }, 400)
     }
-
     if (templates.length > 8) {
       return c.json<ApiResponse>({ error: 'Maximum 8 templates allowed' }, 400)
     }
 
-    await mockDelay(MOCK_DELAYS.EXTRA_LONG)
+    // Verify brand exists
+    const brand = await prisma.brand.findUnique({ where: { id: brandId } })
+    if (!brand) {
+      return c.json<ApiResponse>({ error: 'Brand not found' }, 404)
+    }
 
-    // TODO: Queue photoshoot generation job
-    // TODO: Generate 4 variants with different templates using Brand DNA
-    // For now, return mock response
+    // Create photoshoot with placeholder variants (Phase 3: replace with AI generation)
+    const photoshoot = await prisma.photoshoot.create({
+      data: {
+        brandId,
+        name: `Photoshoot ${new Date().toLocaleDateString()}`,
+        productImageUrl,
+        status: 'GENERATING',
+        creditCost: templates.length * 3,
+        variants: {
+          create: templates.map((template: string) => ({
+            template,
+            imageUrl: `https://placehold.co/1080x1080/1c1b1b/e6d3c1?text=${encodeURIComponent(template)}`,
+            prompt: `Product photoshoot with ${template} style for ${brand.name}`,
+          })),
+        },
+      },
+      include: { variants: true },
+    })
+
+    // Simulate completion (Phase 3: replace with async job queue)
+    await prisma.photoshoot.update({
+      where: { id: photoshoot.id },
+      data: { status: 'COMPLETED', completedAt: new Date() },
+    })
+
     return c.json<ApiResponse>({
       data: {
-        photoshootId: `ps-${Date.now()}`,
-        status: 'GENERATING',
-        creditCost: 10,
-        estimatedCompletionTime: '2-3 minutes',
+        photoshootId: photoshoot.id,
+        status: 'COMPLETED',
+        creditCost: photoshoot.creditCost,
+        variants: photoshoot.variants,
       },
-      message: 'Photoshoot generation queued successfully',
-    })
+      message: 'Photoshoot generated successfully',
+    }, 201)
   } catch (error) {
     console.error('Error generating photoshoot:', error)
     return c.json<ApiResponse>({ error: 'Failed to generate photoshoot' }, 500)
   }
 })
 
-/**
- * POST /api/photoshoot/:id/select - Update selected variants
- */
+// POST /api/photoshoot/:id/select - Update selected variants
 photoshootRouter.post('/:id/select', async (c) => {
   try {
     const id = c.req.param('id')
@@ -150,12 +172,23 @@ photoshootRouter.post('/:id/select', async (c) => {
       return c.json<ApiResponse>({ error: 'variantIds must be an array' }, 400)
     }
 
-    await mockDelay(MOCK_DELAYS.SHORT)
+    // Reset all variants, then select the chosen ones
+    await prisma.$transaction([
+      prisma.photoshootVariant.updateMany({
+        where: { photoshootId: id },
+        data: { selected: false },
+      }),
+      prisma.photoshootVariant.updateMany({
+        where: { id: { in: variantIds }, photoshootId: id },
+        data: { selected: true },
+      }),
+      prisma.photoshoot.update({
+        where: { id },
+        data: { selectedVariantIds: variantIds },
+      }),
+    ])
 
-    // TODO: Update photoshoot in database
-    return c.json<ApiResponse>({
-      message: 'Selected variants updated successfully',
-    })
+    return c.json<ApiResponse>({ message: 'Selected variants updated successfully' })
   } catch (error) {
     console.error('Error updating selected variants:', error)
     return c.json<ApiResponse>({ error: 'Failed to update selected variants' }, 500)
