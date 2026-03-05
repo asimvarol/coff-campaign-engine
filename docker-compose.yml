@@ -34,17 +34,50 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - '3001:3000'
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/coff_campaign_engine
       REDIS_URL: redis://redis:6379
-      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3002
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - '3002:3002'
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/coff_campaign_engine
+      REDIS_URL: redis://redis:6379
+      API_PORT: '3002'
+      NEXT_PUBLIC_WEB_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3002
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bunx prisma migrate deploy --schema=packages/db/prisma/schema.prisma
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/coff_campaign_engine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - migrate
 
 volumes:
   postgres_data:

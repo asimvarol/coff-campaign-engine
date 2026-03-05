@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: coff
+  labels:
+    app: web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/asimvarol/coff-campaign-engine/web:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: coff-secrets
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: '3000'
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: coff
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP

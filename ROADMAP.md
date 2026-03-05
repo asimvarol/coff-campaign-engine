@@ -85,12 +85,14 @@
 - [ ] Real-time collaboration (WebSocket — deferred to Phase 6)
 
 ### Phase 6: Production
-- [ ] Docker deployment
-- [ ] Kubernetes manifests
-- [ ] Monitoring (Sentry, DataDog)
+- [x] Docker deployment (multi-service compose: web, api, postgres, redis, migrate)
+- [x] API Dockerfile (Bun-based)
+- [x] Kubernetes manifests (namespace, web, api, ingress, secrets, migrate job)
+- [x] Monitoring (Sentry integration with PII stripping)
+- [x] Security middleware (rate limiter, security headers, error handler, request timing)
+- [x] GDPR compliance (data export, data deletion, consent endpoint)
 - [ ] Load testing
-- [ ] Security audit
-- [ ] GDPR compliance
+- [ ] Security audit (penetration testing)
 
 ## 🎯 Current Focus
 - Complete feat/analytics-agency branch
