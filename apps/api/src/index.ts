@@ -11,6 +11,10 @@ import { analyticsRouter } from './routes/analytics'
 import { autopilotRouter } from './routes/autopilot'
 import { webhooksRouter } from './routes/webhooks'
 import { socialAuthRouter } from './routes/social-auth'
+import { commentsRouter } from './routes/comments'
+import { approvalsRouter } from './routes/approvals'
+import { activityRouter } from './routes/activity'
+import { whitelabelRouter } from './routes/whitelabel'
 
 const app = new Hono()
 
@@ -39,6 +43,10 @@ app.route('/api/analytics', analyticsRouter)
 app.route('/api/autopilot', autopilotRouter)
 app.route('/api/webhooks', webhooksRouter)
 app.route('/api/auth/social', socialAuthRouter)
+app.route('/api/comments', commentsRouter)
+app.route('/api/approvals', approvalsRouter)
+app.route('/api/activity', activityRouter)
+app.route('/api/whitelabel', whitelabelRouter)
 
 const port = process.env.API_PORT || 3002
 

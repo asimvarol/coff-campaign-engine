@@ -332,6 +332,104 @@ enum PhotoshootStatus {
   FAILED
 }
 
+// ==================== COMMENTS ====================
+model Comment {
+  id           String   @id @default(cuid())
+  userId       String
+  entityType   String   // "campaign", "creative", "photoshoot"
+  entityId     String
+  content      String   @db.Text
+  parentId     String?  // Reply to another comment
+  parent       Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies      Comment[] @relation("CommentReplies")
+  mentions     String[] // User IDs mentioned
+  resolved     Boolean  @default(false)
+  resolvedBy   String?
+  resolvedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+// ==================== ACTIVITY LOG ====================
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String   // "created", "updated", "approved", "rejected", "published", "commented"
+  entityType String   // "campaign", "creative", "brand", "photoshoot"
+  entityId   String
+  entityName String?
+  metadata   Json?    // Additional context
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
+}
+
+// ==================== APPROVAL WORKFLOW ====================
+model ApprovalRequest {
+  id          String         @id @default(cuid())
+  entityType  String         // "campaign", "creative"
+  entityId    String
+  entityName  String?
+  requestedBy String
+  status      ApprovalStatus @default(PENDING)
+  reviewers   String[]       // User IDs who can approve
+  dueDate     DateTime?
+  notes       String?        @db.Text
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  reviews     ApprovalReview[]
+
+  @@index([entityType, entityId])
+  @@index([status])
+  @@index([requestedBy])
+}
+
+model ApprovalReview {
+  id          String         @id @default(cuid())
+  requestId   String
+  request     ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  reviewerId  String
+  decision    ApprovalStatus // APPROVED or REJECTED
+  comment     String?        @db.Text
+  createdAt   DateTime       @default(now())
+
+  @@unique([requestId, reviewerId])
+  @@index([requestId])
+  @@index([reviewerId])
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+// ==================== WHITE LABEL ====================
+model WhiteLabelConfig {
+  id            String  @id @default(cuid())
+  agencyId      String  @unique
+  appName       String  @default("Campaign Engine")
+  logoUrl       String?
+  faviconUrl    String?
+  primaryColor  String  @default("#e11d48")
+  accentColor   String  @default("#f43f5e")
+  customDomain  String? @unique
+  customCss     String? @db.Text
+  footerText    String?
+  isActive      Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([customDomain])
+}
+
 // ==================== AGENCY ====================
 model Agency {
   id        String   @id @default(cuid())

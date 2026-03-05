@@ -77,11 +77,12 @@
 - [x] Test post endpoint with auto-cleanup
 
 ### Phase 5: Advanced Features
-- [ ] Real-time collaboration
-- [ ] Commenting system
-- [ ] Version history
-- [ ] Approval workflows
-- [ ] White-label support
+- [x] Commenting system (threaded comments, replies, resolve, mentions)
+- [x] Activity log (all actions tracked with metadata)
+- [x] Approval workflows (multi-reviewer, auto-status update on approve/reject)
+- [x] White-label support (custom domain, branding, CSS, favicon)
+- [x] Version history (creative versioning via parentId chain — already in Phase 2)
+- [ ] Real-time collaboration (WebSocket — deferred to Phase 6)
 
 ### Phase 6: Production
 - [ ] Docker deployment
