@@ -4,8 +4,10 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { ChevronDown01Icon } from '@/lib/icons'
-import { mockCampaignMetrics } from '@/lib/mock-data/analytics'
 import type { CampaignMetrics } from '@repo/types'
+
+// TODO: Fetch from API
+const mockCampaignMetrics: CampaignMetrics[] = []
 
 type SortField = 'campaignName' | 'reach' | 'engagement' | 'ctr' | 'clicks' | 'score'
 type SortDirection = 'asc' | 'desc'

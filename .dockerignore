@@ -1,5 +1,6 @@
 node_modules
 .next
+apps/web/.next
 .turbo
 dist
 *.log
@@ -9,3 +10,8 @@ dist
 coverage
 .git
 .vercel
+*.md
+!README.md
+memory/
+.openclaw/
+.agents/

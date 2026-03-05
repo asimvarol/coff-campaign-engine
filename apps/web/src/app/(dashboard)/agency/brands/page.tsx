@@ -3,7 +3,10 @@
 import { useEffect } from 'react'
 import { Button } from '@repo/ui'
 import { AgencyBrandsList } from '@/components/agency/agency-brands-list'
-import { mockAgencyBrands } from '@/lib/mock-data/agency'
+import type { AgencyBrand } from '@repo/types'
+
+// TODO: Fetch from API
+const mockAgencyBrands: AgencyBrand[] = []
 
 export default function AgencyBrandsPage() {
   useEffect(() => { document.title = 'Agency Brands | Coff' }, [])

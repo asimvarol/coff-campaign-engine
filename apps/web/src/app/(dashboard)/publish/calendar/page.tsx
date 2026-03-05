@@ -21,7 +21,6 @@ import {
   Badge,
   Separator,
 } from '@repo/ui'
-import { mockScheduledPosts, getPlatform, type ScheduledPost } from '@/lib/mock-data/publish'
 import { toast } from 'sonner'
 import {
   ChevronLeft01Icon,
@@ -31,6 +30,33 @@ import {
   Delete02Icon,
 } from '@/lib/icons'
 
+type Platform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin' | 'x' | 'pinterest' | 'youtube'
+type PostStatus = 'queued' | 'scheduled' | 'publishing' | 'published' | 'failed'
+
+interface ScheduledPost {
+  id: string
+  creativeId: string
+  creativeThumbnail: string
+  platform: Platform
+  scheduledFor: string
+  caption: string
+  status: PostStatus
+  postUrl?: string
+  error?: string
+}
+
+const PLATFORMS: Record<string, { name: string; icon: string }> = {
+  instagram: { name: 'Instagram', icon: '📸' },
+  facebook: { name: 'Facebook', icon: '👥' },
+  tiktok: { name: 'TikTok', icon: '🎵' },
+  linkedin: { name: 'LinkedIn', icon: '💼' },
+  x: { name: 'X', icon: '𝕏' },
+  pinterest: { name: 'Pinterest', icon: '📌' },
+  youtube: { name: 'YouTube', icon: '▶️' },
+}
+
+const getPlatform = (id: string) => PLATFORMS[id]
+
 type ViewMode = 'month' | 'week'
 
 export default function PublishCalendarPage() {
@@ -38,7 +64,7 @@ export default function PublishCalendarPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('month')
   const [currentDate, setCurrentDate] = useState(() => new Date())
-  const [posts, setPosts] = useState<ScheduledPost[]>(mockScheduledPosts)
+  const [posts, setPosts] = useState<ScheduledPost[]>([])
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null)
   const [cancelAlertOpen, setCancelAlertOpen] = useState(false)
 
@@ -50,7 +76,6 @@ export default function PublishCalendarPage() {
           const data = await res.json()
           if (data.data && data.data.length > 0) {
             setPosts(data.data)
-            return
           }
         }
       } catch {}
@@ -83,17 +108,17 @@ export default function PublishCalendarPage() {
     const startingDayOfWeek = firstDay.getDay()
 
     const days: (Date | null)[] = []
-    
+
     // Add empty cells for days before month starts
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null)
     }
-    
+
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day))
     }
-    
+
     return days
   }
 
@@ -101,13 +126,13 @@ export default function PublishCalendarPage() {
     const days: Date[] = []
     const startOfWeek = new Date(currentDate)
     startOfWeek.setDate(currentDate.getDate() - currentDate.getDay())
-    
+
     for (let i = 0; i < 7; i++) {
       const day = new Date(startOfWeek)
       day.setDate(startOfWeek.getDate() + i)
       days.push(day)
     }
-    
+
     return days
   }
 
@@ -225,7 +250,7 @@ export default function PublishCalendarPage() {
                 return <div key={`empty-${index}`} className="min-h-[120px] border-b border-r border-border bg-muted/30" />
               }
 
-              const posts = getPostsForDate(date)
+              const dayPosts = getPostsForDate(date)
               const today = isToday(date)
 
               return (
@@ -239,7 +264,7 @@ export default function PublishCalendarPage() {
                     {date.getDate()}
                   </div>
                   <div className="space-y-1">
-                    {posts.slice(0, 3).map((post) => {
+                    {dayPosts.slice(0, 3).map((post) => {
                       const platform = getPlatform(post.platform)
                       const time = new Date(post.scheduledFor)
                       return (
@@ -267,13 +292,13 @@ export default function PublishCalendarPage() {
                         </button>
                       )
                     })}
-                    {posts.length > 3 && (
+                    {dayPosts.length > 3 && (
                       <div className="text-xs text-muted-foreground">
-                        +{posts.length - 3} more
+                        +{dayPosts.length - 3} more
                       </div>
                     )}
                   </div>
-                  {posts.length === 0 && (
+                  {dayPosts.length === 0 && (
                     <button className="w-full rounded border-2 border-dashed border-transparent py-2 text-xs text-muted-foreground opacity-0 transition-all duration-200 group-hover:border-border group-hover:text-foreground group-hover:opacity-100">
                       + Add Post
                     </button>
@@ -310,7 +335,7 @@ export default function PublishCalendarPage() {
           </div>
           <div className="grid grid-cols-7">
             {weekDays.map((date) => {
-              const posts = getPostsForDate(date)
+              const dayPosts = getPostsForDate(date)
               const today = isToday(date)
 
               return (
@@ -320,7 +345,7 @@ export default function PublishCalendarPage() {
                     today ? 'bg-primary/5' : ''
                   }`}
                 >
-                  {posts.map((post) => {
+                  {dayPosts.map((post) => {
                     const platform = getPlatform(post.platform)
                     const time = new Date(post.scheduledFor)
                     return (

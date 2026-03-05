@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { CreativeEditor } from '@/components/campaigns/creative-editor'
-import { mockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
+import { CreativeEditor, type CreativeData } from '@/components/campaigns/creative-editor'
 import { notFound } from 'next/navigation'
 
 export default function CreativeEditorPage() {
@@ -12,7 +11,7 @@ export default function CreativeEditorPage() {
   const params = useParams()
   const id = params.id as string
   const creativeId = params.creativeId as string
-  const [creative, setCreative] = useState<MockCreative | null>(null)
+  const [creative, setCreative] = useState<CreativeData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -24,18 +23,10 @@ export default function CreativeEditorPage() {
           const found = data.data?.creatives?.find((c: { id: string }) => c.id === creativeId)
           if (found) {
             setCreative(found)
-            setIsLoading(false)
-            return
           }
         }
       } catch {
-        // Fall through to mock data
-      }
-
-      // Fallback to mock data
-      const mockCreative = mockCreatives.find(c => c.id === creativeId)
-      if (mockCreative) {
-        setCreative(mockCreative)
+        // API fetch failed — creative stays null, notFound will render
       }
       setIsLoading(false)
     }

@@ -6,7 +6,6 @@ import { Button } from '@repo/ui'
 import { PlusSignIcon } from '@/lib/icons'
 import { PhotoshootCard } from '@/components/photoshoot/photoshoot-card'
 import { PhotoshootEmptyState } from '@/components/photoshoot/empty-state'
-import { getPhotoshoots } from '@/lib/mock-data/photoshoots'
 
 export default function PhotoshootPage() {
   useEffect(() => { document.title = 'Photoshoot | Coff' }, [])
@@ -43,17 +42,11 @@ export default function PhotoshootPage() {
               completedAt: item.status === 'COMPLETED' ? new Date(item.createdAt) : null,
             }))
             setPhotoshoots(mapped)
-            setIsLoading(false)
-            return
           }
         }
       } catch {
-        // Fall through to mock data
+        // API fetch failed — show empty state
       }
-
-      // Fallback to mock data if API has no data
-      const { data } = getPhotoshoots({ page: 1, limit: 12 })
-      setPhotoshoots(data)
       setIsLoading(false)
     }
 

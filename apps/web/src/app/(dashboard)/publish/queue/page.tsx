@@ -24,7 +24,6 @@ import {
   AlertDialogTitle,
   Separator,
 } from '@repo/ui'
-import { mockScheduledPosts, getPlatform, type PostStatus, type Platform } from '@/lib/mock-data/publish'
 import { toast } from 'sonner'
 import {
   Search01Icon,
@@ -35,10 +34,37 @@ import {
   Calendar03Icon,
 } from '@/lib/icons'
 
+type Platform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin' | 'x' | 'pinterest' | 'youtube'
+type PostStatus = 'queued' | 'scheduled' | 'publishing' | 'published' | 'failed'
+
+interface ScheduledPost {
+  id: string
+  creativeId: string
+  creativeThumbnail: string
+  platform: Platform
+  scheduledFor: string
+  caption: string
+  status: PostStatus
+  postUrl?: string
+  error?: string
+}
+
+const PLATFORMS: Record<string, { name: string; icon: string }> = {
+  instagram: { name: 'Instagram', icon: '📸' },
+  facebook: { name: 'Facebook', icon: '👥' },
+  tiktok: { name: 'TikTok', icon: '🎵' },
+  linkedin: { name: 'LinkedIn', icon: '💼' },
+  x: { name: 'X', icon: '𝕏' },
+  pinterest: { name: 'Pinterest', icon: '📌' },
+  youtube: { name: 'YouTube', icon: '▶️' },
+}
+
+const getPlatform = (id: string) => PLATFORMS[id]
+
 export default function PublishQueuePage() {
   useEffect(() => { document.title = 'Queue | Coff' }, [])
 
-  const [posts, setPosts] = useState(mockScheduledPosts)
+  const [posts, setPosts] = useState<ScheduledPost[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [filterPlatform, setFilterPlatform] = useState<Platform | '__all__'>('__all__')
   const [filterStatus, setFilterStatus] = useState<PostStatus | '__all__'>('__all__')
@@ -55,7 +81,6 @@ export default function PublishQueuePage() {
           const data = await res.json()
           if (data.data && data.data.length > 0) {
             setPosts(data.data)
-            return
           }
         }
       } catch {}
@@ -371,7 +396,7 @@ export default function PublishQueuePage() {
           {filteredPosts.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12">
               <Calendar03Icon className="h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">No posts found</h3>
+              <h3 className="mt-4 text-lg font-semibold">No scheduled posts</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {searchQuery || filterPlatform !== '__all__' || filterStatus !== '__all__'
                   ? 'Try adjusting your filters'

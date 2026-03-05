@@ -4,7 +4,11 @@ import { useEffect } from 'react'
 import { AgencyBillingOverview } from '@/components/agency/agency-billing-overview'
 import { AgencyOverview } from '@/components/agency/agency-overview'
 import { AgencyUpgradeCard } from '@/components/agency/agency-upgrade-card'
-import { mockAgencyBrands, mockAgency } from '@/lib/mock-data/agency'
+import type { AgencyBrand } from '@repo/types'
+
+// TODO: Fetch from API
+const mockAgencyBrands: AgencyBrand[] = []
+const mockAgency = { members: [] as unknown[], totalCreditsUsed: 0, totalCreditsRemaining: 0, monthlySpend: 0, plan: '—' }
 
 export default function AgencyBillingPage() {
   useEffect(() => { document.title = 'Billing | Coff' }, [])

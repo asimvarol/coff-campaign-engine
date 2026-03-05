@@ -4,11 +4,48 @@ import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Textarea, Progress, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui'
 import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons'
 import { CampaignObjective } from '@repo/types'
-import { generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
-import { PLATFORM_FORMATS } from '@/lib/mock-data/creative-formats'
+import { PLATFORM_FORMATS, PLATFORM_LABELS } from '@/lib/platform-config'
 import { useBrand } from '@/lib/brand-context'
 import type { CampaignConcept } from '@repo/types'
-import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
+
+interface MockCreative {
+  id: string
+  campaignId: string
+  platform: string
+  format: string
+  width: number
+  height: number
+  imageUrl: string
+  header: {
+    text: string
+    font: string
+    size: number
+    color: string
+    position: { x: number; y: number }
+    visible: boolean
+  }
+  description: {
+    text: string
+    font: string
+    size: number
+    color: string
+    position: { x: number; y: number }
+    visible: boolean
+  }
+  cta: {
+    text: string
+    style: string
+    url: string
+    visible: boolean
+  }
+  overlay: {
+    color: string
+    opacity: number
+  }
+  version: number
+  status: string
+  createdAt: Date
+}
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -116,8 +153,31 @@ export function CampaignWizard() {
 
   const handleGenerateConcepts = async () => {
     setIsGenerating(true)
-    const concepts = generateMockConcepts(state.brandId, state.objective as CampaignObjective, state.platforms)
-    updateState({ generatedConcepts: concepts })
+    try {
+      const res = await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate-concepts',
+          brandId: state.brandId,
+          objective: state.objective,
+          platforms: state.platforms,
+          description: state.description,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.concepts && data.concepts.length > 0) {
+          updateState({ generatedConcepts: data.concepts })
+          setIsGenerating(false)
+          setStep(2)
+          return
+        }
+      }
+    } catch {
+      // API call failed — show empty result
+    }
+    updateState({ generatedConcepts: [] })
     setIsGenerating(false)
     setStep(2)
   }

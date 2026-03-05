@@ -295,10 +295,34 @@ export async function analyzeBrand(url: string, onProgress?: (p: AnalysisProgres
   
   // Normalize URL
   if (!url.startsWith('http')) url = 'https://' + url
-  
+
+  // SSRF protection: reject private/internal addresses
+  try {
+    const parsed = new URL(url)
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('Only HTTP/HTTPS URLs are allowed')
+    }
+    const hostname = parsed.hostname.toLowerCase()
+    if (
+      hostname === 'localhost' ||
+      hostname.startsWith('127.') ||
+      hostname.startsWith('10.') ||
+      hostname.startsWith('192.168.') ||
+      hostname === '169.254.169.254' ||
+      hostname.endsWith('.local') ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+    ) {
+      throw new Error('Internal URLs are not allowed')
+    }
+  } catch (err) {
+    if (err instanceof Error && (err.message.includes('not allowed') || err.message.includes('Only HTTP'))) {
+      throw err
+    }
+  }
+
   let html = ''
   try {
-    const res = await fetch(url, { 
+    const res = await fetch(url, {
       signal: AbortSignal.timeout(10000),
       headers: { 
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',

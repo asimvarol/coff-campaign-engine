@@ -13,70 +13,8 @@ export const campaignsRouter = new Hono()
 // import { authMiddleware } from '../middleware/auth'
 // campaignsRouter.use('*', authMiddleware)
 
-// Mock data (temporary - will be replaced with Prisma once DB is ready)
-const mockCampaigns = [
-  {
-    id: 'campaign-1',
-    brandId: 'brand-1',
-    name: "Mother's Day - Honor Her Story",
-    description: 'Celebrating maternal love with our heritage collection',
-    objective: 'SEASONAL',
-    status: 'PUBLISHED',
-    platforms: ['instagram', 'facebook', 'pinterest'],
-    concept: {
-      name: 'Heritage & Elegance',
-      description: 'Celebrate timeless beauty',
-      emotion: 'Nostalgic Pride',
-    },
-    creditsCost: 45,
-    createdAt: new Date('2026-02-20'),
-    updatedAt: new Date('2026-02-25'),
-  },
-  {
-    id: 'campaign-2',
-    brandId: 'brand-1',
-    name: 'Spring Collection Launch',
-    description: 'New spring jewelry line',
-    objective: 'PRODUCT_LAUNCH',
-    status: 'REVIEW',
-    platforms: ['instagram', 'facebook', 'tiktok', 'pinterest'],
-    concept: {
-      name: 'Spring Awakening',
-      description: 'Fresh, vibrant, renewed',
-      emotion: 'Joy & Renewal',
-    },
-    creditsCost: 60,
-    createdAt: new Date('2026-02-22'),
-    updatedAt: new Date('2026-02-26'),
-  },
-]
-
-const mockConcepts = [
-  {
-    name: 'Heritage & Elegance',
-    description: 'Celebrate the timeless beauty of traditional craftsmanship with modern elegance.',
-    emotion: 'Nostalgic Pride',
-    hashtags: ['#TimelessElegance', '#HeritageJewellery', '#CraftsmanshipMatters'],
-    colorMood: 'Warm earth tones with gold accents',
-    textPosition: 'bottom',
-  },
-  {
-    name: 'Empowered Femininity',
-    description: 'Honor the strength and grace of women through bold, statement pieces.',
-    emotion: 'Empowerment',
-    hashtags: ['#EmpoweredWomen', '#ConfidentStyle', '#StatementJewellery'],
-    colorMood: 'Deep blacks with rose gold highlights',
-    textPosition: 'top',
-  },
-  {
-    name: 'Sentimental Journey',
-    description: 'Every piece tells a story—of love, memory, and cherished moments.',
-    emotion: 'Warmth & Nostalgia',
-    hashtags: ['#StoriesThatShine', '#SentimentalValue', '#CherishedMoments'],
-    colorMood: 'Soft pastels with warm lighting',
-    textPosition: 'center',
-  },
-]
+// In-memory store (temporary - will be replaced with Prisma once DB is ready)
+const campaigns: Record<string, unknown>[] = []
 
 // GET /api/campaigns - List all campaigns
 // TODO: Add auth middleware to verify user access
@@ -90,10 +28,10 @@ campaignsRouter.get('/', async (c) => {
     const page = parseInt(c.req.query('page') || '1')
     const limit = Math.min(parseInt(c.req.query('limit') || '20'), 100)
     
-    let campaigns = mockCampaigns
+    let campaigns = campaigns
     
     if (brandId) {
-      campaigns = mockCampaigns.filter(c => c.brandId === brandId)
+      campaigns = campaigns.filter(c => c.brandId === brandId)
     }
 
     // Pagination
@@ -105,7 +43,7 @@ campaignsRouter.get('/', async (c) => {
     return c.json<ApiResponse>({
       data: paginatedCampaigns.map(campaign => ({
         ...campaign,
-        _count: { creatives: Math.floor(Math.random() * 15) + 5 },
+        _count: { creatives: 0 },
       })),
       pagination: {
         page,
@@ -132,7 +70,7 @@ campaignsRouter.get('/:id', async (c) => {
   try {
     // TODO: Verify user has access to this campaign
     const id = c.req.param('id')
-    const campaign = mockCampaigns.find(c => c.id === id)
+    const campaign = campaigns.find(c => c.id === id)
 
     if (!campaign) {
       return c.json<ApiResponse>(
@@ -144,27 +82,11 @@ campaignsRouter.get('/:id', async (c) => {
       )
     }
 
-    // Mock creatives
-    const creatives = Array.from({ length: 12 }, (_, i) => ({
-      id: `creative-${id}-${i}`,
-      campaignId: id,
-      platform: ['instagram', 'facebook', 'tiktok'][i % 3],
-      format: ['story', 'feed', 'reels'][i % 3],
-      imageUrl: `https://placehold.co/1080x1920?text=Creative+${i + 1}`,
-      status: 'PUBLISHED',
-      version: 1,
-      createdAt: new Date(),
-    }))
-
+    // TODO: Fetch creatives from DB
     return c.json<ApiResponse>({
       data: {
         ...campaign,
-        brand: {
-          id: 'brand-1',
-          name: 'Golden Horn Jewellery',
-          logo: { primary: 'https://placehold.co/200x200?text=GH' },
-        },
-        creatives,
+        creatives: [],
       }
     })
   } catch (error) {
@@ -222,7 +144,7 @@ campaignsRouter.post('/', async (c) => {
       updatedAt: new Date(),
     }
 
-    mockCampaigns.push(newCampaign)
+    campaigns.push(newCampaign)
 
     return c.json<ApiResponse>(
       {
@@ -264,7 +186,7 @@ campaignsRouter.put('/:id', async (c) => {
 
     const body = validation.data
 
-    const campaignIndex = mockCampaigns.findIndex(c => c.id === id)
+    const campaignIndex = campaigns.findIndex(c => c.id === id)
     if (campaignIndex === -1) {
       return c.json<ApiResponse>(
         {
@@ -275,14 +197,14 @@ campaignsRouter.put('/:id', async (c) => {
       )
     }
 
-    mockCampaigns[campaignIndex] = {
-      ...mockCampaigns[campaignIndex],
+    campaigns[campaignIndex] = {
+      ...campaigns[campaignIndex],
       ...body,
       updatedAt: new Date(),
     }
 
     return c.json<ApiResponse>({
-      data: mockCampaigns[campaignIndex],
+      data: campaigns[campaignIndex],
       message: 'Campaign updated successfully'
     })
   } catch (error) {
@@ -304,7 +226,7 @@ campaignsRouter.delete('/:id', async (c) => {
     // TODO: Verify user has access and admin rights
     // TODO: Implement soft delete instead of hard delete
     const id = c.req.param('id')
-    const campaignIndex = mockCampaigns.findIndex(c => c.id === id)
+    const campaignIndex = campaigns.findIndex(c => c.id === id)
 
     if (campaignIndex === -1) {
       return c.json<ApiResponse>(
@@ -317,7 +239,7 @@ campaignsRouter.delete('/:id', async (c) => {
     }
 
     // TODO: Replace with soft delete: { deletedAt: new Date() }
-    mockCampaigns.splice(campaignIndex, 1)
+    campaigns.splice(campaignIndex, 1)
 
     return c.json<ApiResponse>({
       data: { success: true },
@@ -343,7 +265,7 @@ campaignsRouter.post('/:id/generate-concepts', async (c) => {
     // TODO: Check user has enough credits (5 credits required)
     const id = c.req.param('id')
     
-    const campaign = mockCampaigns.find(c => c.id === id)
+    const campaign = campaigns.find(c => c.id === id)
     if (!campaign) {
       return c.json<ApiResponse>(
         {
@@ -360,9 +282,10 @@ campaignsRouter.post('/:id/generate-concepts', async (c) => {
     // TODO: Deduct 5 credits from user
     // TODO: Call AI service to generate concepts
 
+    // TODO: Call AI service to generate real concepts
     return c.json<ApiResponse>({
       data: {
-        concepts: mockConcepts,
+        concepts: [],
         creditsCost: 5,
       },
       message: 'Concepts generated successfully'
@@ -387,7 +310,7 @@ campaignsRouter.post('/:id/generate-creatives', async (c) => {
     // TODO: Check user has enough credits (3 credits per creative)
     const id = c.req.param('id')
     
-    const campaign = mockCampaigns.find(c => c.id === id)
+    const campaign = campaigns.find(c => c.id === id)
     if (!campaign) {
       return c.json<ApiResponse>(
         {

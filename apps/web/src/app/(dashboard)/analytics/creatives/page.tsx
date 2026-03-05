@@ -4,7 +4,10 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { ScoreGauge } from '@/components/analytics/score-gauge'
-import { mockCreativeMetrics } from '@/lib/mock-data/analytics'
+import type { CreativeMetrics } from '@repo/types'
+
+// TODO: Fetch from API
+const mockCreativeMetrics: CreativeMetrics[] = []
 
 type PerformanceFilter = 'all' | 'excellent' | 'good' | 'average' | 'poor' | 'critical'
 

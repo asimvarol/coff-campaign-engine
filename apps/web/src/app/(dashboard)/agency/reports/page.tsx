@@ -4,7 +4,10 @@ import { useEffect } from 'react'
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@repo/ui'
 import { Download04Icon } from '@/lib/icons'
-import { mockAgencyBrands } from '@/lib/mock-data/agency'
+import type { AgencyBrand } from '@repo/types'
+
+// TODO: Fetch from API
+const mockAgencyBrands: AgencyBrand[] = []
 
 export default function AgencyReportsPage() {
   useEffect(() => { document.title = 'Agency Reports | Coff' }, [])

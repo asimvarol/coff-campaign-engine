@@ -3,7 +3,10 @@
 import { useEffect } from 'react'
 import { Button } from '@repo/ui'
 import { AgencyTeamTable } from '@/components/agency/agency-team-table'
-import { mockAgencyMembers } from '@/lib/mock-data/agency'
+import type { AgencyMember } from '@repo/types'
+
+// TODO: Fetch from API
+const mockAgencyMembers: AgencyMember[] = []
 
 export default function AgencyTeamPage() {
   useEffect(() => { document.title = 'Team | Coff' }, [])

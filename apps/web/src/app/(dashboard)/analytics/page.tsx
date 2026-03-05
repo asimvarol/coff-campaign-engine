@@ -5,14 +5,15 @@ import type { AnalyticsDateRange } from '@repo/types'
 import { AnalyticsCampaignComparison } from '@/components/analytics/analytics-campaign-comparison'
 import { AnalyticsAIInsights } from '@/components/analytics/analytics-ai-insights'
 import { AnalyticsDateRangePicker } from '@/components/analytics/analytics-date-range-picker'
-import {
-  mockCampaignAnalytics,
-  mockAIInsightsLegacy,
-  mockAnalyticsOverview,
-  mockReachTrend,
-  mockPlatformBreakdown,
-  mockCreativeMetrics,
-} from '@/lib/mock-data/analytics'
+import type { AnalyticsOverview, ReachTrendDataPoint, PlatformBreakdown, CampaignAnalytics, AnalyticsAIInsight, CreativeMetrics } from '@repo/types'
+
+// TODO: Fetch from API — these are empty defaults until backend is wired
+const mockAnalyticsOverview: AnalyticsOverview = { totalReach: 0, totalReachChange: 0, totalEngagement: 0, totalEngagementChange: 0, avgCtr: 0, avgCtrChange: 0, totalClicks: 0, totalClicksChange: 0, totalSaves: 0, totalSavesChange: 0 }
+const mockReachTrend: ReachTrendDataPoint[] = []
+const mockPlatformBreakdown: PlatformBreakdown[] = []
+const mockCampaignAnalytics: CampaignAnalytics[] = []
+const mockAIInsightsLegacy: AnalyticsAIInsight[] = []
+const mockCreativeMetrics: CreativeMetrics[] = []
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { TrendUp01Icon, TrendDown01Icon, AlertCircle01Icon } from '@/lib/icons'
 import { LineChart } from '@/components/analytics/line-chart'
@@ -34,9 +35,11 @@ export default function AnalyticsPage() {
   const trendData = getTrendData()
 
   // Find top performing and underperforming creatives
-  const topCreative = mockCreativeMetrics.reduce((prev, current) =>
-    prev.performanceScore > current.performanceScore ? prev : current
-  )
+  const topCreative = mockCreativeMetrics.length > 0
+    ? mockCreativeMetrics.reduce((prev, current) =>
+        prev.performanceScore > current.performanceScore ? prev : current
+      )
+    : null
 
   const underperformingCreatives = mockCreativeMetrics.filter(
     (c) => c.performanceLabel === 'critical' || c.performanceLabel === 'poor'
@@ -156,21 +159,25 @@ export default function AnalyticsPage() {
             <CardDescription>Highest scoring creative this period</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
-              <div
-                className="h-20 w-20 flex-shrink-0 rounded-lg bg-cover bg-center"
-                style={{ backgroundImage: `url(${topCreative.thumbnailUrl})` }}
-              />
-              <div className="flex-1">
-                <p className="font-medium">{topCreative.creativeName}</p>
-                <p className="text-sm text-muted-foreground">{topCreative.campaignName}</p>
-                <div className="mt-2 flex gap-4 text-sm">
-                  <span>Reach: {topCreative.reach.toLocaleString()}</span>
-                  <span className="text-primary">CTR: {topCreative.ctr}%</span>
-                  <span className="font-medium">Score: {topCreative.performanceScore}</span>
+            {topCreative ? (
+              <div className="flex gap-4">
+                <div
+                  className="h-20 w-20 flex-shrink-0 rounded-lg bg-cover bg-center"
+                  style={{ backgroundImage: `url(${topCreative.thumbnailUrl})` }}
+                />
+                <div className="flex-1">
+                  <p className="font-medium">{topCreative.creativeName}</p>
+                  <p className="text-sm text-muted-foreground">{topCreative.campaignName}</p>
+                  <div className="mt-2 flex gap-4 text-sm">
+                    <span>Reach: {topCreative.reach.toLocaleString()}</span>
+                    <span className="text-primary">CTR: {topCreative.ctr}%</span>
+                    <span className="font-medium">Score: {topCreative.performanceScore}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No creative data yet</p>
+            )}
           </CardContent>
         </Card>
       </div>

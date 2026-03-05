@@ -12,8 +12,8 @@ export const creativesRouter = new Hono()
 // import { authMiddleware } from '../middleware/auth'
 // creativesRouter.use('*', authMiddleware)
 
-// Mock creative storage (temporary)
-const mockCreatives = new Map<string, any>()
+// In-memory storage (temporary — will be replaced with Prisma)
+const creativeStore = new Map<string, Record<string, unknown>>()
 
 // GET /api/creatives/:id - Get single creative with details
 // TODO: Add auth middleware to verify user owns this creative
@@ -23,53 +23,13 @@ creativesRouter.get('/:id', async (c) => {
     const id = c.req.param('id')
     
     // TODO: Fetch from database with Prisma
-    // Mock creative data
-    const creative = {
-      id,
-      campaignId: 'campaign-1',
-      brandId: 'brand-1',
-      platform: 'instagram',
-      format: 'story',
-      width: 1080,
-      height: 1920,
-      imageUrl: `https://placehold.co/1080x1920?text=Creative`,
-      imagePrompt: 'Elegant jewelry photography with warm lighting',
-      header: {
-        text: 'HONOR HER STORY',
-        font: 'Playfair Display',
-        size: 48,
-        color: '#ffffff',
-        position: { x: 50, y: 200 },
-        visible: true,
-      },
-      description: {
-        text: 'Celebrating the women who inspire us',
-        font: 'Outfit',
-        size: 18,
-        color: '#e6d3c1',
-        position: { x: 50, y: 280 },
-        visible: true,
-      },
-      cta: {
-        text: 'Shop Now',
-        style: 'primary',
-        url: 'https://example.com',
-        visible: true,
-      },
-      overlay: {
-        color: '#000000',
-        opacity: 0.4,
-      },
-      version: 1,
-      parentId: null,
-      publishStatus: 'DRAFT',
-      publishedAt: null,
-      postUrl: null,
-      postId: null,
-      performanceScore: null,
-      autopilotStatus: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const creative = creativeStore.get(id)
+
+    if (!creative) {
+      return c.json<ApiResponse>(
+        { error: 'Creative not found', code: 'NOT_FOUND' },
+        404
+      )
     }
 
     return c.json<ApiResponse>({ data: creative })
@@ -110,13 +70,13 @@ creativesRouter.put('/:id', async (c) => {
     // TODO: Update with Prisma
     
     // Store updates in mock storage
-    const existingCreative = mockCreatives.get(id) || {}
+    const existingCreative = creativeStore.get(id) || {}
     const updatedCreative = {
       ...existingCreative,
       ...body,
       updatedAt: new Date(),
     }
-    mockCreatives.set(id, updatedCreative)
+    creativeStore.set(id, updatedCreative)
 
     return c.json<ApiResponse>({
       data: updatedCreative,
@@ -199,31 +159,7 @@ creativesRouter.get('/:id/versions', async (c) => {
     const id = c.req.param('id')
 
     // TODO: Fetch versions from database with Prisma
-    // SELECT * FROM creatives WHERE parentId = id OR id = id ORDER BY version DESC
-    
-    // Mock version history
-    const versions = [
-      {
-        id: `${id}-v3`,
-        version: 3,
-        createdAt: new Date(Date.now() - 2 * 60 * 1000),
-        isCurrent: true,
-      },
-      {
-        id: `${id}-v2`,
-        version: 2,
-        createdAt: new Date(Date.now() - 15 * 60 * 1000),
-        isCurrent: false,
-      },
-      {
-        id: `${id}-v1`,
-        version: 1,
-        createdAt: new Date(Date.now() - 30 * 60 * 1000),
-        isCurrent: false,
-      },
-    ]
-
-    return c.json<ApiResponse>({ data: versions })
+    return c.json<ApiResponse>({ data: [] })
   } catch (error) {
     console.error('Error fetching versions:', error)
     return c.json<ApiResponse>(
