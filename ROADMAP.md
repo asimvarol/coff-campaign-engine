@@ -67,11 +67,14 @@
 - [ ] A/B test recommendations
 
 ### Phase 4: Social Integration
-- [ ] Meta Ads API
-- [ ] Facebook/Instagram publishing
-- [ ] Twitter/X integration
-- [ ] LinkedIn Ads
-- [ ] TikTok Ads
+- [x] Meta Graph API (Instagram + Facebook publishing, metrics, webhooks)
+- [x] Twitter/X OAuth 2.0 + Content API
+- [x] LinkedIn OAuth + UGC Posts API
+- [x] TikTok Content Posting API
+- [x] OAuth callback flow with token refresh
+- [x] Publishing service (publish-now, retry, metrics fetch)
+- [x] Webhook handlers (Instagram, Facebook, TikTok, LinkedIn)
+- [x] Test post endpoint with auto-cleanup
 
 ### Phase 5: Advanced Features
 - [ ] Real-time collaboration

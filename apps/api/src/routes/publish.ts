@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@repo/db'
 import type { ApiResponse } from '@repo/types'
 import { generateBestPostingTimes } from '../lib/openai'
+import { publishToSocial, fetchPostMetrics } from '../lib/social/publisher'
 
 export const publishRouter = new Hono()
 
@@ -109,7 +110,7 @@ publishRouter.delete('/accounts/:id', async (c) => {
   }
 })
 
-// POST /api/publish/accounts/:id/test - Test post (placeholder for Phase 4)
+// POST /api/publish/accounts/:id/test - Send test post to verify connection
 publishRouter.post('/accounts/:id/test', async (c) => {
   try {
     const id = c.req.param('id')
@@ -119,10 +120,37 @@ publishRouter.post('/accounts/:id/test', async (c) => {
       return c.json<ApiResponse>({ error: 'Account not found' }, 404)
     }
 
-    // Phase 4: Send actual test post to platform
+    const { getSocialClient } = await import('../lib/social')
+    const client = getSocialClient(account.platform)
+    if (!client) {
+      return c.json<ApiResponse>({ error: `Unsupported platform: ${account.platform}` }, 400)
+    }
+
+    const result = await client.publish(
+      { accessToken: account.accessToken, refreshToken: account.refreshToken || undefined },
+      {
+        imageUrl: 'https://placehold.co/1080x1080/1c1b1b/e6d3c1?text=Coff+Test+Post',
+        caption: 'Test post from Coff Campaign Engine. This post will be deleted shortly.',
+      }
+    )
+
+    if (result.success && result.postId) {
+      // Delete the test post after a short delay
+      setTimeout(async () => {
+        try {
+          await client.deletePost(
+            { accessToken: account.accessToken },
+            result.postId!
+          )
+        } catch {
+          // Test post cleanup is best-effort
+        }
+      }, 5000)
+    }
+
     return c.json<ApiResponse>({
-      message: 'Test post sent successfully',
-      data: { postUrl: `https://${account.platform}.com/test-post` },
+      message: result.success ? 'Test post sent successfully' : 'Test post failed',
+      data: { success: result.success, postUrl: result.postUrl, error: result.error },
     })
   } catch (error) {
     console.error('Error sending test post:', error)
@@ -287,11 +315,54 @@ publishRouter.post('/queue/:id/retry', async (c) => {
       data: { status: 'QUEUED', retryCount: { increment: 1 }, error: null },
     })
 
-    // Phase 4: Queue actual publishing job
-    return c.json<ApiResponse>({ data: schedule, message: 'Post queued for retry' })
+    // Attempt to publish
+    const result = await publishToSocial(id)
+
+    return c.json<ApiResponse>({
+      data: { schedule, publishResult: result },
+      message: result.success ? 'Post published successfully' : 'Post queued for retry',
+    })
   } catch (error) {
     console.error('Error retrying post:', error)
     return c.json<ApiResponse>({ error: 'Failed to retry post' }, 500)
+  }
+})
+
+// POST /api/publish/queue/:id/publish-now - Immediately publish a scheduled post
+publishRouter.post('/queue/:id/publish-now', async (c) => {
+  try {
+    const id = c.req.param('id')
+
+    const schedule = await prisma.publishSchedule.findUnique({ where: { id } })
+    if (!schedule) {
+      return c.json<ApiResponse>({ error: 'Schedule not found' }, 404)
+    }
+
+    if (schedule.status === 'PUBLISHED') {
+      return c.json<ApiResponse>({ error: 'Already published' }, 400)
+    }
+
+    const result = await publishToSocial(id)
+
+    return c.json<ApiResponse>({
+      data: result,
+      message: result.success ? 'Published successfully' : `Publishing failed: ${result.error}`,
+    })
+  } catch (error) {
+    console.error('Error publishing now:', error)
+    return c.json<ApiResponse>({ error: 'Failed to publish' }, 500)
+  }
+})
+
+// POST /api/publish/fetch-metrics/:creativeId - Fetch latest metrics from platform
+publishRouter.post('/fetch-metrics/:creativeId', async (c) => {
+  try {
+    const creativeId = c.req.param('creativeId')
+    await fetchPostMetrics(creativeId)
+    return c.json<ApiResponse>({ message: 'Metrics fetched successfully' })
+  } catch (error) {
+    console.error('Error fetching metrics:', error)
+    return c.json<ApiResponse>({ error: 'Failed to fetch metrics' }, 500)
   }
 })
 
