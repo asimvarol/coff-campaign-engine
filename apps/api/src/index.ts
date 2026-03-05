@@ -10,6 +10,7 @@ import { publishRouter } from './routes/publish'
 import { analyticsRouter } from './routes/analytics'
 import { autopilotRouter } from './routes/autopilot'
 import { webhooksRouter } from './routes/webhooks'
+import { socialAuthRouter } from './routes/social-auth'
 
 const app = new Hono()
 
@@ -37,6 +38,7 @@ app.route('/api/publish', publishRouter)
 app.route('/api/analytics', analyticsRouter)
 app.route('/api/autopilot', autopilotRouter)
 app.route('/api/webhooks', webhooksRouter)
+app.route('/api/auth/social', socialAuthRouter)
 
 const port = process.env.API_PORT || 3002
 
