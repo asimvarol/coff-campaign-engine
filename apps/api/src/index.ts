@@ -18,6 +18,8 @@ import { approvalsRouter } from './routes/approvals'
 import { activityRouter } from './routes/activity'
 import { whitelabelRouter } from './routes/whitelabel'
 import { gdprRouter } from './routes/gdpr'
+import { abTestRouter } from './routes/ab-test'
+import { uploadRouter } from './routes/upload'
 
 // Initialize Sentry
 initSentry()
@@ -58,6 +60,8 @@ app.route('/api/approvals', approvalsRouter)
 app.route('/api/activity', activityRouter)
 app.route('/api/whitelabel', whitelabelRouter)
 app.route('/api/gdpr', gdprRouter)
+app.route('/api/ab-test', abTestRouter)
+app.route('/api/upload', uploadRouter)
 
 const port = process.env.API_PORT || 3002
 
