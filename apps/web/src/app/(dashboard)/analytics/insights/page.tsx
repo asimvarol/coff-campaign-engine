@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@repo/ui'
+import { toast } from 'sonner'
 import {
   Lightbulb01Icon,
   AlertCircle01Icon,
@@ -36,27 +37,12 @@ export default function InsightsPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedInsight, setSelectedInsight] = useState<AIInsight | null>(null)
 
-  const rotatingInsights: Omit<AIInsight, 'id' | 'createdAt' | 'isRead'>[] = [
-    { type: 'optimization', title: 'Carousel Format Trending', description: 'Carousel posts have 2.1x higher save rate compared to single image posts.', affectedEntity: null, suggestedAction: 'Create more carousel content for upcoming campaigns.', severity: 'medium' },
-    { type: 'trend', title: 'Video Content Rising', description: 'Short-form video content shows 3.2x higher engagement than static posts this week.', affectedEntity: null, suggestedAction: 'Allocate more budget to Reels and TikTok formats.', severity: 'low' },
-    { type: 'audience', title: 'New Audience Segment', description: '25-34 age group engagement increased by 45% after latest campaign launch.', affectedEntity: null, suggestedAction: 'Create targeted content for this high-growth segment.', severity: 'medium' },
-    { type: 'alert', title: 'Facebook Reach Declining', description: 'Facebook organic reach dropped 22% over the past 2 weeks.', affectedEntity: null, suggestedAction: 'Consider boosting top-performing posts or adjusting posting schedule.', severity: 'high' },
-  ]
-
   const handleGenerateInsights = async () => {
     setIsGenerating(true)
+    // TODO: Call AI insights API
     await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    const template = rotatingInsights[insights.length % rotatingInsights.length]
-    const newInsight: AIInsight = {
-      ...template,
-      id: `insight-${Date.now()}`,
-      createdAt: new Date(),
-      isRead: false,
-    }
-
-    setInsights([newInsight, ...insights])
     setIsGenerating(false)
+    toast('AI insights generation is not yet connected to an API.')
   }
 
   const handleDismiss = (insightId: string) => {

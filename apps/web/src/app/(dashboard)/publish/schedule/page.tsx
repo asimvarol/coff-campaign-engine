@@ -95,12 +95,8 @@ export default function SchedulePostPage() {
           }
         }
       } catch {}
-      // Fallback
-      setCreatives([
-        { id: '1', thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=200&fit=crop', name: 'Creative 1' },
-        { id: '2', thumbnail: 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=200&h=200&fit=crop', name: 'Creative 2' },
-        { id: '3', thumbnail: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=200&h=200&fit=crop', name: 'Creative 3' },
-      ])
+      // No creatives available — empty state
+      setCreatives([])
     }
     fetchCreatives()
   }, [])
