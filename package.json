@@ -27,7 +27,10 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
-    "prepare": "husky install || true"
+    "prepare": "husky install || true",
+    "test:load": "bun run tests/load/api-load-test.ts",
+    "test:security": "bun run tests/security/audit.ts",
+    "test:a11y": "bun run tests/a11y/lighthouse.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

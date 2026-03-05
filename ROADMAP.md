@@ -82,19 +82,17 @@
 - [x] Creative editor refactor (552 -> 145 lines + 5 panel components)
 - [x] Real-time collaboration (WebSocket server + presence + live cursors)
 
-## Remaining
-
-- [ ] Load testing
-- [ ] Security audit (penetration testing)
-- [ ] Accessibility audit
-- [ ] Performance profiling
+### Phase 8: Testing & Audit
+- [x] Load test script (20 concurrent users, per-endpoint breakdown)
+- [x] Security audit script (headers, rate limit, SQLi, XSS, CORS)
+- [x] Lighthouse accessibility & performance audit (7 pages, thresholds)
+- [x] npm scripts for all test suites
 
 ## Metrics
 - Pages: 24/24
 - TypeScript errors: 0
 - API routes: 17 routers
 - Prisma models: 16
-- Test coverage: TBD
-- Lighthouse score: TBD
+- WebSocket server: port 3003
 
 Last updated: 2026-03-05
