@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth'
 import { getAllPosts, createPost } from '../data-store'
 
 export async function GET() {
+  const { error } = await requireAuth()
+  if (error) return error
+
   const posts = getAllPosts()
   return NextResponse.json({ data: posts })
 }
 
 export async function POST(request: NextRequest) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const body = await request.json()
     const { creativeId, creativeThumbnail, platform, scheduledFor, caption, status } = body

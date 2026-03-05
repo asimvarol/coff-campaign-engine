@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth'
 import { brandStore } from '../../data-store'
 import type { MockBrandDNA } from '../../data-store'
 import { analyzeBrand } from '@/lib/brand-analyzer'
@@ -7,10 +8,10 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-export async function POST(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function POST(request: NextRequest, context: RouteContext) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const { id } = await context.params
     const existingBrand = brandStore.get(id)
@@ -19,7 +20,6 @@ export async function POST(
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 })
     }
 
-    // Re-analyze using real brand analyzer (same as initial analyze)
     const result = await analyzeBrand(existingBrand.url)
 
     const updatedBrand: MockBrandDNA = {
@@ -37,7 +37,6 @@ export async function POST(
       images: result.images,
       socialProfiles: result.socialProfiles,
       products: result.products || existingBrand.products || [],
-      // Keep original ID, URL, and created date
       id: existingBrand.id,
       url: existingBrand.url,
       createdAt: existingBrand.createdAt,
@@ -46,8 +45,8 @@ export async function POST(
 
     brandStore.set(id, updatedBrand)
     return NextResponse.json({ data: updatedBrand })
-  } catch (error) {
-    console.error('Error re-analyzing brand:', error)
+  } catch (err) {
+    console.error('Error re-analyzing brand:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

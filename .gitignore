@@ -54,3 +54,12 @@ Thumbs.db
 logs/
 *.log
 .vercel
+
+# Security — never commit these
+.env.vercel
+.env.backup
+render.yaml
+memory/
+.openclaw/
+*.report.html
+*.report.json

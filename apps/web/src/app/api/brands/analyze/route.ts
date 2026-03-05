@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth'
 import { brandStore } from '../data-store'
 import { analyzeBrand } from '@/lib/brand-analyzer'
 import type { MockBrandDNA } from '../data-store'
 
 export async function POST(request: NextRequest) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const body = await request.json()
     const { url } = body
@@ -16,7 +20,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
     }
 
-    // Use the full brand analyzer (deterministic mock based on domain)
     const result = await analyzeBrand(url)
     const id = brandStore.generateId()
     const now = new Date().toISOString()
@@ -44,8 +47,8 @@ export async function POST(request: NextRequest) {
 
     brandStore.set(id, brand)
     return NextResponse.json({ data: brand }, { status: 201 })
-  } catch (error) {
-    console.error('Error analyzing brand:', error)
+  } catch (err) {
+    console.error('Error analyzing brand:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

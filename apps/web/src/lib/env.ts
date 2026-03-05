@@ -33,7 +33,7 @@ export const env = {
 
   // Auth
   nextAuthUrl: getEnvVar('NEXTAUTH_URL', 'http://localhost:3001'),
-  nextAuthSecret: getEnvVar('NEXTAUTH_SECRET', 'dev-secret-change-in-production'),
+  nextAuthSecret: getEnvVar('NEXTAUTH_SECRET'),
   
   googleClientId: getEnvVar('GOOGLE_CLIENT_ID', ''),
   googleClientSecret: getEnvVar('GOOGLE_CLIENT_SECRET', ''),

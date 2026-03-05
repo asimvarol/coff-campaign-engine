@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth'
 import { brandStore } from '../data-store'
 import type { MockBrandDNA } from '../data-store'
 
@@ -6,94 +7,76 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-export async function GET(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function GET(request: NextRequest, context: RouteContext) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const { id } = await context.params
-
     const brand = brandStore.get(id)
-
     if (!brand) {
-      return NextResponse.json(
-        { error: 'Brand not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Brand not found' }, { status: 404 })
     }
-
     return NextResponse.json({ data: brand })
-  } catch (error) {
-    console.error('Error fetching brand:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (err) {
+    console.error('Error fetching brand:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function PUT(request: NextRequest, context: RouteContext) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const { id } = await context.params
     const body = await request.json()
 
-    if (!brandStore.has(id)) {
-      return NextResponse.json(
-        { error: 'Brand not found' },
-        { status: 404 }
-      )
+    const existingBrand = brandStore.get(id)
+    if (!existingBrand) {
+      return NextResponse.json({ error: 'Brand not found' }, { status: 404 })
     }
 
-    // Get existing brand
-    const existingBrand = brandStore.get(id)!
-
-    // Update with new data
     const updatedBrand: MockBrandDNA = {
       ...existingBrand,
-      ...body,
-      id, // Ensure ID cannot be changed
+      name: body.name ?? existingBrand.name,
+      url: body.url ?? existingBrand.url,
+      colors: body.colors ?? existingBrand.colors,
+      typography: body.typography ?? existingBrand.typography,
+      voice: body.voice ?? existingBrand.voice,
+      values: body.values ?? existingBrand.values,
+      aesthetic: body.aesthetic ?? existingBrand.aesthetic,
+      industry: body.industry ?? existingBrand.industry,
+      targetAudience: body.targetAudience ?? existingBrand.targetAudience,
+      summary: body.summary ?? existingBrand.summary,
+      logo: body.logo ?? existingBrand.logo,
+      images: body.images ?? existingBrand.images,
+      socialProfiles: body.socialProfiles ?? existingBrand.socialProfiles,
+      id,
       updatedAt: new Date().toISOString(),
     }
 
     brandStore.set(id, updatedBrand)
-
     return NextResponse.json({ data: updatedBrand })
-  } catch (error) {
-    console.error('Error updating brand:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (err) {
+    console.error('Error updating brand:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const { id } = await context.params
-
     if (!brandStore.has(id)) {
-      return NextResponse.json(
-        { error: 'Brand not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Brand not found' }, { status: 404 })
     }
-
     brandStore.delete(id)
-
-    return NextResponse.json({ 
-      data: { success: true, message: 'Brand deleted successfully' }
-    })
-  } catch (error) {
-    console.error('Error deleting brand:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ data: { success: true, message: 'Brand deleted successfully' } })
+  } catch (err) {
+    console.error('Error deleting brand:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

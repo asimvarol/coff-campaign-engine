@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth'
 import { campaignStore, getAllCampaigns } from './data'
 
 export async function GET(request: NextRequest) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const brandId = request.nextUrl.searchParams.get('brandId')
     const allCampaigns = getAllCampaigns(brandId)
     return NextResponse.json({ data: allCampaigns })
-  } catch (error) {
-    console.error('Error fetching campaigns:', error)
+  } catch (err) {
+    console.error('Error fetching campaigns:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const body = await request.json()
     const id = `campaign-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
@@ -35,8 +42,8 @@ export async function POST(request: NextRequest) {
     }
     campaignStore.set(id, campaign)
     return NextResponse.json({ data: campaign }, { status: 201 })
-  } catch (error) {
-    console.error('Error creating campaign:', error)
+  } catch (err) {
+    console.error('Error creating campaign:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
