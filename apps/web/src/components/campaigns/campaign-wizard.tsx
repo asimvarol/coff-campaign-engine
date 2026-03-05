@@ -1,38 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Textarea, Progress, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui'
-import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, Image01Icon, Target03Icon, Sparkles01Icon, Edit02Icon, Download04Icon } from '@/lib/icons'
+import { Progress } from '@repo/ui'
+import { CheckmarkCircle02Icon } from '@/lib/icons'
 import { CampaignObjective } from '@repo/types'
-import { generateMockConcepts, generateMockCreatives, type MockCreative } from '@/lib/mock-data/campaigns'
+import { generateMockConcepts, type MockCreative } from '@/lib/mock-data/campaigns'
 import { PLATFORM_FORMATS } from '@/lib/mock-data/creative-formats'
 import { useBrand } from '@/lib/brand-context'
 import type { CampaignConcept } from '@repo/types'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
-import Image from 'next/image'
-import Link from 'next/link'
 import { toast } from 'sonner'
 
-const OBJECTIVES = [
-  { id: 'AWARENESS', label: 'Brand Awareness', icon: '👁️', description: 'Increase brand visibility' },
-  { id: 'ENGAGEMENT', label: 'Engagement', icon: '❤️', description: 'Drive likes, comments, shares' },
-  { id: 'CONVERSION', label: 'Conversion', icon: '🎯', description: 'Drive sales and signups' },
-  { id: 'TRAFFIC', label: 'Traffic', icon: '🚀', description: 'Bring visitors to your site' },
-  { id: 'PRODUCT_LAUNCH', label: 'Product Launch', icon: '✨', description: 'Launch new products' },
-  { id: 'SEASONAL', label: 'Seasonal', icon: '🎉', description: 'Holiday & seasonal campaigns' },
-]
-
-const PLATFORMS = [
-  { id: 'instagram', label: 'Instagram', formats: 'Feed, Story, Reels' },
-  { id: 'facebook', label: 'Facebook', formats: 'Feed, Story' },
-  { id: 'tiktok', label: 'TikTok', formats: 'Video, Photo' },
-  { id: 'linkedin', label: 'LinkedIn', formats: 'Post, Carousel' },
-  { id: 'x', label: 'X (Twitter)', formats: 'Post, Header' },
-  { id: 'pinterest', label: 'Pinterest', formats: 'Pin, Idea Pin' },
-]
+import { BriefStep } from './wizard-steps/brief-step'
+import { ConceptsStep } from './wizard-steps/concepts-step'
+import { GenerationStep } from './wizard-steps/generation-step'
+import { ReviewStep } from './wizard-steps/review-step'
+import { CompleteStep } from './wizard-steps/complete-step'
 
 interface WizardState {
-  // Step 1
   brandId: string
   campaignName: string
   objective: CampaignObjective | ''
@@ -40,29 +25,16 @@ interface WizardState {
   description: string
   productImage: string
   referenceImages: string[]
-  
-  // Step 2
   selectedConcept: CampaignConcept | null
   generatedConcepts: CampaignConcept[]
-  
-  // Step 3
   generatedCreatives: MockCreative[]
   generatingProgress: number
-  
-  // Step 4
   approvedCreatives: string[]
 }
 
 export function CampaignWizard() {
   const { brands, selectedBrandId } = useBrand()
   const [step, setStep] = useState(1)
-
-  // Auto-set brand from sidebar selection
-  useEffect(() => {
-    if (selectedBrandId && !state.brandId) {
-      updateState({ brandId: selectedBrandId })
-    }
-  }, [selectedBrandId])
   const [isGenerating, setIsGenerating] = useState(false)
   const [state, setState] = useState<WizardState>({
     brandId: selectedBrandId || '',
@@ -78,6 +50,16 @@ export function CampaignWizard() {
     generatingProgress: 0,
     approvedCreatives: [],
   })
+
+  useEffect(() => {
+    if (selectedBrandId && !state.brandId) {
+      updateState({ brandId: selectedBrandId })
+    }
+  }, [selectedBrandId])
+
+  const updateState = (updates: Partial<WizardState>) => {
+    setState(prev => ({ ...prev, ...updates }))
+  }
 
   const saveCampaign = async (status: string) => {
     try {
@@ -97,10 +79,7 @@ export function CampaignWizard() {
           description: state.description,
           conceptName: state.selectedConcept?.name || '',
           creatives: state.generatedCreatives.map(cr => ({
-            id: cr.id,
-            platform: cr.platform,
-            format: cr.format,
-            imageUrl: cr.imageUrl,
+            id: cr.id, platform: cr.platform, format: cr.format, imageUrl: cr.imageUrl,
           })),
         }),
       })
@@ -108,10 +87,6 @@ export function CampaignWizard() {
     } catch (err) {
       console.error('Failed to save campaign:', err)
     }
-  }
-
-  const updateState = (updates: Partial<WizardState>) => {
-    setState(prev => ({ ...prev, ...updates }))
   }
 
   const handleGenerateConcepts = async () => {
@@ -132,40 +107,21 @@ export function CampaignWizard() {
 
     const brandColors = brand.colors || { primary: '#000', secondary: '#666', accent: '#999', background: '#fff', text: '#000', palette: [] }
 
-    // Build generation tasks per platform
     const sizeMap: Record<string, string> = {
-      instagram: 'square_hd',
-      facebook: 'landscape_16_9',
-      tiktok: 'portrait_16_9',
-      linkedin: 'landscape_4_3',
-      x: 'landscape_16_9',
-      pinterest: 'portrait_4_3',
+      instagram: 'square_hd', facebook: 'landscape_16_9', tiktok: 'portrait_16_9',
+      linkedin: 'landscape_4_3', x: 'landscape_16_9', pinterest: 'portrait_4_3',
     }
-
     const formatMap: Record<string, string> = {
-      instagram: 'feed',
-      facebook: 'feed',
-      tiktok: 'video',
-      linkedin: 'post',
-      x: 'post',
-      pinterest: 'pin',
+      instagram: 'feed', facebook: 'feed', tiktok: 'video',
+      linkedin: 'post', x: 'post', pinterest: 'pin',
     }
 
-    const tasks = state.platforms.map(platform => {
-      const format = formatMap[platform] || 'feed'
-      if (!PLATFORM_FORMATS[platform]?.[format]) {
-        console.warn(`Missing format definition for ${platform}:${format}`)
-      }
-      return {
-        platform,
-        format,
-        imageSize: sizeMap[platform] || 'square_hd',
-      }
-    })
+    const tasks = state.platforms.map(platform => ({
+      platform,
+      format: formatMap[platform] || 'feed',
+      imageSize: sizeMap[platform] || 'square_hd',
+    }))
 
-    const totalTasks = tasks.length
-
-    // Animate progress bar while generation runs
     let progressDone = false
     let fakeProgress = 0
     const progressInterval = setInterval(() => {
@@ -174,7 +130,6 @@ export function CampaignWizard() {
       updateState({ generatingProgress: fakeProgress })
     }, 300)
 
-    // Build creative metadata (shared between success and fallback)
     const buildCreative = (task: typeof tasks[0], imageUrl: string): MockCreative => {
       const platformFormat = PLATFORM_FORMATS[task.platform]?.[task.format]
       const width = platformFormat?.width || 1080
@@ -184,30 +139,19 @@ export function CampaignWizard() {
         campaignId: 'campaign-new',
         platform: task.platform,
         format: task.format,
-        width,
-        height,
-        imageUrl,
+        width, height, imageUrl,
         header: {
-          text: concept.name.toUpperCase(),
-          font: 'Playfair Display',
-          size: 42,
-          color: '#ffffff',
-          position: { x: 50, y: 100 },
-          visible: true,
+          text: concept.name.toUpperCase(), font: 'Playfair Display', size: 42,
+          color: '#ffffff', position: { x: 50, y: 100 }, visible: true,
         },
         description: {
           text: concept.description.substring(0, 60) + '...',
-          font: 'Outfit',
-          size: 16,
-          color: brandColors.secondary,
-          position: { x: 50, y: 170 },
-          visible: true,
+          font: 'Outfit', size: 16, color: brandColors.secondary,
+          position: { x: 50, y: 170 }, visible: true,
         },
         cta: { text: 'Shop Now', style: 'primary', url: '', visible: true },
         overlay: { color: '#000000', opacity: 0.3 },
-        version: 1,
-        status: 'DRAFT',
-        createdAt: new Date(),
+        version: 1, status: 'DRAFT', createdAt: new Date(),
       }
     }
 
@@ -223,13 +167,10 @@ export function CampaignWizard() {
     const imageGenEnabled = process.env.NEXT_PUBLIC_ENABLE_IMAGE_GEN !== 'false'
     const imageGenEndpoint = process.env.NEXT_PUBLIC_IMAGE_GEN_ENDPOINT || '/api/generate-image'
 
-    // Generate all platforms in parallel with error boundary
     try {
       const results = await Promise.allSettled(
         tasks.map(async (task) => {
-          if (!imageGenEnabled) {
-            return buildCreative(task, placeholderUrl(task))
-          }
+          if (!imageGenEnabled) return buildCreative(task, placeholderUrl(task))
           try {
             const res = await fetch(imageGenEndpoint, {
               method: 'POST',
@@ -241,12 +182,10 @@ export function CampaignWizard() {
                 num_images: 1,
               }),
             })
-
             if (!res.ok) throw new Error('Generation failed')
             const data = await res.json()
             const imageUrl = data?.images?.[0]?.url
             if (!imageUrl || typeof imageUrl !== 'string') throw new Error('Invalid response')
-
             return buildCreative(task, imageUrl)
           } catch (error) {
             console.warn(`Image generation failed for ${task.platform}:`, error instanceof Error ? error.message : 'Unknown error')
@@ -255,7 +194,6 @@ export function CampaignWizard() {
           }
         })
       )
-
       const creatives = results.map(r => r.status === 'fulfilled' ? r.value : r.reason)
       updateState({ generatedCreatives: creatives, generatingProgress: 100 })
     } catch (criticalError) {
@@ -270,46 +208,23 @@ export function CampaignWizard() {
     }
   }
 
-  const handleApproveAll = () => {
-    const allIds = state.generatedCreatives.map(c => c.id)
-    updateState({ approvedCreatives: allIds })
-  }
-
-  const toggleApprove = (id: string) => {
-    const approved = state.approvedCreatives.includes(id)
-    if (approved) {
-      updateState({ approvedCreatives: state.approvedCreatives.filter(i => i !== id) })
-    } else {
-      updateState({ approvedCreatives: [...state.approvedCreatives, id] })
-    }
-  }
-
   const canProceed = () => {
-    if (step === 1) {
-      return state.brandId && state.campaignName && state.objective && state.platforms.length > 0
-    }
-    if (step === 2) {
-      return state.selectedConcept !== null
-    }
-    if (step === 3) {
-      return state.generatedCreatives.length > 0
-    }
-    if (step === 4) {
-      return state.approvedCreatives.length > 0
-    }
+    if (step === 1) return !!(state.brandId && state.campaignName && state.objective && state.platforms.length > 0)
+    if (step === 2) return state.selectedConcept !== null
+    if (step === 3) return state.generatedCreatives.length > 0
+    if (step === 4) return state.approvedCreatives.length > 0
     return true
   }
 
   return (
     <div className="mx-auto max-w-5xl">
-      {/* Progress */}
+      {/* Progress Bar */}
       <div className="mb-8">
         <div className="mb-4 flex items-center justify-between">
           {['Brief', 'Concepts', 'Generation', 'Review', 'Complete'].map((name, idx) => {
             const stepNum = idx + 1
             const isCompleted = step > stepNum
             const isCurrent = step === stepNum
-            const isFuture = step < stepNum
             return (
               <div key={name} className="flex flex-1 items-center">
                 <div className="flex flex-col items-center gap-1">
@@ -321,35 +236,19 @@ export function CampaignWizard() {
                       <CheckmarkCircle02Icon className="h-4 w-4" />
                     </button>
                   ) : (
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                        isCurrent
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground'
-                      }`}
-                    >
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+                      isCurrent ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                    }`}>
                       {stepNum}
                     </div>
                   )}
-                  <span
-                    className={`text-xs ${
-                      isCompleted
-                        ? 'font-medium text-primary'
-                        : isCurrent
-                          ? 'font-medium text-foreground'
-                          : 'text-muted-foreground'
-                    }`}
-                  >
+                  <span className={`text-xs ${
+                    isCompleted ? 'font-medium text-primary' : isCurrent ? 'font-medium text-foreground' : 'text-muted-foreground'
+                  }`}>
                     {name}
                   </span>
                 </div>
-                {idx < 4 && (
-                  <div
-                    className={`mx-2 h-px flex-1 ${
-                      step > stepNum ? 'bg-primary' : 'bg-border'
-                    }`}
-                  />
-                )}
+                {idx < 4 && <div className={`mx-2 h-px flex-1 ${step > stepNum ? 'bg-primary' : 'bg-border'}`} />}
               </div>
             )
           })}
@@ -357,394 +256,69 @@ export function CampaignWizard() {
         <Progress value={(step / 5) * 100} className="h-2" />
       </div>
 
-      {/* Step 1: Brief */}
+      {/* Steps */}
       {step === 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Campaign Brief</CardTitle>
-            <CardDescription>Tell us about your campaign goals</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="campaignName">Campaign Name *</Label>
-              <Input
-                id="campaignName"
-                placeholder="Mother's Day Collection 2026"
-                value={state.campaignName}
-                onChange={(e) => updateState({ campaignName: e.target.value })}
-                required
-                aria-required="true"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="brand">Brand *</Label>
-              <Select value={state.brandId} onValueChange={(value) => updateState({ brandId: value })}>
-                <SelectTrigger id="brand">
-                  <SelectValue placeholder="Select brand..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {brands.map(brand => (
-                    <SelectItem key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Campaign Objective *</Label>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {OBJECTIVES.map(obj => (
-                  <button
-                    key={obj.id}
-                    onClick={() => updateState({ objective: obj.id as CampaignObjective })}
-                    className={`relative rounded-lg border p-4 text-left transition-all ${
-                      state.objective === obj.id
-                        ? 'border-2 border-primary bg-primary/10 shadow-sm'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    {state.objective === obj.id && (
-                      <div className="absolute right-2 top-2">
-                        <CheckmarkCircle02Icon className="h-4 w-4 text-primary" />
-                      </div>
-                    )}
-                    <div className="mb-2 text-2xl">{obj.icon}</div>
-                    <div className="font-semibold">{obj.label}</div>
-                    <div className="text-xs text-muted-foreground">{obj.description}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Target Platforms * (select at least one)</Label>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {PLATFORMS.map(platform => (
-                  <label
-                    key={platform.id}
-                    htmlFor={`platform-${platform.id}`}
-                    className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all ${
-                      state.platforms.includes(platform.id)
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <input
-                      id={`platform-${platform.id}`}
-                      type="checkbox"
-                      checked={state.platforms.includes(platform.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateState({ platforms: [...state.platforms, platform.id] })
-                        } else {
-                          updateState({ platforms: state.platforms.filter(p => p !== platform.id) })
-                        }
-                      }}
-                      className="mt-1 rounded border-input"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium">{platform.label}</div>
-                      <div className="text-xs text-muted-foreground">{platform.formats}</div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Campaign Description (optional)</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe your campaign in natural language... AI will use this to generate better concepts."
-                rows={4}
-                value={state.description}
-                onChange={(e) => updateState({ description: e.target.value })}
-              />
-            </div>
-
-            <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-between border-t border-border bg-card p-6 sm:static sm:mx-0 sm:mb-0 sm:border-0 sm:bg-transparent sm:p-0">
-              <Button variant="outline" asChild>
-                <Link href="/campaigns">Cancel</Link>
-              </Button>
-              <div className="flex flex-col items-end gap-1">
-                <Button
-                  size="lg"
-                  onClick={handleGenerateConcepts}
-                  disabled={!canProceed() || isGenerating}
-                >
-                  {isGenerating ? (
-                    <>Generating Concepts...</>
-                  ) : (
-                    <>
-                      Generate Concepts (5 credits)
-                      <ArrowRight01Icon className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-                {!canProceed() && (
-                  <p className="text-xs text-muted-foreground">
-                    Select an objective and at least one platform to continue
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <BriefStep
+          brandId={state.brandId}
+          campaignName={state.campaignName}
+          objective={state.objective}
+          platforms={state.platforms}
+          description={state.description}
+          brands={brands}
+          isGenerating={isGenerating}
+          onUpdate={updateState}
+          onGenerate={handleGenerateConcepts}
+          canProceed={canProceed()}
+        />
       )}
 
-      {/* Step 2: AI Concepts */}
       {step === 2 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>AI-Generated Concepts</CardTitle>
-            <CardDescription>Select a concept or regenerate for new ideas</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              {state.generatedConcepts.map((concept, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSelectConcept(concept)}
-                  className={`rounded-lg border p-6 text-left transition-all ${
-                    state.selectedConcept === concept
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="mb-3 flex items-start justify-between">
-                    <h3 className="text-lg font-semibold">{concept.name}</h3>
-                    <Sparkles01Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <p className="mb-3 text-sm text-muted-foreground">{concept.description}</p>
-                  <div className="mb-3 flex items-center gap-2 text-sm">
-                    <span className="rounded-full bg-muted px-2 py-1 text-xs">{concept.emotion}</span>
-                    <span className="text-xs text-muted-foreground">{concept.colorMood}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {concept.hashtags.slice(0, 3).map(tag => (
-                      <span key={tag} className="text-xs text-primary">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(1)}>
-                <ArrowLeft01Icon className="mr-2 h-4 w-4" />
-                Back
-              </Button>
-              <Button variant="outline" onClick={handleGenerateConcepts} disabled={isGenerating}>
-                Regenerate Concepts (5 credits)
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <ConceptsStep
+          concepts={state.generatedConcepts}
+          selectedConcept={state.selectedConcept}
+          isGenerating={isGenerating}
+          onSelectConcept={handleSelectConcept}
+          onRegenerate={handleGenerateConcepts}
+          onBack={() => setStep(1)}
+        />
       )}
 
-      {/* Step 3: Creative Generation */}
       {step === 3 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generating Creatives</CardTitle>
-            <CardDescription>
-              AI is creating {state.platforms.length * 2}+ creatives for {state.platforms.length} platforms...
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="py-12 text-center">
-              <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-              <Progress value={state.generatingProgress} className="mb-4" />
-              <p className="text-lg font-semibold">{Math.round(state.generatingProgress)}%</p>
-              <p className="text-sm text-muted-foreground">
-                {state.generatedCreatives.length} creatives generated
-              </p>
-            </div>
-
-            {state.generatedCreatives.length > 0 && (
-              <div className="grid gap-4 md:grid-cols-3">
-                {state.generatedCreatives.map(creative => (
-                  <div key={creative.id} className="overflow-hidden rounded-lg border bg-card opacity-0 animate-in fade-in">
-                    <div className="relative aspect-square">
-                      <Image
-                        src={creative.imageUrl}
-                        alt={creative.header.text}
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-3">
-                      <div className="text-xs text-muted-foreground">
-                        {PLATFORM_LABELS[creative.platform]} — {creative.format}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <GenerationStep
+          platforms={state.platforms}
+          generatingProgress={state.generatingProgress}
+          generatedCreatives={state.generatedCreatives}
+        />
       )}
 
-      {/* Step 4: Review */}
       {step === 4 && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Review Creatives</CardTitle>
-                <CardDescription>
-                  {state.approvedCreatives.length} of {state.generatedCreatives.length} creatives approved
-                </CardDescription>
-              </div>
-              <Button onClick={handleApproveAll} variant="outline">
-                Approve All
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
-              {state.generatedCreatives.map(creative => {
-                const isApproved = state.approvedCreatives.includes(creative.id)
-                return (
-                  <div
-                    key={creative.id}
-                    className={`group relative overflow-hidden rounded-lg border transition-all ${
-                      isApproved ? 'border-primary' : 'border-border'
-                    }`}
-                  >
-                    <div className="relative aspect-square">
-                      <Image
-                        src={creative.imageUrl}
-                        alt={creative.header.text}
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                      {isApproved && (
-                        <div className="absolute right-2 top-2 rounded-full bg-primary p-1">
-                          <CheckmarkCircle02Icon className="h-4 w-4 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3">
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="text-xs font-medium">
-                          {PLATFORM_LABELS[creative.platform]}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{creative.format}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant={isApproved ? 'default' : 'outline'}
-                          className="flex-1"
-                          onClick={() => toggleApprove(creative.id)}
-                        >
-                          {isApproved ? 'Approved' : 'Approve'}
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Edit02Icon className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(2)}>
-                <ArrowLeft01Icon className="mr-2 h-4 w-4" />
-                Back to Concepts
-              </Button>
-              <Button
-                size="lg"
-                onClick={() => setStep(5)}
-                disabled={!canProceed()}
-              >
-                Continue
-                <ArrowRight01Icon className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <ReviewStep
+          generatedCreatives={state.generatedCreatives}
+          approvedCreatives={state.approvedCreatives}
+          onApproveAll={() => updateState({ approvedCreatives: state.generatedCreatives.map(c => c.id) })}
+          onToggleApprove={(id) => {
+            const approved = state.approvedCreatives.includes(id)
+            updateState({
+              approvedCreatives: approved
+                ? state.approvedCreatives.filter(i => i !== id)
+                : [...state.approvedCreatives, id]
+            })
+          }}
+          onBack={() => setStep(2)}
+          onContinue={() => setStep(5)}
+          canProceed={canProceed()}
+        />
       )}
 
-      {/* Step 5: Complete */}
       {step === 5 && (
-        <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <CheckmarkCircle02Icon className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle>Campaign Ready!</CardTitle>
-            <CardDescription>
-              {state.approvedCreatives.length} creatives approved across {state.platforms.length} platforms
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="rounded-lg border bg-muted/50 p-6">
-              <h3 className="mb-4 font-semibold">Campaign Summary</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Name:</span>
-                  <span className="font-medium">{state.campaignName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Concept:</span>
-                  <span className="font-medium">{state.selectedConcept?.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Platforms:</span>
-                  <span className="font-medium">{state.platforms.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Approved Creatives:</span>
-                  <span className="font-medium">{state.approvedCreatives.length}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Button variant="outline" className="w-full" onClick={async () => {
-                for (const creative of state.generatedCreatives) {
-                  try {
-                    const res = await fetch(creative.imageUrl)
-                    const blob = await res.blob()
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `${creative.platform}-${creative.format}.png`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                  } catch { toast.error(`Failed to download ${creative.platform} creative`) }
-                }
-              }}>
-                <Download04Icon className="mr-2 h-4 w-4" />
-                Download All
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => saveCampaign('DRAFT')}>
-                Save as Draft
-              </Button>
-              <Button className="w-full" onClick={() => saveCampaign('PUBLISHED')}>
-                Schedule & Publish
-              </Button>
-            </div>
-
-            <div className="text-center">
-              <Button variant="link" onClick={() => window.location.href = '/campaigns'}>
-                View All Campaigns
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <CompleteStep
+          campaignName={state.campaignName}
+          selectedConcept={state.selectedConcept}
+          platforms={state.platforms}
+          approvedCreatives={state.approvedCreatives}
+          generatedCreatives={state.generatedCreatives}
+          onSave={saveCampaign}
+        />
       )}
     </div>
   )
