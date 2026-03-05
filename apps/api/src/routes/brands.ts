@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { prisma } from '@repo/db'
 import type { ApiResponse } from '@repo/types'
 import { analyzeBrand } from '../lib/brand-analyzer'
+import { cacheGet, cacheSet, cacheDel, buildCacheKey } from '../lib/redis'
 
 export const brandsRouter = new Hono()
 
@@ -9,10 +10,15 @@ export const brandsRouter = new Hono()
 brandsRouter.get('/', async (c) => {
   try {
     // TODO: Add user auth and filter by userId
+    const cacheKey = buildCacheKey('brands', 'list')
+    const cached = await cacheGet<unknown[]>(cacheKey)
+    if (cached) return c.json<ApiResponse>({ data: cached })
+
     const brands = await prisma.brand.findMany({
       orderBy: { createdAt: 'desc' },
       take: 50,
     })
+    await cacheSet(cacheKey, brands, 120)
     return c.json<ApiResponse>({ data: brands })
   } catch (error) {
     console.error('Error fetching brands:', error)
@@ -24,6 +30,10 @@ brandsRouter.get('/', async (c) => {
 brandsRouter.get('/:id', async (c) => {
   try {
     const id = c.req.param('id')
+    const cacheKey = buildCacheKey('brands', id)
+    const cached = await cacheGet(cacheKey)
+    if (cached) return c.json<ApiResponse>({ data: cached })
+
     const brand = await prisma.brand.findUnique({
       where: { id },
       include: {
@@ -36,6 +46,7 @@ brandsRouter.get('/:id', async (c) => {
       return c.json<ApiResponse>({ error: 'Brand not found' }, 404)
     }
 
+    await cacheSet(cacheKey, brand, 300)
     return c.json<ApiResponse>({ data: brand })
   } catch (error) {
     console.error('Error fetching brand:', error)
@@ -76,9 +87,10 @@ brandsRouter.post('/analyze', async (c) => {
       },
     })
 
-    return c.json<ApiResponse>({ 
-      data: brand, 
-      message: 'Brand DNA analyzed successfully' 
+    await cacheDel(buildCacheKey('brands', 'list'))
+    return c.json<ApiResponse>({
+      data: brand,
+      message: 'Brand DNA analyzed successfully'
     }, 201)
   } catch (error) {
     console.error('Error analyzing brand:', error)
@@ -117,6 +129,7 @@ brandsRouter.post('/', async (c) => {
       },
     })
 
+    await cacheDel(buildCacheKey('brands', 'list'))
     return c.json<ApiResponse>({ data: brand, message: 'Brand created' }, 201)
   } catch (error) {
     console.error('Error creating brand:', error)
@@ -135,6 +148,8 @@ brandsRouter.put('/:id', async (c) => {
       data: body,
     })
 
+    await cacheDel(buildCacheKey('brands', id))
+    await cacheDel(buildCacheKey('brands', 'list'))
     return c.json<ApiResponse>({ data: brand, message: 'Brand updated' })
   } catch (error) {
     console.error('Error updating brand:', error)
@@ -151,6 +166,8 @@ brandsRouter.delete('/:id', async (c) => {
       where: { id },
     })
 
+    await cacheDel(buildCacheKey('brands', id))
+    await cacheDel(buildCacheKey('brands', 'list'))
     return c.json<ApiResponse>({ message: 'Brand deleted' })
   } catch (error) {
     console.error('Error deleting brand:', error)

@@ -1,11 +1,11 @@
 # Coff Campaign Engine - Roadmap
 
-## ✅ Completed (feat/analytics-agency)
+## Completed
 
 ### Core Features
 - [x] Brand DNA extraction & analysis
 - [x] Campaign management (CRUD)
-- [x] Photoshoot studio (basic)
+- [x] Photoshoot studio
 - [x] Publishing calendar
 - [x] Analytics dashboard
 - [x] Autopilot mode
@@ -19,7 +19,7 @@
 - [x] Monorepo structure (Turborepo)
 - [x] CI/CD pipeline (GitHub Actions)
 - [x] ESLint + strict rules
-- [x] SEO (metadata, sitemap, robots.txt)
+- [x] SEO (metadata all 26 pages, sitemap, robots.txt)
 - [x] Security headers (middleware)
 
 ### UI/UX
@@ -32,39 +32,24 @@
 - [x] Error boundaries
 - [x] Custom 404 pages
 - [x] Mobile responsive
-
-## 🚧 In Progress
-
-### Testing
-- [ ] Sub-agent page testing (running)
-- [ ] Manual QA
-- [ ] Accessibility audit
-
-### Polish
-- [ ] Add metadata to all 24 pages
-- [ ] Refactor large components (campaign-wizard, creative-editor)
-- [ ] Bundle size optimization
-- [ ] Performance profiling
-
-## 📋 Backlog
+- [x] Campaign wizard refactored (751 -> 325 lines + 5 step components)
+- [x] Creative editor refactored (552 -> 145 lines + 5 panel components)
 
 ### Phase 2: Data Layer
-- [ ] PostgreSQL schema implementation
-- [ ] Prisma migrations
-- [ ] Redis caching
-- [ ] Real API endpoints (replace mocks)
-- [ ] File upload (S3/Cloudinary)
-- [ ] Database seeding
+- [x] PostgreSQL schema (Prisma)
+- [x] Prisma migrations
+- [x] Real API endpoints (all mock routes replaced)
+- [x] Database seeding
+- [x] Photoshoot models
 
 ### Phase 3: AI Features
 - [x] OpenAI integration (gpt-4o-mini: concepts, insights, brand voice, best posting times)
-- [x] Fal.ai for image generation (nano-banana-2: creatives, photoshoot)
+- [x] Fal.ai image generation (nano-banana-2: creatives, photoshoot)
 - [x] Fal.ai background removal (birefnet)
 - [x] Campaign concept generation from brand DNA
 - [x] Creative image generation per platform
 - [x] AI-powered analytics insights
 - [x] AI best posting time suggestions
-- [ ] A/B test recommendations
 
 ### Phase 4: Social Integration
 - [x] Meta Graph API (Instagram + Facebook publishing, metrics, webhooks)
@@ -74,36 +59,41 @@
 - [x] OAuth callback flow with token refresh
 - [x] Publishing service (publish-now, retry, metrics fetch)
 - [x] Webhook handlers (Instagram, Facebook, TikTok, LinkedIn)
-- [x] Test post endpoint with auto-cleanup
 
 ### Phase 5: Advanced Features
-- [x] Commenting system (threaded comments, replies, resolve, mentions)
-- [x] Activity log (all actions tracked with metadata)
-- [x] Approval workflows (multi-reviewer, auto-status update on approve/reject)
-- [x] White-label support (custom domain, branding, CSS, favicon)
-- [x] Version history (creative versioning via parentId chain — already in Phase 2)
-- [ ] Real-time collaboration (WebSocket — deferred to Phase 6)
+- [x] Commenting system (threaded, replies, resolve, mentions)
+- [x] Activity log (all actions tracked)
+- [x] Approval workflows (multi-reviewer)
+- [x] White-label support (custom domain, branding, CSS)
+- [x] Version history (creative parentId chain)
 
 ### Phase 6: Production
-- [x] Docker deployment (multi-service compose: web, api, postgres, redis, migrate)
+- [x] Docker deployment (multi-service compose)
 - [x] API Dockerfile (Bun-based)
-- [x] Kubernetes manifests (namespace, web, api, ingress, secrets, migrate job)
-- [x] Monitoring (Sentry integration with PII stripping)
-- [x] Security middleware (rate limiter, security headers, error handler, request timing)
-- [x] GDPR compliance (data export, data deletion, consent endpoint)
+- [x] Kubernetes manifests
+- [x] Monitoring (Sentry with PII stripping)
+- [x] Security middleware (rate limiter, headers, error handler)
+- [x] GDPR compliance (data export, deletion, consent)
+
+### Phase 7: Remaining Features
+- [x] Redis caching (API response cache with invalidation)
+- [x] File upload (S3 with CDN, multipart + URL upload)
+- [x] A/B test recommendations (AI-powered, campaign + creative level)
+- [x] Creative editor refactor (552 -> 145 lines + 5 panel components)
+
+## Remaining
+
+- [ ] Real-time collaboration (WebSocket)
 - [ ] Load testing
 - [ ] Security audit (penetration testing)
+- [ ] Accessibility audit
+- [ ] Performance profiling
 
-## 🎯 Current Focus
-- Complete feat/analytics-agency branch
-- Merge to main
-- Deploy to staging
-- Begin Phase 2 (data layer)
-
-## 📊 Metrics
-- Pages: 24/24 ✅
-- Build time: ~4.5s
+## Metrics
+- Pages: 24/24
 - TypeScript errors: 0
+- API routes: 17 routers
+- Prisma models: 16
 - Test coverage: TBD
 - Lighthouse score: TBD
 
