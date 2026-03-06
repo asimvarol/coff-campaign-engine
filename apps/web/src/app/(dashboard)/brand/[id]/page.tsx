@@ -58,8 +58,10 @@ export default function BrandDetailPage() {
     if (!brand || isReanalyzing) return
     setIsReanalyzing(true)
     try {
-      await fetch(`/api/brands/${brandId}/analyze`, { method: 'POST' })
-      await fetchBrand()
+      const res = await fetch(`/api/brands/${brandId}/analyze`, { method: 'POST' })
+      const json = await res.json()
+      if (json.data) setBrand(json.data)
+      else await fetchBrand()
       toast.success('Brand re-analyzed successfully')
     } catch {
       toast.error('Failed to re-analyze brand')
