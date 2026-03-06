@@ -15,6 +15,7 @@ import {
 } from '@/lib/mock-data/analytics'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { TrendUp01Icon, TrendDown01Icon, AlertCircle01Icon } from '@/lib/icons'
+import { toast } from 'sonner'
 import { LineChart } from '@/components/analytics/line-chart'
 import { DonutChart } from '@/components/analytics/donut-chart'
 
@@ -97,17 +98,17 @@ export default function AnalyticsPage() {
         </div>
         <div className="flex items-center gap-3">
           <AnalyticsDateRangePicker value={dateRange} onChange={setDateRange} />
-          <Button variant="outline" size="sm">Export</Button>
+          <Button variant="outline" size="sm" onClick={() => toast.info('Export coming soon')}>Export</Button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-6 md:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {kpiCards.map((kpi) => (
           <Card key={kpi.title}>
             <CardHeader className="pb-2">
               <CardDescription title={kpi.tooltip} aria-label={kpi.tooltip}>{kpi.title}</CardDescription>
-              <CardTitle className="text-2xl font-mono">{kpi.value}</CardTitle>
+              <p className="text-2xl font-semibold font-mono tracking-tight">{kpi.value}</p>
             </CardHeader>
             <CardContent>
               <div
@@ -130,7 +131,7 @@ export default function AnalyticsPage() {
       {/* Reach Over Time */}
       <Card>
         <CardHeader>
-          <CardTitle>Reach Over Time</CardTitle>
+          <CardTitle as="h2">Reach Over Time</CardTitle>
           <CardDescription>Daily reach for the selected period</CardDescription>
         </CardHeader>
         <CardContent className="h-72">
@@ -142,7 +143,7 @@ export default function AnalyticsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Platform Breakdown</CardTitle>
+            <CardTitle as="h2">Platform Breakdown</CardTitle>
             <CardDescription>Reach distribution across platforms</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center py-8">
@@ -152,7 +153,7 @@ export default function AnalyticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Performing Creative</CardTitle>
+            <CardTitle as="h2">Top Performing Creative</CardTitle>
             <CardDescription>Highest scoring creative this period</CardDescription>
           </CardHeader>
           <CardContent>
@@ -184,7 +185,7 @@ export default function AnalyticsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertCircle01Icon className="text-destructive" />
-              <CardTitle>Underperforming Creatives (Autopilot Alerts)</CardTitle>
+              <CardTitle as="h2">Underperforming Creatives (Autopilot Alerts)</CardTitle>
             </div>
             <CardDescription>
               Creatives with critical or poor performance that need attention

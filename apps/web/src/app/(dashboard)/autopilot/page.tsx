@@ -1,19 +1,22 @@
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge } from '@repo/ui'
+import { Button, Card, CardContent, CardDescription, CardHeader, Badge } from '@repo/ui'
 import { PlusIcon, ZapIcon, AlertCircleIcon, TrendingUpIcon } from '@/lib/icons'
+import Link from 'next/link'
 
 export const metadata = { title: 'Autopilot | Coff' }
 
 export default function AutopilotPage() {
   return (
-    <div >
+    <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Autopilot</h1>
           <p className="text-muted-foreground">Automatic campaign optimization</p>
         </div>
-        <Button size="lg">
-          <PlusIcon className="mr-2 h-4 w-4" />
-          New Rule
+        <Button size="lg" asChild>
+          <Link href="/autopilot/new">
+            <PlusIcon className="mr-2 h-4 w-4" />
+            New Rule
+          </Link>
         </Button>
       </div>
 
@@ -21,26 +24,26 @@ export default function AutopilotPage() {
         <Card>
           <CardHeader>
             <CardDescription title="Rules currently monitoring your campaigns">Active Rules</CardDescription>
-            <CardTitle className="text-2xl">4/6</CardTitle>
+            <p className="text-2xl font-semibold tracking-tight">4/6</p>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
             <CardDescription>Actions Today</CardDescription>
-            <CardTitle className="text-2xl">7</CardTitle>
+            <p className="text-2xl font-semibold tracking-tight">7</p>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
             <CardDescription title="Estimated savings from automated optimizations this month">Savings</CardDescription>
-            <CardTitle className="text-2xl">$342</CardTitle>
+            <p className="text-2xl font-semibold tracking-tight">$342</p>
             <p className="text-xs text-muted-foreground mt-1">Saved from auto-optimizations this month</p>
           </CardHeader>
         </Card>
       </div>
 
       <div className="mb-6">
-        <h3 className="mb-3 text-lg font-semibold">Recent Actions</h3>
+        <h2 className="mb-3 text-lg font-semibold">Recent Actions</h2>
         <div className="space-y-3">
           <Card>
             <CardContent className="flex items-start gap-4 p-4">
@@ -77,7 +80,7 @@ export default function AutopilotPage() {
               </div>
               <div className="flex gap-2">
                 <Button size="sm">Approve & Publish</Button>
-                <Button size="sm" variant="outline">Reject</Button>
+                <Button size="sm" variant="ghost">Reject</Button>
               </div>
             </CardContent>
           </Card>
@@ -96,8 +99,8 @@ export default function AutopilotPage() {
                 <p className="mt-1 text-xs text-muted-foreground">9:15 AM</p>
               </div>
               <div className="flex gap-2">
-                <Button size="sm">Boost 2x</Button>
-                <Button size="sm" variant="outline">Ignore</Button>
+                <Button size="sm" variant="outline">Boost 2x</Button>
+                <Button size="sm" variant="ghost">Ignore</Button>
               </div>
             </CardContent>
           </Card>
@@ -105,7 +108,7 @@ export default function AutopilotPage() {
       </div>
 
       <div>
-        <h3 className="mb-3 text-lg font-semibold">Active Rules</h3>
+        <h2 className="mb-3 text-lg font-semibold">Active Rules</h2>
         <div className="grid gap-3">
           <Card>
             <CardContent className="flex items-center justify-between p-4">

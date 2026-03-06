@@ -22,17 +22,21 @@ export default function BrandPage() {
 
   const [brands, setBrands] = useState<Brand[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/brands')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load brands')
+        return res.json()
+      })
       .then(data => setBrands(data.data || []))
-      .catch(console.error)
+      .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false))
   }, [])
 
   return (
-    <div >
+    <div aria-busy={isLoading}>
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Brand DNA</h1>
@@ -43,7 +47,15 @@ export default function BrandPage() {
         </Link>
       </div>
 
-      {isLoading ? (
+      {error ? (
+        <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 p-12 text-center">
+          <p className="font-semibold text-destructive">Something went wrong</p>
+          <p className="mt-1 text-sm text-muted-foreground">{error}</p>
+          <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+            Try again
+          </Button>
+        </div>
+      ) : isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
             <Card key={i} className="p-6">
@@ -58,7 +70,7 @@ export default function BrandPage() {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <Sparkles01Icon className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold">No brands yet</h3>
+          <h2 className="mt-4 text-lg font-semibold">No brands yet</h2>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
             Create your first brand by analyzing a website. We'll extract colors, fonts, voice, and more.
           </p>
@@ -74,7 +86,7 @@ export default function BrandPage() {
                 {/* Bento Grid */}
                 <div className="grid grid-cols-[1fr_1fr] gap-px bg-border">
                   {/* Logo - Large */}
-                  <div className="flex aspect-square items-center justify-center bg-[#f0ede6] p-8">
+                  <div className="flex aspect-square items-center justify-center bg-muted p-8">
                     <div className="relative h-full w-full">
                       {brand.logo.primary ? (
                         <Image

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { Calendar03Icon, Link01Icon, Share08Icon, AlertCircle01Icon } from '@/lib/icons'
 import { getPublishStats, getRecentActivity, getPlatform, mockConnectedAccounts } from '@/lib/mock-data/publish'
@@ -89,7 +90,7 @@ export default function PublishPage() {
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
             <Link01Icon className="h-8 w-8 text-primary" />
             <div>
-              <h3 className="font-semibold">Connect your social accounts</h3>
+              <h2 className="font-semibold">Connect your social accounts</h2>
               <p className="mt-1 text-sm text-muted-foreground">Link your Instagram, Facebook, TikTok and more to start publishing</p>
             </div>
             <Button asChild>
@@ -104,7 +105,7 @@ export default function PublishPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle as="h2">Recent Activity</CardTitle>
               <CardDescription>Last 10 published and scheduled posts</CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
@@ -126,11 +127,12 @@ export default function PublishPage() {
                 >
                   {/* Creative Thumbnail */}
                   <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
-                    <img
+                    <Image
                       src={post.creativeThumbnail}
-                      alt="Creative"
-                      className="h-full w-full object-cover"
-
+                      alt={`Creative for ${platform?.name || 'post'}`}
+                      fill
+                      unoptimized
+                      className="object-cover"
                     />
                   </div>
 
@@ -158,9 +160,9 @@ export default function PublishPage() {
                               : 'bg-primary/10 text-primary'
                         }`}
                       >
-                        {post.status === 'published' ? '✓ Published' : 
-                         post.status === 'failed' ? '✗ Failed' : 
-                         '◷ Scheduled'}
+                        {post.status === 'published' ? 'Published' :
+                         post.status === 'failed' ? 'Failed' :
+                         'Scheduled'}
                       </span>
                       {post.status === 'failed' && (
                         <span className="text-xs text-destructive">
@@ -190,7 +192,7 @@ export default function PublishPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="border-2 border-dashed hover:border-primary transition-colors">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle as="h2" className="flex items-center gap-2">
               <Calendar03Icon className="h-5 w-5" />
               Content Calendar
             </CardTitle>
@@ -207,7 +209,7 @@ export default function PublishPage() {
 
         <Card className="border-2 border-dashed hover:border-primary transition-colors">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle as="h2" className="flex items-center gap-2">
               <Link01Icon className="h-5 w-5" />
               Connected Accounts
             </CardTitle>
