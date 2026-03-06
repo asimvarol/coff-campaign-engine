@@ -63,12 +63,14 @@ const MASONRY_ITEMS = [
 
 function AnimatedMasonryBackground() {
   const [mounted, setMounted] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    setPrefersReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   }, [])
 
-  if (!mounted) return null
+  if (!mounted || prefersReducedMotion) return null
 
   return (
     <div className="absolute inset-0 overflow-hidden opacity-50">
@@ -191,7 +193,7 @@ export default function AuthLayout({
               <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <h1 className="text-4xl font-bold">Coff Campaign Engine</h1>
+          <p className="text-4xl font-bold" aria-hidden="true">Coff Campaign Engine</p>
           <p className="text-lg text-muted-foreground">
             AI-powered campaign management and optimization platform. Create stunning campaigns in minutes, not days.
           </p>

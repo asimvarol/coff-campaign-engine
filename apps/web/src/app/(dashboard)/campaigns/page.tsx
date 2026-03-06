@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Badge, Card, CardContent, Input } from '@repo/ui'
+import { Button, Badge, Card, CardContent, Input, Skeleton } from '@repo/ui'
 import { Add01Icon, Target03Icon, Search01Icon } from '@/lib/icons'
 import Link from 'next/link'
 import { PLATFORM_LABELS } from '@/lib/mock-data/creative-formats'
@@ -45,17 +45,22 @@ export default function CampaignsPage() {
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const { selectedBrandId } = useBrand()
 
   useEffect(() => {
     setIsLoading(true)
+    setError(null)
     const url = selectedBrandId ? `/api/campaigns?brandId=${selectedBrandId}` : '/api/campaigns'
     fetch(url)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load campaigns')
+        return res.json()
+      })
       .then(data => setCampaigns(data.data || []))
-      .catch(console.error)
+      .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false))
   }, [selectedBrandId])
 
@@ -75,7 +80,7 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div >
+    <div aria-busy={isLoading}>
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Campaigns</h1>
@@ -97,6 +102,7 @@ export default function CampaignsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
+            aria-label="Search campaigns"
           />
         </div>
         <div className="flex gap-2">
@@ -106,6 +112,7 @@ export default function CampaignsPage() {
               variant={statusFilter === status ? 'default' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter(status)}
+              aria-pressed={statusFilter === status}
             >
               {status === 'all' ? 'All' : statusConfig[status]?.label || status}
             </Button>
@@ -142,14 +149,39 @@ export default function CampaignsPage() {
       </div>
 
       {/* Campaigns Grid */}
-      {isLoading ? (
-        <div className="flex h-48 items-center justify-center text-muted-foreground">Loading campaigns...</div>
+      {error ? (
+        <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 p-12 text-center">
+          <p className="font-semibold text-destructive">Something went wrong</p>
+          <p className="mt-1 text-sm text-muted-foreground">{error}</p>
+          <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+            Try again
+          </Button>
+        </div>
+      ) : isLoading ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <Card key={i} className="p-6">
+              <div className="mb-4 flex items-start gap-3">
+                <Skeleton className="h-10 w-10 rounded-md" />
+                <div className="flex-1">
+                  <Skeleton className="h-5 w-32 mb-1" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </div>
+              <div className="mb-4 flex gap-2">
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-full" />
+            </Card>
+          ))}
+        </div>
       ) : campaigns.length === 0 ? (
         <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed border-border p-12 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <Target03Icon className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold">No campaigns yet</h3>
+          <h2 className="mt-4 text-lg font-semibold">No campaigns yet</h2>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
             Add a brand first, then campaigns will be generated from your brand's products and collections.
           </p>
@@ -160,7 +192,7 @@ export default function CampaignsPage() {
       ) : filteredCampaigns.length === 0 ? (
         <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-border p-12 text-center">
           <Search01Icon className="h-8 w-8 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold">No results found</h3>
+          <h2 className="mt-4 text-lg font-semibold">No results found</h2>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
             No campaigns match your search or filter criteria. Try adjusting your filters.
           </p>
