@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button, Card, Badge, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@repo/ui'
 import { ArrowLeft01Icon, Download04Icon, Sparkles01Icon, Upload04Icon, RotateCcwIcon, ExternalLinkIcon, Trash2Icon } from '@/lib/icons'
@@ -30,28 +30,19 @@ interface Brand {
 }
 
 export default function BrandDetailPage() {
-  useEffect(() => { document.title = 'Brand Detail | Coff' }, [])
-
   const params = useParams()
   const brandId = params.id as string
   const router = useRouter()
   const { deleteBrand } = useBrand()
   const [brand, setBrand] = useState<Brand | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const leftRef = useRef<HTMLDivElement>(null)
-  const [leftHeight, setLeftHeight] = useState<number>(0)
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
   const [isReanalyzing, setIsReanalyzing] = useState(false)
 
   useEffect(() => { fetchBrand() }, [brandId])
 
   useEffect(() => {
-    if (!leftRef.current) return
-    const ro = new ResizeObserver(([entry]) => {
-      setLeftHeight(entry.contentRect.height)
-    })
-    ro.observe(leftRef.current)
-    return () => ro.disconnect()
+    if (brand) document.title = `${brand.name} — Brand DNA | Coff`
   }, [brand])
 
   const fetchBrand = async () => {
@@ -70,16 +61,11 @@ export default function BrandDetailPage() {
       await fetch(`/api/brands/${brandId}/analyze`, { method: 'POST' })
       await fetchBrand()
       toast.success('Brand re-analyzed successfully')
-    } catch (err) {
-      console.error(err)
+    } catch {
       toast.error('Failed to re-analyze brand')
     } finally {
       setIsReanalyzing(false)
     }
-  }
-
-  const handleDeleteClick = () => {
-    setDeleteAlertOpen(true)
   }
 
   const handleConfirmDelete = async () => {
@@ -99,170 +85,164 @@ export default function BrandDetailPage() {
 
   const allImages = [...(brand.images?.scraped || []), ...(brand.images?.uploaded || []), ...(brand.images?.products || [])]
   const displayColors = brand.colors.palette.length > 0
-    ? brand.colors.palette.slice(0, 4)
-    : [brand.colors.primary, brand.colors.secondary, brand.colors.accent, brand.colors.background]
+    ? brand.colors.palette
+    : [brand.colors.primary, brand.colors.secondary, brand.colors.accent, brand.colors.background].filter(Boolean)
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <Link href="/brand" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+      {/* Back link */}
+      <div className="mb-6">
+        <Link href="/brand" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft01Icon className="h-4 w-4" />
           Back to Brands
         </Link>
-        <div className="flex gap-2">
+      </div>
+
+      {/* Hero: Logo + Name + Actions */}
+      <div className="mb-8 flex items-start gap-6">
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
+          <Image src={brand.logo.primary} alt={brand.name} fill className="object-contain p-2" unoptimized />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-3xl font-bold truncate">{brand.name}</h1>
+          <a href={brand.url} target="_blank" rel="noopener noreferrer"
+            className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            {brand.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+            <ExternalLinkIcon className="h-3 w-3" />
+          </a>
+          {brand.industry && (
+            <div className="mt-2">
+              <Badge variant="outline" className="capitalize text-xs">{brand.industry}</Badge>
+            </div>
+          )}
+        </div>
+        <div className="flex shrink-0 gap-2">
           <Button variant="outline" size="sm"><Download04Icon className="mr-2 h-4 w-4" />Download Kit</Button>
-          <Button variant="outline" size="sm" onClick={handleReanalyze} disabled={isReanalyzing}>{isReanalyzing ? <><span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />Analyzing...</> : <><Sparkles01Icon className="mr-2 h-4 w-4" />Re-analyze</>}</Button>
-          <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleDeleteClick}><Trash2Icon className="mr-2 h-4 w-4" />Delete</Button>
+          <Button variant="outline" size="sm" onClick={handleReanalyze} disabled={isReanalyzing}>
+            {isReanalyzing
+              ? <><span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />Analyzing...</>
+              : <><Sparkles01Icon className="mr-2 h-4 w-4" />Re-analyze</>
+            }
+          </Button>
+          <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => setDeleteAlertOpen(true)}>
+            <Trash2Icon className="mr-2 h-4 w-4" />Delete
+          </Button>
         </div>
       </div>
 
       {/* Bento Grid */}
-      <div className="grid gap-5 lg:grid-cols-[1fr_1fr] items-start">
-
-        {/* === LEFT COLUMN === */}
-        <div ref={leftRef} className="space-y-5">
-          {/* Brand Name + URL */}
-          <Card className="p-6">
-            <h1 className="text-2xl font-bold">{brand.name}</h1>
-            <a href={brand.url} target="_blank" rel="noopener noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              {brand.url.replace(/^https?:\/\//, '')}
-              <ExternalLinkIcon className="h-3 w-3" />
-            </a>
-          </Card>
-
-          {/* Logo + Fonts Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Card className="flex aspect-square items-center justify-center overflow-hidden bg-[#f0ede6] p-8">
-              <div className="relative h-full w-full">
-                <Image src={brand.logo.primary} alt={brand.name} fill className="object-contain" unoptimized />
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Colors — full width */}
+        <Card className="p-6 md:col-span-2">
+          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Colors</h2>
+          <div className="flex items-center gap-5 flex-wrap">
+            {displayColors.map((color, i) => (
+              <div key={i} className="flex flex-col items-center gap-2">
+                <div className="h-14 w-14 rounded-full border border-border shadow-sm" style={{ backgroundColor: color }} />
+                <span className="font-mono text-[10px] text-muted-foreground">{color}</span>
               </div>
-            </Card>
-            <Card className="flex flex-col justify-center p-6">
-              <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Fonts</div>
-              <div className="text-7xl font-bold leading-none" style={{ fontFamily: brand.typography.heading }}>Aa</div>
-              <div className="mt-3 text-sm font-medium">{brand.typography.heading}</div>
-              {brand.typography.body !== brand.typography.heading && (
-                <div className="mt-1 text-xs text-muted-foreground">{brand.typography.body}</div>
-              )}
-            </Card>
+            ))}
+          </div>
+        </Card>
+
+        {/* Typography */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Typography</h2>
+          <div className="text-7xl font-bold leading-none" style={{ fontFamily: brand.typography.heading }}>Aa</div>
+          <div className="mt-4 space-y-1">
+            <p className="text-sm font-medium">{brand.typography.heading}</p>
+            {brand.typography.body !== brand.typography.heading && (
+              <p className="text-xs text-muted-foreground">{brand.typography.body}</p>
+            )}
+          </div>
+        </Card>
+
+        {/* Tagline / Summary */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Tagline</h2>
+          <p className="text-lg italic leading-relaxed">
+            {brand.voice.sampleTexts?.[0] || brand.summary}
+          </p>
+        </Card>
+
+        {/* Brand Values */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand Values</h2>
+          <div className="flex flex-wrap gap-2">
+            {brand.values.map((v, i) => <Badge key={i} variant="outline">{v}</Badge>)}
+          </div>
+        </Card>
+
+        {/* Tone of Voice */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Tone of Voice</h2>
+          <div className="flex flex-wrap gap-2">
+            {brand.voice.tone.map((t, i) => <Badge key={i} variant="outline">{t}</Badge>)}
+          </div>
+        </Card>
+
+        {/* Aesthetic */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand Aesthetic</h2>
+          <div className="flex flex-wrap gap-2">
+            {brand.aesthetic.map((a, i) => <Badge key={i} variant="outline">{a}</Badge>)}
+          </div>
+        </Card>
+
+        {/* Target Audience */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Target Audience</h2>
+          <p className="text-sm text-muted-foreground">{brand.targetAudience}</p>
+        </Card>
+
+        {/* Images — full width */}
+        <Card className="p-6 md:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Images</h2>
+            <span className="text-xs text-muted-foreground">{allImages.length} images</span>
           </div>
 
-          {/* Colors */}
-          <Card className="p-6">
-            <div className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Colors</div>
-            <div className="flex items-center gap-6">
-              {displayColors.map((color, i) => (
-                <div key={i} className="flex flex-col items-center gap-2">
-                  <div className="h-14 w-14 rounded-full border border-border shadow-sm" style={{ backgroundColor: color }} />
-                  <span className="font-mono text-[10px] text-muted-foreground">{color}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* Tagline + Values Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Card className="p-6">
-              <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Tagline</div>
-              <p className="text-base italic leading-relaxed">{brand.voice.sampleTexts?.[0] || brand.summary}</p>
-            </Card>
-            <Card className="p-6">
-              <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand values</div>
-              <div className="flex flex-wrap gap-2">
-                {brand.values.map((v, i) => <Badge key={i} variant="outline" className="text-xs">{v}</Badge>)}
-              </div>
-            </Card>
-          </div>
-
-          {/* Aesthetic + Tone Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Card className="p-6">
-              <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand aesthetic</div>
-              <div className="flex flex-wrap gap-2">
-                {brand.aesthetic.map((a, i) => <Badge key={i} variant="outline" className="text-xs">{a}</Badge>)}
-              </div>
-            </Card>
-            <Card className="p-6">
-              <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Brand tone of voice</div>
-              <div className="flex flex-wrap gap-2">
-                {brand.voice.tone.map((t, i) => <Badge key={i} variant="outline" className="text-xs">{t}</Badge>)}
-              </div>
-            </Card>
-          </div>
-        </div>
-
-        {/* === RIGHT COLUMN — Images (matches left height with fade) === */}
-        <Card
-          className="relative overflow-hidden p-6"
-          style={leftHeight > 0 ? { maxHeight: leftHeight } : undefined}
-        >
-          <h2 className="text-xl font-bold mb-5">Images</h2>
-
-          {/* Top: Small Grid + Promo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-            <div className="grid grid-cols-3 gap-1.5">
-              {(allImages.length >= 9 ? allImages.slice(0, 9) : allImages.slice(0, Math.min(allImages.length, 9))).map((img, i) => (
-                <div key={i} className="aspect-square overflow-hidden rounded-md bg-muted">
+          {allImages.length > 0 ? (
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+              {allImages.map((img, i) => (
+                <div key={i} className="aspect-square overflow-hidden rounded-lg bg-muted">
                   <Image src={img} alt={`Brand image ${i + 1}`} width={150} height={150} className="h-full w-full object-cover" unoptimized />
                 </div>
               ))}
-              {allImages.length < 9 && Array.from({ length: 9 - Math.min(allImages.length, 9) }).map((_, i) => (
-                <div key={`ph-${i}`} className="aspect-square rounded-md bg-muted" />
-              ))}
             </div>
-            <div className="flex flex-col justify-center rounded-lg border p-6">
-              <h3 className="mb-2 text-lg font-bold">Endless creatives, ready in minutes</h3>
-              <p className="mb-4 text-sm text-muted-foreground">Generate professional product photos with AI-powered backgrounds</p>
-              <Link href="/photoshoot">
-                <Button className="w-full"><Sparkles01Icon className="mr-2 h-4 w-4" />Try Photoshoot</Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Upload Card */}
-          <div
-            role="button"
-            tabIndex={0}
-            aria-label="Upload brand images"
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click() } }}
-            className="mb-5 flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          >
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <Upload04Icon className="h-6 w-6" />
-              <span className="text-sm font-medium">Upload Images</span>
-            </div>
-          </div>
-
-          {/* Image Grid */}
-          {allImages.length > 0 && (
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {allImages.map((img, i) => (
-                <div key={i} className="aspect-square overflow-hidden rounded-lg bg-muted">
-                  <Image src={img} alt={`Image ${i + 1}`} width={300} height={300} className="h-full w-full object-cover" unoptimized />
-                </div>
-              ))}
+          ) : (
+            <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed text-muted-foreground">
+              <div className="flex flex-col items-center gap-2">
+                <Upload04Icon className="h-6 w-6" />
+                <span className="text-sm">No images found</span>
+              </div>
             </div>
           )}
+        </Card>
 
-          {/* Fade overlay + Reset button pinned to bottom */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 flex justify-center pb-5">
-            <Button onClick={handleReanalyze} className="pointer-events-auto shadow-lg">
-              <RotateCcwIcon className="mr-2 h-4 w-4" />Reset Business DNA
+        {/* Photoshoot CTA — full width */}
+        <Card className="md:col-span-2 overflow-hidden">
+          <div className="flex items-center justify-between p-6">
+            <div>
+              <h2 className="text-lg font-bold">Generate product photos</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Create professional product photos with AI-powered backgrounds</p>
+            </div>
+            <Button asChild>
+              <Link href="/photoshoot">
+                <Sparkles01Icon className="mr-2 h-4 w-4" />Try Photoshoot
+              </Link>
             </Button>
           </div>
         </Card>
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Dialog */}
       <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Brand</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this brand? This action cannot be undone and will remove all associated campaigns and creatives.
+              Are you sure you want to delete &quot;{brand.name}&quot;? This action cannot be undone and will remove all associated campaigns and creatives.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
