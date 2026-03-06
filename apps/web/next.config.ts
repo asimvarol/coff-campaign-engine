@@ -17,15 +17,15 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   compress: true,
   poweredByHeader: false,
-  
+
   // Strict mode for better debugging
   reactStrictMode: true,
-  
+
   // Type checking in production builds
   typescript: {
     ignoreBuildErrors: false,
   },
-  
+
   eslint: {
     ignoreDuringBuilds: true,
   },
