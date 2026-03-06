@@ -172,6 +172,43 @@ campaignsRouter.delete('/:id', async (c) => {
   }
 })
 
+// POST /api/campaigns/generate-concepts - Generate AI concepts without existing campaign
+campaignsRouter.post('/generate-concepts', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { brandId, objective, platforms, description } = body
+
+    if (!brandId || !objective || !platforms?.length) {
+      return c.json<ApiResponse>({ error: 'brandId, objective, and platforms are required' }, 400)
+    }
+
+    const brand = await prisma.brand.findUnique({ where: { id: brandId } })
+    if (!brand) {
+      return c.json<ApiResponse>({ error: 'Brand not found' }, 404)
+    }
+
+    const brandVoice = (brand as Record<string, unknown>).voice as { tone?: string[] } | undefined
+    const brandValues = (brand as Record<string, unknown>).values as string[] | undefined
+
+    const concepts = await generateConcepts({
+      brandName: brand.name,
+      brandVoice: brandVoice?.tone || [],
+      brandValues: brandValues || [],
+      objective,
+      platforms,
+      description: description || undefined,
+    })
+
+    return c.json<ApiResponse>({
+      data: { concepts },
+      message: 'Concepts generated successfully',
+    })
+  } catch (error) {
+    console.error('Error generating concepts:', error)
+    return c.json<ApiResponse>({ error: 'Failed to generate concepts' }, 500)
+  }
+})
+
 // POST /api/campaigns/:id/generate-concepts - Generate AI campaign concepts
 campaignsRouter.post('/:id/generate-concepts', async (c) => {
   try {
