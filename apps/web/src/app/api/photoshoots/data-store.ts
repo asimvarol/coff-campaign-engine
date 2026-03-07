@@ -11,7 +11,9 @@ export interface PhotoshootRecord {
   updatedAt: string
 }
 
-const store = new Map<string, PhotoshootRecord>()
+const g = globalThis as Record<string, unknown>
+const store: Map<string, PhotoshootRecord> = (g.__coffPhotoshoots as Map<string, PhotoshootRecord>) ?? new Map()
+g.__coffPhotoshoots = store
 
 export function getAllPhotoshoots(): PhotoshootRecord[] {
   return Array.from(store.values()).sort(
@@ -29,6 +31,10 @@ export function createPhotoshoot(data: Omit<PhotoshootRecord, 'id' | 'createdAt'
   const record: PhotoshootRecord = { ...data, id, createdAt: now, updatedAt: now }
   store.set(id, record)
   return record
+}
+
+export function deletePhotoshoot(id: string): boolean {
+  return store.delete(id)
 }
 
 export function updatePhotoshoot(id: string, data: Partial<PhotoshootRecord>): PhotoshootRecord | undefined {

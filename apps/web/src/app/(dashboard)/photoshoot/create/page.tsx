@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { PhotoshootTemplate } from '@repo/types'
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, Label } from '@repo/ui'
 
 import { toast } from 'sonner'
 import { ArrowLeft01Icon, SparklesIcon } from '@/lib/icons'
@@ -23,6 +23,7 @@ export default function CreatePhotoshootPage() {
   const router = useRouter()
   const [productImage, setProductImage] = useState('')
   const [selectedTemplates, setSelectedTemplates] = useState<PhotoshootTemplate[]>([])
+  const [customPrompt, setCustomPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState('')
   const [brands, setBrands] = useState<Array<{ id: string; name: string }>>([])
@@ -55,7 +56,10 @@ export default function CreatePhotoshootPage() {
       const brand = brands.find(b => b.id === selectedBrandId)
       const brandStyle = brand ? `${brand.name} brand style` : ''
       const templateNames = selectedTemplates.join(', ')
-      const prompt = `Professional product photography, ${templateNames} style background, studio lighting, high quality commercial photography${brandStyle ? `, ${brandStyle}` : ''}`
+      const basePrompt = customPrompt
+        ? customPrompt
+        : `same product on ${templateNames} style background, professional product photography, studio lighting, high quality`
+      const prompt = `${basePrompt}${brandStyle ? `, ${brandStyle}` : ''}`
 
       const response = await fetch('/api/generate-image', {
         method: 'POST',
@@ -63,7 +67,7 @@ export default function CreatePhotoshootPage() {
         body: JSON.stringify({
           prompt,
           image_url: productImage,
-          strength: 0.65,
+          strength: 0.3,
           num_images: selectedTemplates.length,
           image_size: 'square_hd',
         }),
@@ -178,6 +182,23 @@ export default function CreatePhotoshootPage() {
           </CardHeader>
           <CardContent>
             <TemplateSelector value={selectedTemplates} onChange={setSelectedTemplates} />
+          </CardContent>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Custom Prompt (Optional)</CardTitle>
+            <CardDescription>
+              Describe the scene you want. Leave empty to auto-generate from templates.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              placeholder="e.g. Gold ring on white marble surface with soft natural lighting and rose petals"
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              rows={3}
+            />
           </CardContent>
         </Card>
 
