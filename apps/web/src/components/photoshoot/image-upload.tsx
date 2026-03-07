@@ -153,7 +153,7 @@ export function ImageUpload({ value, onChange, onError }: ImageUploadProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept={ALLOWED_TYPES.join(',')}
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
         onChange={handleFileSelect}
         className="hidden"
       />
