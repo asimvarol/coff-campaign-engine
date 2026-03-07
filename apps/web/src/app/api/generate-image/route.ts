@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-
 const FAL_API_KEY = process.env.FAL_AI_KEY
 
 const VALID_SIZES = ['square', 'square_hd', 'portrait', 'portrait_4_3', 'portrait_16_9', 'landscape', 'landscape_4_3', 'landscape_16_9']
