@@ -91,6 +91,7 @@ export function CampaignWizard() {
 
   const handleGenerateConcepts = async () => {
     setIsGenerating(true)
+    setStep(2)
     try {
       const res = await fetch('/api/campaigns/generate-concepts', {
         method: 'POST',
@@ -107,15 +108,14 @@ export function CampaignWizard() {
         updateState({ generatedConcepts: json.data.concepts })
       } else {
         toast.error('Failed to generate concepts')
-        return
+        setStep(1)
       }
     } catch {
       toast.error('Failed to generate concepts')
-      return
+      setStep(1)
     } finally {
       setIsGenerating(false)
     }
-    setStep(2)
   }
 
   const handleSelectConcept = async (concept: CampaignConcept) => {
