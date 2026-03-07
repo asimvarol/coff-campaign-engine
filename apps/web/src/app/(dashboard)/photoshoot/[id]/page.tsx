@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -13,6 +13,7 @@ import {
   Calendar03Icon,
   ImageAddIcon,
   CheckmarkCircle02Icon,
+  Trash2Icon,
 } from '@/lib/icons'
 
 interface PhotoshootDetail {
@@ -28,6 +29,7 @@ export default function PhotoshootDetailPage() {
   useEffect(() => { document.title = 'Photoshoot Detail | Coff' }, [])
 
   const params = useParams()
+  const router = useRouter()
   const id = params.id as string
   const [photoshoot, setPhotoshoot] = useState<PhotoshootDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -143,6 +145,23 @@ export default function PhotoshootDetailPage() {
           <Button size="sm" onClick={handleDownloadSelected}>
             <Download01Icon className="h-4 w-4 mr-2" />
             Download Selected ({selectedImages.size})
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            onClick={async () => {
+              const res = await fetch(`/api/photoshoots/${id}`, { method: 'DELETE' })
+              if (res.ok) {
+                toast.success('Photoshoot deleted')
+                router.push('/photoshoot')
+              } else {
+                toast.error('Failed to delete photoshoot')
+              }
+            }}
+          >
+            <Trash2Icon className="h-4 w-4 mr-2" />
+            Delete
           </Button>
         </div>
       </div>

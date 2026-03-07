@@ -37,14 +37,9 @@ export default function BrandPage() {
 
   return (
     <div aria-busy={isLoading}>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Brand DNA</h1>
-          <p className="text-muted-foreground">Extract and manage your brand identities</p>
-        </div>
-        <Link href="/brand/new">
-          <Button size="lg"><PlusIcon className="mr-2 h-4 w-4" />Add Brand</Button>
-        </Link>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Brand DNA</h1>
+        <p className="text-muted-foreground">Extract and manage your brand identities</p>
       </div>
 
       {error ? (
@@ -56,7 +51,7 @@ export default function BrandPage() {
           </Button>
         </div>
       ) : isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
             <Card key={i} className="p-6">
               <Skeleton className="h-40 w-full rounded-lg mb-4" />
@@ -72,20 +67,32 @@ export default function BrandPage() {
           </div>
           <h2 className="mt-4 text-lg font-semibold">No brands yet</h2>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-            Create your first brand by analyzing a website. We'll extract colors, fonts, voice, and more.
+            Create your first brand by analyzing a website. We&apos;ll extract colors, fonts, voice, and more.
           </p>
           <Link href="/brand/new" className="mt-6">
             <Button><PlusIcon className="mr-2 h-4 w-4" />Add Your First Brand</Button>
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* Add Brand Card */}
+          <Link href="/brand/new" className="group">
+            <div className="flex h-full min-h-[280px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border transition-colors hover:border-primary hover:bg-primary/5 cursor-pointer">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted group-hover:bg-primary/10 transition-colors">
+                <PlusIcon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+              <p className="mt-3 text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                + Marka Ekle
+              </p>
+            </div>
+          </Link>
+
           {brands.map((brand) => (
             <Link key={brand.id} href={`/brand/${brand.id}`}>
-              <Card className="overflow-hidden transition-all hover:border-primary hover:shadow-lg cursor-pointer group">
+              <Card className="h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg cursor-pointer group">
                 {/* Bento Grid */}
                 <div className="grid grid-cols-[1fr_1fr] gap-px bg-border">
-                  {/* Logo - Large */}
+                  {/* Logo */}
                   <div className="flex aspect-square items-center justify-center bg-muted p-8">
                     <div className="relative h-full w-full">
                       {brand.logo.primary ? (
@@ -105,10 +112,9 @@ export default function BrandPage() {
                   </div>
 
                   {/* Info */}
-                  <div className="flex flex-col bg-card">
-                    {/* Name & URL */}
-                    <div className="flex-1 p-5">
-                      <h3 className="text-lg font-bold group-hover:text-primary transition-colors">
+                  <div className="flex flex-col bg-card overflow-hidden">
+                    <div className="flex-1 p-4">
+                      <h3 className="text-base font-bold group-hover:text-primary transition-colors truncate">
                         {brand.name}
                       </h3>
                       {brand.url && (
@@ -119,17 +125,17 @@ export default function BrandPage() {
                       )}
                       {brand.typography && (
                         <div className="mt-3">
-                          <div className="text-4xl font-bold" style={{ fontFamily: brand.typography.heading }}>Aa</div>
-                          <div className="mt-1 text-xs text-muted-foreground">{brand.typography.heading}</div>
+                          <div className="text-3xl font-bold" style={{ fontFamily: brand.typography.heading }}>Aa</div>
+                          <div className="mt-1 text-xs text-muted-foreground truncate">{brand.typography.heading}</div>
                         </div>
                       )}
                     </div>
 
-                    {/* Colors Strip */}
-                    <div className="border-t border-border p-4 overflow-hidden">
-                      <div className="flex gap-2 flex-wrap">
+                    {/* Colors */}
+                    <div className="border-t border-border p-3 overflow-hidden">
+                      <div className="flex gap-1.5 flex-wrap">
                         {brand.colors.palette.slice(0, 5).map((color, i) => (
-                          <div key={i} className="h-8 w-8 rounded-full border border-border" style={{ backgroundColor: color }} title={color} />
+                          <div key={i} className="h-7 w-7 rounded-full border border-border shrink-0" style={{ backgroundColor: color }} title={color} />
                         ))}
                       </div>
                     </div>
@@ -138,7 +144,7 @@ export default function BrandPage() {
 
                 {/* Industry Badge */}
                 {brand.industry && (
-                  <div className="border-t border-border bg-card px-5 py-3">
+                  <div className="border-t border-border bg-card px-4 py-2.5">
                     <Badge variant="outline" className="capitalize text-xs">{brand.industry}</Badge>
                   </div>
                 )}

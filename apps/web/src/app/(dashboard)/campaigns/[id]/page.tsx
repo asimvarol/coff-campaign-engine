@@ -278,7 +278,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                     <div className="relative" style={{ aspectRatio: `${creative.width}/${creative.height}` }}>
                       <Image
                         src={creative.imageUrl}
-                        alt={creative.header.text}
+                        alt={creative.header?.text || creative.platform || 'Creative'}
                         fill
                         unoptimized
                         className="object-cover"
@@ -294,7 +294,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-1">
-                        {creative.header.text}
+                        {creative.header?.text || creative.platform || 'Creative'}
                       </p>
                       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                         <span>v{creative.version}</span>
@@ -318,7 +318,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                       <div className="relative" style={{ aspectRatio: `${creative.width}/${creative.height}` }}>
                         <Image
                           src={creative.imageUrl}
-                          alt={creative.header.text}
+                          alt={creative.header?.text || creative.platform || 'Creative'}
                           fill
                           className="object-cover"
                           unoptimized
@@ -332,7 +332,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-1">
-                          {creative.header.text}
+                          {creative.header?.text || creative.platform || 'Creative'}
                         </p>
                       </div>
                     </Link>

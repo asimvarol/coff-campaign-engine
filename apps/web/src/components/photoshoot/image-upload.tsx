@@ -54,10 +54,12 @@ export function ImageUpload({ value, onChange, onError }: ImageUploadProps) {
         return
       }
 
-      // Create a local blob URL for preview. The generate-image API is prompt-based
-      // and does not require an uploaded image URL, so blob URL is sufficient here.
-      const previewUrl = URL.createObjectURL(file)
-      onChange(previewUrl)
+      // Convert to base64 data URL so it can be sent to fal.ai for image-to-image
+      const reader = new FileReader()
+      reader.onload = () => {
+        onChange(reader.result as string)
+      }
+      reader.readAsDataURL(file)
 
       setIsValidating(false)
     },
@@ -151,7 +153,7 @@ export function ImageUpload({ value, onChange, onError }: ImageUploadProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept={ALLOWED_TYPES.join(',')}
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
         onChange={handleFileSelect}
         className="hidden"
       />

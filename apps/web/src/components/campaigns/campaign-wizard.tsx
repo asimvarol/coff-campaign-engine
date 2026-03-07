@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Progress } from '@repo/ui'
 import { CheckmarkCircle02Icon } from '@/lib/icons'
 import { CampaignObjective } from '@repo/types'
-import { generateMockConcepts, type MockCreative } from '@/lib/mock-data/campaigns'
+import { type MockCreative } from '@/lib/mock-data/campaigns'
 import { PLATFORM_FORMATS } from '@/lib/mock-data/creative-formats'
 import { useBrand } from '@/lib/brand-context'
 import type { CampaignConcept } from '@repo/types'
@@ -91,10 +91,31 @@ export function CampaignWizard() {
 
   const handleGenerateConcepts = async () => {
     setIsGenerating(true)
-    const concepts = generateMockConcepts(state.brandId, state.objective as CampaignObjective, state.platforms)
-    updateState({ generatedConcepts: concepts })
-    setIsGenerating(false)
     setStep(2)
+    try {
+      const res = await fetch('/api/campaigns/generate-concepts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brandId: state.brandId,
+          objective: state.objective,
+          platforms: state.platforms,
+          description: state.description,
+        }),
+      })
+      const json = await res.json()
+      if (json.data?.concepts?.length) {
+        updateState({ generatedConcepts: json.data.concepts })
+      } else {
+        toast.error('Failed to generate concepts')
+        setStep(1)
+      }
+    } catch {
+      toast.error('Failed to generate concepts')
+      setStep(1)
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const handleSelectConcept = async (concept: CampaignConcept) => {

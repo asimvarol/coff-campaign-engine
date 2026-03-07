@@ -152,7 +152,7 @@ export function BriefStep({
           <div className="flex flex-col items-end gap-1">
             <Button size="lg" onClick={onGenerate} disabled={!canProceed || isGenerating}>
               {isGenerating ? (
-                <>Generating Concepts...</>
+                <><span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />Generating Concepts...</>
               ) : (
                 <>
                   Generate Concepts (5 credits)

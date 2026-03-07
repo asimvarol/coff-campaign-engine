@@ -210,9 +210,12 @@ brandsRouter.post('/:id/analyze', async (c) => {
       },
     })
 
-    return c.json<ApiResponse>({ 
-      data: brand, 
-      message: 'Brand DNA re-analyzed successfully' 
+    await cacheDel(buildCacheKey('brands', id))
+    await cacheDel(buildCacheKey('brands', 'list'))
+
+    return c.json<ApiResponse>({
+      data: brand,
+      message: 'Brand DNA re-analyzed successfully'
     })
   } catch (error) {
     console.error('Error re-analyzing brand:', error)
