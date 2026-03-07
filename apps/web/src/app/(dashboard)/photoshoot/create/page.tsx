@@ -74,36 +74,51 @@ export default function CreatePhotoshootPage() {
 
     try {
       const brand = brands.find(b => b.id === selectedBrandId)
-      const brandStyle = brand ? `${brand.name} brand style` : ''
-      const templateNames = selectedTemplates.join(', ')
-      const basePrompt = customPrompt
-        ? customPrompt
-        : `same product on ${templateNames} style background, professional product photography, studio lighting, high quality`
-      const prompt = `${basePrompt}${brandStyle ? `, ${brandStyle}` : ''}`
+      const brandStyle = brand ? `, ${brand.name} brand aesthetic` : ''
 
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          image_url: productImage,
-          strength: 0.3,
-          num_images: selectedTemplates.length,
-          image_size: 'square_hd',
-        }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to generate images')
+      const sceneMap: Record<string, string> = {
+        minimalist: 'clean white background, minimalist studio, soft shadows',
+        lifestyle: 'lifestyle scene, cozy real-world setting, natural light',
+        nature: 'outdoor natural setting, greenery, sunlight',
+        luxury: 'luxury setting, velvet, marble, gold accents, premium feel',
+        seasonal: 'festive holiday theme, warm seasonal decoration',
+        abstract: 'artistic abstract colorful background, creative',
+        flat_lay: 'flat lay top-down view, styled arrangement, clean surface',
+        in_use: 'product being worn or used, lifestyle model photography',
       }
 
-      const genData = await response.json().catch(() => ({ images: [] }))
-      const images = (genData.images || []).map((img: { url: string }, i: number) => ({
-        id: `img-${Date.now()}-${i}`,
-        url: img.url,
-        template: selectedTemplates[i] || selectedTemplates[0],
-      }))
+      // Generate one image per template using product-shot
+      const results = await Promise.allSettled(
+        selectedTemplates.map(async (template) => {
+          const scene = customPrompt
+            ? customPrompt
+            : `${sceneMap[template] || 'professional product photography'}${brandStyle}`
+
+          const response = await fetch('/api/generate-product-shot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image_url: productImage,
+              scene_description: scene,
+              num_results: 1,
+            }),
+          })
+
+          if (!response.ok) throw new Error('Generation failed')
+          const data = await response.json()
+          return { url: data.images?.[0]?.url, template }
+        })
+      )
+
+      const images = results
+        .filter((r): r is PromiseFulfilledResult<{ url: string; template: string }> => r.status === 'fulfilled' && !!r.value.url)
+        .map((r, i) => ({
+          id: `img-${Date.now()}-${i}`,
+          url: r.value.url,
+          template: r.value.template,
+        }))
+
+      if (images.length === 0) throw new Error('No images were generated')
 
       await fetch('/api/photoshoots', {
         method: 'POST',
