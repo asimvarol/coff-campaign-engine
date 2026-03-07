@@ -52,16 +52,20 @@ export default function CreatePhotoshootPage() {
     setIsGenerating(true)
 
     try {
+      const brand = brands.find(b => b.id === selectedBrandId)
+      const brandStyle = brand ? `${brand.name} brand style` : ''
       const templateNames = selectedTemplates.join(', ')
-      const prompt = `Professional product photography with ${templateNames} style background`
+      const prompt = `Professional product photography, ${templateNames} style background, studio lighting, high quality commercial photography${brandStyle ? `, ${brandStyle}` : ''}`
 
       const response = await fetch('/api/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt,
+          image_url: productImage,
+          strength: 0.65,
           num_images: selectedTemplates.length,
-          image_size: 'landscape_16_9',
+          image_size: 'square_hd',
         }),
       })
 
@@ -77,7 +81,6 @@ export default function CreatePhotoshootPage() {
         template: selectedTemplates[i] || selectedTemplates[0],
       }))
 
-      const brand = brands.find(b => b.id === selectedBrandId)
       await fetch('/api/photoshoots', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -9,7 +9,7 @@ const VALID_SIZES = ['square', 'square_hd', 'portrait', 'portrait_4_3', 'portrai
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { prompt, negative_prompt, image_size, num_images } = body
+    const { prompt, negative_prompt, image_size, num_images, image_url, strength } = body
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
         num_images: Math.min(num_images || 1, 4),
         guidance_scale: 3.5,
         num_inference_steps: 28,
+        ...(image_url && { image_url, strength: strength ?? 0.65 }),
       }),
     })
 
