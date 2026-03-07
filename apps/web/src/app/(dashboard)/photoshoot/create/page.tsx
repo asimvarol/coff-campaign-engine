@@ -9,7 +9,8 @@ import { PhotoshootTemplate } from '@repo/types'
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, Label } from '@repo/ui'
 
 import { toast } from 'sonner'
-import { ArrowLeft01Icon, SparklesIcon } from '@/lib/icons'
+import { ArrowLeft01Icon, SparklesIcon, CheckmarkCircle02Icon } from '@/lib/icons'
+import Image from 'next/image'
 import { ImageUpload } from '@/components/photoshoot/image-upload'
 import { TemplateSelector } from '@/components/photoshoot/template-selector'
 
@@ -26,8 +27,9 @@ export default function CreatePhotoshootPage() {
   const [customPrompt, setCustomPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState('')
-  const [brands, setBrands] = useState<Array<{ id: string; name: string }>>([])
+  const [brands, setBrands] = useState<Array<{ id: string; name: string; images?: { scraped?: string[]; uploaded?: string[]; products?: string[] } }>>([])
   const [selectedBrandId, setSelectedBrandId] = useState('')
+  const [brandImages, setBrandImages] = useState<string[]>([])
 
   const creditCost = 10
 
@@ -36,6 +38,24 @@ export default function CreatePhotoshootPage() {
       if (data.data) setBrands(data.data)
     }).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!selectedBrandId) { setBrandImages([]); return }
+    const brand = brands.find(b => b.id === selectedBrandId)
+    if (brand?.images) {
+      const all = [...(brand.images.scraped || []), ...(brand.images.uploaded || []), ...(brand.images.products || [])]
+      setBrandImages(all)
+    } else {
+      // Fetch full brand detail for images
+      fetch(`/api/brands/${selectedBrandId}`).then(r => r.json()).then(data => {
+        const imgs = data.data?.images
+        if (imgs) {
+          const all = [...(imgs.scraped || []), ...(imgs.uploaded || []), ...(imgs.products || [])]
+          setBrandImages(all)
+        }
+      }).catch(() => {})
+    }
+  }, [selectedBrandId, brands])
 
   const handleGenerate = async () => {
     setError('')
@@ -144,23 +164,48 @@ export default function CreatePhotoshootPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Brand DNA (Optional)</CardTitle>
+              <CardTitle>Brand Images</CardTitle>
               <CardDescription>
-                Select a brand to apply its colors and style to the generated images
+                Select a brand and pick a product image from your website
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               {brands.length > 0 ? (
-                <Select value={selectedBrandId} onValueChange={setSelectedBrandId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a brand..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brands.map(brand => (
-                      <SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <>
+                  <Select value={selectedBrandId} onValueChange={setSelectedBrandId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a brand..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brands.map(brand => (
+                        <SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {brandImages.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                      {brandImages.map((img, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setProductImage(img)}
+                          className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                            productImage === img ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <Image src={img} alt={`Brand image ${i + 1}`} fill unoptimized className="object-cover" />
+                          {productImage === img && (
+                            <div className="absolute top-1 right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                              <CheckmarkCircle02Icon className="h-3 w-3 text-primary-foreground" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {selectedBrandId && brandImages.length === 0 && (
+                    <p className="text-xs text-muted-foreground">No images found for this brand</p>
+                  )}
+                </>
               ) : (
                 <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
                   <p className="text-sm text-muted-foreground">No brands available</p>
