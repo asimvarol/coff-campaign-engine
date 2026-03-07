@@ -1,61 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || '' })
+export const runtime = 'edge'
 
-const SIZE_MAP: Record<string, 'auto' | '1024x1024' | '1536x1024' | '1024x1536'> = {
-  square: '1024x1024',
-  square_hd: '1024x1024',
-  portrait: '1024x1536',
-  portrait_4_3: '1024x1536',
-  portrait_16_9: '1024x1536',
-  landscape: '1536x1024',
-  landscape_4_3: '1536x1024',
-  landscape_16_9: '1536x1024',
-}
+const FAL_API_KEY = process.env.FAL_AI_KEY
+
+const VALID_SIZES = ['square', 'square_hd', 'portrait', 'portrait_4_3', 'portrait_16_9', 'landscape', 'landscape_4_3', 'landscape_16_9']
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { prompt, image_size, num_images } = body
+    const { prompt, negative_prompt, image_size, num_images } = body
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'OPENAI_API_KEY not configured' }, { status: 500 })
+    if (!FAL_API_KEY) {
+      return NextResponse.json({ error: 'FAL_AI_KEY not configured' }, { status: 500 })
     }
 
-    const size = SIZE_MAP[image_size] || '1024x1024'
-    const count = Math.min(num_images || 1, 1) // DALL-E 3 supports 1 at a time
+    const size = VALID_SIZES.includes(image_size) ? image_size : 'square_hd'
 
-    const response = await openai.images.generate({
-      model: 'dall-e-3',
-      prompt: `${prompt}. Do NOT include any text, words, letters, or watermarks in the image.`,
-      n: count,
-      size,
-      quality: 'standard',
+    const response = await fetch('https://fal.run/fal-ai/nano-banana-2', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Key ${FAL_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        negative_prompt: negative_prompt || 'text, watermark, logo, blurry, low quality',
+        image_size: size,
+        num_images: Math.min(num_images || 1, 4),
+        guidance_scale: 3.5,
+        num_inference_steps: 28,
+      }),
     })
 
-    const images = response.data.map((img) => ({
-      url: img.url,
-      width: size === '1536x1024' ? 1536 : 1024,
-      height: size === '1024x1536' ? 1536 : 1024,
-      content_type: 'image/png',
-    }))
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('Fal.ai error:', response.status, error)
+      return NextResponse.json({ error: 'Image generation failed' }, { status: 500 })
+    }
 
-    return NextResponse.json({ images })
+    const result = await response.json()
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Image generation error:', error)
-    return NextResponse.json(
-      {
-        error: 'Failed to generate image',
-        ...(process.env.NODE_ENV === 'development' && {
-          details: error instanceof Error ? error.message : 'Unknown error',
-        }),
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 })
   }
 }
